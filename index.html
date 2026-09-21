@@ -44,12 +44,14 @@ button{
 
 button:disabled{
   opacity:.35;
+  cursor:not-allowed;
 }
 
 .app{
   width:min(100%,900px);
   min-height:100dvh;
   margin:auto;
+
   padding:
     max(14px,env(safe-area-inset-top))
     16px
@@ -61,9 +63,10 @@ button:disabled{
 
 .header{
   height:67px;
+
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
 
   border-bottom:1px solid var(--line);
 }
@@ -77,13 +80,14 @@ button:disabled{
 
 .logo span{
   display:block;
+
   margin-top:7px;
 
-  font-size:9px;
-  letter-spacing:3px;
-  font-style:normal;
-
   color:var(--muted);
+
+  font-size:9px;
+  font-style:normal;
+  letter-spacing:3px;
 }
 
 .help{
@@ -101,6 +105,7 @@ button:disabled{
 
 .game{
   flex:1;
+
   display:flex;
   flex-direction:column;
 }
@@ -117,7 +122,9 @@ button:disabled{
 
 .hudTop{
   display:flex;
+  align-items:center;
   justify-content:space-between;
+
   gap:10px;
 
   margin-bottom:10px;
@@ -133,17 +140,20 @@ button:disabled{
 
 .cash{
   color:var(--muted);
+
   font-size:12px;
 }
 
 .cash strong{
-  color:white;
+  color:#fff;
+
   font-size:14px;
 }
 
 .stats{
   display:grid;
   grid-template-columns:repeat(3,1fr);
+
   gap:9px 10px;
 }
 
@@ -151,27 +161,30 @@ button:disabled{
   display:flex;
   justify-content:space-between;
 
-  font-size:10px;
   color:var(--muted);
+
+  font-size:10px;
 }
 
 .stat strong{
-  color:white;
+  color:#fff;
 }
 
 .bar{
   height:4px;
+
   margin-top:5px;
+
+  overflow:hidden;
 
   background:#303640;
 
   border-radius:20px;
-  overflow:hidden;
 }
 
 .fill{
-  height:100%;
   width:0;
+  height:100%;
 
   background:var(--acid);
 
@@ -180,6 +193,11 @@ button:disabled{
   transition:width .7s ease;
 }
 
+
+/* =========================
+   メインステージ
+========================= */
+
 .stage{
   flex:1;
 
@@ -187,21 +205,21 @@ button:disabled{
 
   margin-top:12px;
 
-  border:1px solid var(--line);
-  border-radius:10px;
-
   overflow:hidden;
-
-  background:
-    radial-gradient(
-      circle at 50% 25%,
-      #363b45 0,
-      #22262d 40%,
-      #121419 78%
-    );
 
   display:flex;
   flex-direction:column;
+
+  border:1px solid var(--line);
+  border-radius:11px;
+
+  background:
+    radial-gradient(
+      circle at 50% 28%,
+      #343a45 0,
+      #20242b 39%,
+      #111318 78%
+    );
 }
 
 .stageTop{
@@ -210,125 +228,252 @@ button:disabled{
   display:flex;
   justify-content:space-between;
 
+  color:var(--muted);
+
   font-size:10px;
   letter-spacing:1px;
-
-  color:var(--muted);
 }
 
 .stageTop b{
   color:var(--acid);
 }
 
-.characters{
-  flex:1;
 
-  min-height:220px;
+/* =========================
+   1人だけ表示
+========================= */
 
-  display:flex;
-  justify-content:center;
-  align-items:flex-end;
-
-  gap:1px;
-
-  padding:8px 4px 0;
-}
-
-.character{
-  width:25%;
-  height:215px;
+.characterStage{
+  height:355px;
 
   position:relative;
 
   display:flex;
-  justify-content:center;
   align-items:flex-end;
+  justify-content:center;
 
-  opacity:.36;
-
-  transform:scale(.91);
-
-  transition:
-    opacity .25s ease,
-    transform .25s ease;
+  overflow:hidden;
 }
 
-.character.active{
-  opacity:1;
-  transform:scale(1.03);
+.characterStage::after{
+  content:"";
+
+  position:absolute;
+
+  left:12%;
+  right:12%;
+  bottom:-15px;
+
+  height:90px;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(0,0,0,.5),
+      transparent 68%
+    );
+
+  pointer-events:none;
 }
 
-.charImg{
-  width:100%;
+.singleCharacter{
+  position:absolute;
+
+  inset:0;
+
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+
+.singleCharacter.enter .characterImg{
+  animation:characterEnter .35s ease both;
+}
+
+@keyframes characterEnter{
+
+  from{
+    opacity:0;
+    transform:
+      translateY(26px)
+      scale(.94);
+  }
+
+  to{
+    opacity:1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+
+}
+
+.characterImg{
+  width:82%;
   height:100%;
 
   object-fit:contain;
+  object-position:center bottom;
 
   display:block;
 
   filter:
-    drop-shadow(0 10px 14px rgba(0,0,0,.45));
+    drop-shadow(
+      0 18px 20px
+      rgba(0,0,0,.52)
+    );
 }
 
-.character:not(.active) .charImg{
-  filter:
-    grayscale(.18)
-    brightness(.68)
-    drop-shadow(0 8px 12px rgba(0,0,0,.3));
-}
-
-.memberName{
+.memberBadge{
   position:absolute;
 
   left:50%;
-  bottom:4px;
+  bottom:5px;
+
+  z-index:3;
 
   transform:translateX(-50%);
 
-  background:#101216dd;
+  padding:5px 12px;
+
+  background:#0d0f13e6;
 
   border-top:2px solid var(--member);
 
-  padding:3px 6px;
+  border-radius:6px;
 
-  border-radius:4px;
-
-  white-space:nowrap;
-
-  font-size:9px;
+  font-size:11px;
   font-weight:900;
+  letter-spacing:.5px;
 }
 
+
+/* =========================
+   MANAGER時
+========================= */
+
+.managerVisual{
+  position:absolute;
+
+  inset:0;
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  text-align:center;
+}
+
+.managerVisual.show{
+  display:flex;
+
+  animation:managerEnter .35s ease both;
+}
+
+.managerLogo{
+  margin-top:-30px;
+
+  font-size:36px;
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:-2px;
+
+  opacity:.85;
+}
+
+.managerLogo span{
+  display:block;
+
+  margin-top:10px;
+
+  color:var(--muted);
+
+  font-size:10px;
+  font-style:normal;
+  letter-spacing:4px;
+}
+
+@keyframes managerEnter{
+
+  from{
+    opacity:0;
+    transform:scale(.96);
+  }
+
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+
+}
+
+
+/* =========================
+   セリフ
+========================= */
+
 .dialogue{
-  min-height:108px;
+  min-height:120px;
 
-  margin:0 10px 10px;
-  padding:14px 15px;
+  margin:0 12px 12px;
+  padding:15px 16px 17px;
 
-  background:#f1f2eb;
+  position:relative;
 
-  color:#171a20;
+  background:#f2f2ec;
+  color:#16191e;
 
-  border-radius:9px;
+  border-radius:12px;
 
-  box-shadow:0 5px 18px #0008;
+  box-shadow:
+    0 8px 24px
+    rgba(0,0,0,.35);
+}
+
+.dialogue::before{
+  content:"";
+
+  position:absolute;
+
+  top:-10px;
+  left:36px;
+
+  width:20px;
+  height:20px;
+
+  background:#f2f2ec;
+
+  transform:rotate(45deg);
 }
 
 .speaker{
-  margin-bottom:6px;
+  position:relative;
 
-  font-size:10px;
+  z-index:2;
+
+  margin-bottom:7px;
+
+  font-size:11px;
   font-weight:900;
-  letter-spacing:1.5px;
+  letter-spacing:2px;
 }
 
 .dialogueText{
-  font-size:14px;
-  font-weight:500;
-  line-height:1.75;
+  position:relative;
+
+  z-index:2;
 
   white-space:pre-line;
+
+  font-size:15px;
+  font-weight:500;
+  line-height:1.75;
 }
+
+
+/* =========================
+   操作
+========================= */
 
 .controls{
   padding:0 10px 10px;
@@ -354,6 +499,10 @@ button:disabled{
   background:#20242b;
 }
 
+.choice:active{
+  background:#292f38;
+}
+
 .choice strong{
   display:block;
 
@@ -375,6 +524,8 @@ button:disabled{
   width:100%;
 
   min-height:48px;
+
+  padding:11px;
 
   border:none;
   border-radius:7px;
@@ -408,11 +559,11 @@ button:disabled{
 }
 
 .plan{
+  margin-bottom:8px;
+
   display:flex;
 
   gap:5px;
-
-  margin-bottom:8px;
 }
 
 .slot{
@@ -428,6 +579,87 @@ button:disabled{
 .slot.done{
   background:var(--acid);
 }
+
+
+/* =========================
+   楽曲解放
+========================= */
+
+.songUnlock{
+  margin-bottom:10px;
+  padding:16px;
+
+  text-align:center;
+
+  border:
+    1px solid
+    rgba(217,255,102,.35);
+
+  border-radius:10px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(217,255,102,.08),
+      rgba(255,255,255,.015)
+    );
+
+  box-shadow:
+    inset 0 0 25px
+    rgba(217,255,102,.025);
+}
+
+.songNew{
+  color:var(--acid);
+
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:3px;
+}
+
+.songTitle{
+  margin-top:7px;
+
+  font-size:23px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.songSub{
+  margin-top:3px;
+
+  color:var(--muted);
+
+  font-size:10px;
+}
+
+.songButton{
+  width:100%;
+
+  margin-top:12px;
+  padding:11px;
+
+  border:
+    1px solid
+    rgba(217,255,102,.55);
+
+  border-radius:7px;
+
+  background:#151a13;
+  color:var(--acid);
+
+  font-weight:800;
+}
+
+.songButton.playing{
+  background:var(--acid);
+  color:#111;
+}
+
+
+/* =========================
+   グッズ等
+========================= */
 
 .good{
   padding:10px;
@@ -502,9 +734,15 @@ button:disabled{
 }
 
 .resultNumber small{
-  font-size:14px;
   color:var(--muted);
+
+  font-size:14px;
 }
+
+
+/* =========================
+   その他
+========================= */
 
 .feedback{
   position:fixed;
@@ -514,7 +752,8 @@ button:disabled{
 
   z-index:30;
 
-  transform:translate(-50%,-10px);
+  transform:
+    translate(-50%,-10px);
 
   padding:8px 14px;
 
@@ -536,7 +775,8 @@ button:disabled{
 .feedback.show{
   opacity:1;
 
-  transform:translate(-50%,0);
+  transform:
+    translate(-50%,0);
 }
 
 .modal{
@@ -606,72 +846,97 @@ button:disabled{
   text-decoration:underline;
 }
 
-@media(max-height:700px){
 
-  .characters{
-    min-height:170px;
-  }
+@media(max-height:750px){
 
-  .character{
-    height:170px;
+  .characterStage{
+    height:285px;
   }
 
 }
 
+
 @media(min-width:700px){
 
-  .characters{
-    min-height:320px;
+  .characterStage{
+    height:520px;
   }
 
-  .character{
-    height:300px;
+  .characterImg{
+    width:65%;
   }
 
 }
 </style>
 </head>
 
+
 <body>
 
+
 <div class="app">
+
 
 <header class="header">
 
   <div class="logo">
+
     O-VER-KiLL
-    <span>MANAGER'S STORY</span>
+
+    <span>
+      MANAGER'S STORY
+    </span>
+
   </div>
 
-  <button class="help" id="help">?</button>
+  <button
+    class="help"
+    id="help"
+  >
+    ?
+  </button>
 
 </header>
 
+
 <main class="game">
+
 
 <section class="hud">
 
   <div class="hudTop">
 
-    <div class="week" id="weekLabel">
+    <div
+      class="week"
+      id="weekLabel"
+    >
       WEEK 1 / 04
     </div>
 
     <div class="cash">
+
       活動資金
+
       <strong id="cash">
         ¥220,000
       </strong>
+
     </div>
 
   </div>
 
-  <div class="stats" id="stats"></div>
+
+  <div
+    class="stats"
+    id="stats"
+  >
+  </div>
 
 </section>
 
 
 <section class="stage">
+
 
   <div class="stageTop">
 
@@ -686,9 +951,45 @@ button:disabled{
   </div>
 
 
-  <div
-    class="characters"
-    id="characters">
+  <div class="characterStage">
+
+    <div
+      class="singleCharacter"
+      id="singleCharacter"
+    >
+
+      <img
+        class="characterImg"
+        id="characterImg"
+        alt=""
+      >
+
+      <div
+        class="memberBadge"
+        id="memberBadge"
+      >
+      </div>
+
+    </div>
+
+
+    <div
+      class="managerVisual"
+      id="managerVisual"
+    >
+
+      <div class="managerLogo">
+
+        O-VER-KiLL
+
+        <span>
+          THE BEGINNING
+        </span>
+
+      </div>
+
+    </div>
+
   </div>
 
 
@@ -696,13 +997,15 @@ button:disabled{
 
     <div
       class="speaker"
-      id="speaker">
+      id="speaker"
+    >
       MANAGER
     </div>
 
     <div
       class="dialogueText"
-      id="dialogue">
+      id="dialogue"
+    >
     </div>
 
   </div>
@@ -710,10 +1013,13 @@ button:disabled{
 
   <div
     class="controls"
-    id="controls">
+    id="controls"
+  >
   </div>
 
+
 </section>
+
 
 </main>
 
@@ -730,56 +1036,72 @@ button:disabled{
 
 </footer>
 
+
 </div>
 
 
 <div
   class="feedback"
-  id="feedback">
+  id="feedback"
+>
 </div>
 
 
 <div
   class="modal"
-  id="modal">
+  id="modal"
+>
 
   <div
     class="modalBox"
-    id="modalBox">
+    id="modalBox"
+  >
   </div>
 
 </div>
 
 
+<audio
+  id="songAudio"
+  src="./akunaki-kodou.mp3"
+  preload="metadata"
+>
+</audio>
+
+
 <script>
 
-const MEMBERS = [
+/* ========================================
+   基本設定
+======================================== */
 
-  {
+const MEMBERS = {
+
+  SARiNA:{
     id:"sarina",
     name:"SARiNA",
     color:"#65df90"
   },
 
-  {
+  MiYU:{
     id:"miyu",
     name:"MiYU",
     color:"#6fb9ff"
   },
 
-  {
+  KiLUA:{
     id:"kilua",
     name:"KiLUA",
     color:"#ff737f"
   },
 
-  {
+  RAiSA:{
     id:"raisa",
     name:"RAiSA",
     color:"#ffdc69"
   }
 
-];
+};
 
 
 const CHAR_IMAGES = {
@@ -819,6 +1141,25 @@ const CHAR_IMAGES = {
 };
 
 
+/*
+  ★あとで本当のサビ位置が分かったら
+  この2つだけ変えればOK。
+
+  例：
+  1分12秒から1分42秒なら
+  START = 72
+  END   = 102
+*/
+
+const SONG_CHORUS_START = 0;
+
+const SONG_CHORUS_END = 30;
+
+
+/* ========================================
+   ステータス
+======================================== */
+
 const STAT_NAMES = {
 
   vocal:"歌唱",
@@ -829,6 +1170,10 @@ const STAT_NAMES = {
 
 };
 
+
+/* ========================================
+   行動
+======================================== */
 
 const ACTIONS = {
 
@@ -847,11 +1192,17 @@ const ACTIONS = {
     },
 
     reaction:{
+
       member:"SARiNA",
+
       expression:"smile",
+
       text:
 `もっと歌えるようになりたい。
-次のライブでは、ちゃんと届かせたい。`
+
+次のライブでは、
+ちゃんと届かせたい。`
+
     }
 
   },
@@ -872,11 +1223,17 @@ const ACTIONS = {
     },
 
     reaction:{
+
       member:"KiLUA",
+
       expression:"smile",
+
       text:
 `もっと動ける。
-まだまだこんなもんじゃないよ！`
+
+まだまだ
+こんなもんじゃないよ！`
+
     }
 
   },
@@ -896,11 +1253,17 @@ const ACTIONS = {
     },
 
     reaction:{
+
       member:"MiYU",
+
       expression:"smile",
+
       text:
 `反応ちょっと増えてる！
-少しずつ見つかってきてるかも。`
+
+少しずつ
+見つかってきてるかも。`
+
     }
 
   },
@@ -921,13 +1284,17 @@ const ACTIONS = {
     },
 
     reaction:{
+
       member:"RAiSA",
+
       expression:"troubled",
+
       text:
 `受け取ってくれた人、
 ライブ来てくれるかな。
 
 ちゃんと覚えてもらいたいね。`
+
     }
 
   },
@@ -947,12 +1314,16 @@ const ACTIONS = {
     },
 
     reaction:{
+
       member:"SARiNA",
+
       expression:"smile",
+
       text:
 `４人で同じ方向を見ていこう。
 
 まだ始まったばかりだから。`
+
     }
 
   },
@@ -971,18 +1342,26 @@ const ACTIONS = {
     },
 
     reaction:{
+
       member:"MiYU",
+
       expression:"smile",
+
       text:
 `休むのも活動のうち！
 
 また明日から頑張ろ。`
+
     }
 
   }
 
 };
 
+
+/* ========================================
+   イベント
+======================================== */
 
 const EVENTS = {
 
@@ -993,10 +1372,12 @@ const EVENTS = {
     expression:"troubled",
 
     text:
-`ライブハウスから、
-急きょ出演枠が空いたと連絡が来た。
+`ライブハウスから
+急きょ出演枠が空いたと
+連絡が来た。
 
 本番経験を積めるチャンス。
+
 でも準備時間は少ない。`,
 
     choices:[
@@ -1014,7 +1395,9 @@ const EVENTS = {
         },
 
         result:{
+
           member:"SARiNA",
+
           expression:"smile",
 
           text:
@@ -1022,6 +1405,7 @@ const EVENTS = {
 
 完璧ではなかったけど、
 初めて４人を知った人もいた。`
+
         }
 
       },
@@ -1038,7 +1422,9 @@ const EVENTS = {
         },
 
         result:{
+
           member:"SARiNA",
+
           expression:"normal",
 
           text:
@@ -1046,6 +1432,7 @@ const EVENTS = {
 
 焦らずデビューライブに
 照準を合わせる。`
+
         }
 
       }
@@ -1062,7 +1449,8 @@ const EVENTS = {
     expression:"troubled",
 
     text:
-`SNSで投稿が少し伸び始めた。
+`SNSで投稿が
+少し伸び始めた。
 
 この流れをどう使う？`,
 
@@ -1081,14 +1469,18 @@ const EVENTS = {
         },
 
         result:{
+
           member:"MiYU",
+
           expression:"smile",
 
           text:
-`勢いに合わせて告知を追加。
+`勢いに合わせて
+告知を追加。
 
 少しずつ名前が
 広がっていった。`
+
         }
 
       },
@@ -1105,12 +1497,17 @@ const EVENTS = {
         },
 
         result:{
+
           member:"MiYU",
+
           expression:"normal",
 
           text:
 `無理に追わず、
-次の活動を整えることにした。`
+
+次の活動を
+整えることにした。`
+
         }
 
       }
@@ -1121,6 +1518,10 @@ const EVENTS = {
 
 };
 
+
+/* ========================================
+   グッズ
+======================================== */
 
 const GOODS = {
 
@@ -1139,21 +1540,31 @@ const GOODS = {
 };
 
 
+/* ========================================
+   導入
+======================================== */
+
 const INTRO = [
 
   {
+
     member:"MANAGER",
+
     expression:"normal",
 
     text:
 `2,000名が応募したオーディション。
 
-その中から、４人が選ばれた。`
+その中から、
+４人が選ばれた。`
+
   },
 
 
   {
+
     member:"SARiNA",
+
     expression:"normal",
 
     text:
@@ -1161,36 +1572,47 @@ const INTRO = [
 
 まだ何も始まってないけど、
 絶対ここから大きくしたい。`
+
   },
 
 
   {
+
     member:"MiYU",
+
     expression:"smile",
 
     text:
 `MiYUです！
 
 ４人なら、
-なんか面白いことできそうじゃない？`
+なんか面白いこと
+できそうじゃない？`
+
   },
 
 
   {
+
     member:"KiLUA",
+
     expression:"angry",
 
     text:
 `KiLUA。
 
-やるなら中途半端は嫌。
+やるなら
+中途半端は嫌。
 
 ちゃんと上まで行きたい。`
+
   },
 
 
   {
+
     member:"RAiSA",
+
     expression:"smile",
 
     text:
@@ -1198,26 +1620,35 @@ const INTRO = [
 
 まだ知られてないなら、
 これから知ってもらえばいいよね。`
+
   },
 
 
   {
+
     member:"MANAGER",
+
     expression:"normal",
 
     text:
-`デビューライブまで、あと４週間。
+`デビューライブまで
+あと４週間。
 
 あなたは今日から、
 この４人のマネージャーだ。`
+
   }
 
 ];
 
 
 const STORAGE_KEY =
-  "overkill_debut_v5";
+  "overkill_debut_v6";
 
+
+/* ========================================
+   セーブ
+======================================== */
 
 function freshState(){
 
@@ -1273,17 +1704,17 @@ function load(){
 
   try{
 
-    const saved =
+    const data =
       JSON.parse(
         localStorage.getItem(
           STORAGE_KEY
         )
       );
 
-    return saved
+    return data
       ? {
           ...freshState(),
-          ...saved
+          ...data
         }
       : freshState();
 
@@ -1302,13 +1733,36 @@ let state =
   load();
 
 
+function save(){
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(state)
+  );
+
+}
+
+
+/* ========================================
+   DOM
+======================================== */
+
 const $ =
   id =>
     document.getElementById(id);
 
 
-const characters =
-  $("characters");
+const characterImg =
+  $("characterImg");
+
+const singleCharacter =
+  $("singleCharacter");
+
+const memberBadge =
+  $("memberBadge");
+
+const managerVisual =
+  $("managerVisual");
 
 const controls =
   $("controls");
@@ -1328,22 +1782,19 @@ const progressLabel =
 const feedback =
   $("feedback");
 
+const songAudio =
+  $("songAudio");
+
+
+/* ========================================
+   共通
+======================================== */
 
 function yen(n){
 
   return "¥" +
     Math.round(n)
       .toLocaleString("ja-JP");
-
-}
-
-
-function save(){
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(state)
-  );
 
 }
 
@@ -1386,7 +1837,9 @@ function applyEffect(effect){
 
       state.stats[key] =
         clamp(
-          state.stats[key] + value
+          state.stats[key]
+          +
+          value
         );
 
     }
@@ -1396,85 +1849,129 @@ function applyEffect(effect){
 }
 
 
-function getMember(name){
+function stopSong(){
 
-  return MEMBERS.find(
-    member =>
-      member.name===name
-  );
+  songAudio.pause();
+
+  songAudio.currentTime =
+    SONG_CHORUS_START;
 
 }
 
 
-function renderCharacters(
-  activeName,
-  activeExpression="normal"
+/* ========================================
+   1人表示
+======================================== */
+
+function showCharacter(
+  memberName,
+  expression="normal"
 ){
 
-  const active =
-    getMember(activeName);
+  singleCharacter
+    .classList
+    .remove("enter");
 
 
-  characters.innerHTML =
-    MEMBERS.map(member=>{
+  if(
+    memberName==="MANAGER"
+  ){
 
-      const isActive =
-        active &&
-        active.id===member.id;
+    singleCharacter.style.display =
+      "none";
 
+    managerVisual
+      .classList
+      .add("show");
 
-      const expression =
-        isActive
-          ? activeExpression
-          : "normal";
+    return;
 
-
-      const source =
-        CHAR_IMAGES[member.id][expression]
-        ||
-        CHAR_IMAGES[member.id].normal;
+  }
 
 
-      return `
+  const member =
+    MEMBERS[memberName];
 
-        <div
-          class="character
-          ${isActive ? "active" : ""}"
 
-          style="
-          --member:${member.color}
-          "
-        >
+  if(!member){
 
-          <img
-            class="charImg"
-            src="${source}"
-            alt="${member.name}"
-          >
+    singleCharacter.style.display =
+      "none";
 
-          <div
-            class="memberName"
-          >
-            ${member.name}
-          </div>
+    managerVisual
+      .classList
+      .add("show");
 
-        </div>
+    return;
 
-      `;
+  }
 
-    }).join("");
+
+  managerVisual
+    .classList
+    .remove("show");
+
+
+  singleCharacter.style.display =
+    "flex";
+
+
+  const source =
+
+    CHAR_IMAGES[member.id][expression]
+
+    ||
+
+    CHAR_IMAGES[member.id].normal;
+
+
+  characterImg.src =
+    source;
+
+
+  characterImg.alt =
+    member.name;
+
+
+  memberBadge.textContent =
+    member.name;
+
+
+  memberBadge.style.setProperty(
+    "--member",
+    member.color
+  );
+
+
+  memberBadge.style.borderTopColor =
+    member.color;
+
+
+  requestAnimationFrame(()=>{
+
+    singleCharacter
+      .classList
+      .add("enter");
+
+  });
 
 }
 
+
+/* ========================================
+   HUD
+======================================== */
 
 function renderHud(){
 
   $("weekLabel").textContent =
 
     state.phase==="result"
+
       ? "DEBUT REPORT"
 
       : state.phase==="live"
+
       ? "DEBUT LIVE"
 
       : `WEEK ${state.week} / 04`;
@@ -1485,9 +1982,11 @@ function renderHud(){
 
 
   $("stats").innerHTML =
+
     Object.entries(
       STAT_NAMES
     )
+
     .map(
       ([key,name])=>`
 
@@ -1510,7 +2009,8 @@ function renderHud(){
           <div
             class="fill"
             id="bar-${key}"
-          ></div>
+          >
+          </div>
 
         </div>
 
@@ -1518,6 +2018,7 @@ function renderHud(){
 
     `
     )
+
     .join("");
 
 
@@ -1528,13 +2029,16 @@ function renderHud(){
       of Object.keys(STAT_NAMES)
     ){
 
-      const el =
+      const bar =
         $("bar-"+key);
 
-      if(el){
 
-        el.style.width =
-          state.stats[key] + "%";
+      if(bar){
+
+        bar.style.width =
+          state.stats[key]
+          +
+          "%";
 
       }
 
@@ -1544,6 +2048,10 @@ function renderHud(){
 
 }
 
+
+/* ========================================
+   会話
+======================================== */
 
 function setScene(
   member,
@@ -1569,13 +2077,17 @@ function setScene(
     progress;
 
 
-  renderCharacters(
+  showCharacter(
     member,
     expression
   );
 
 }
 
+
+/* ========================================
+   ボタン
+======================================== */
 
 function primary(
   text,
@@ -1586,9 +2098,13 @@ function primary(
   return `
 
     <button
+
       class="primary"
+
       data-action="${action}"
+
       ${extra}
+
     >
 
       ${text}
@@ -1609,9 +2125,13 @@ function secondary(
   return `
 
     <button
+
       class="secondary"
+
       data-action="${action}"
+
       ${extra}
+
     >
 
       ${text}
@@ -1629,9 +2149,9 @@ function showFeedback(text){
     text;
 
 
-  feedback.classList.add(
-    "show"
-  );
+  feedback
+    .classList
+    .add("show");
 
 
   clearTimeout(
@@ -1642,9 +2162,11 @@ function showFeedback(text){
   showFeedback.timer =
     setTimeout(
       ()=>{
-        feedback.classList.remove(
-          "show"
-        );
+
+        feedback
+          .classList
+          .remove("show");
+
       },
       1300
     );
@@ -1652,53 +2174,9 @@ function showFeedback(text){
 }
 
 
-function pendingEvent(){
-
-  return (
-
-    EVENTS[state.week]
-
-    &&
-
-    !state.events[state.week]
-
-    &&
-
-    state.plan.length===0
-
-  );
-
-}
-
-
-function deliverGoods(){
-
-  const delivered =
-    state.pending.filter(
-      item =>
-        item.week<=state.week
-    );
-
-
-  for(
-    const item
-    of delivered
-  ){
-
-    state.stock[item.id]
-      += item.qty;
-
-  }
-
-
-  state.pending =
-    state.pending.filter(
-      item =>
-        item.week>state.week
-    );
-
-}
-
+/* ========================================
+   INTRO
+======================================== */
 
 function renderIntro(){
 
@@ -1726,24 +2204,58 @@ function renderIntro(){
     <div class="row">
 
       ${secondary(
+
         "‹ 戻る",
+
         "introBack",
+
         state.intro===0
           ? "disabled"
           : ""
+
       )}
 
+
       ${primary(
-        state.intro===INTRO.length-1
+
+        state.intro
+        ===
+        INTRO.length-1
+
           ? "物語を始める →"
+
           : "次へ →",
 
         "introNext"
+
       )}
 
     </div>
 
   `;
+
+}
+
+
+/* ========================================
+   WEEK EVENT
+======================================== */
+
+function pendingEvent(){
+
+  return (
+
+    EVENTS[state.week]
+
+    &&
+
+    !state.events[state.week]
+
+    &&
+
+    state.plan.length===0
+
+  );
 
 }
 
@@ -1773,33 +2285,36 @@ function renderEvent(){
 
     <div class="actions">
 
-      ${event.choices.map(
+      ${event.choices
 
-        (choice,index)=>`
+        .map(
+          (choice,index)=>`
 
-        <button
+          <button
 
-          class="choice"
+            class="choice"
 
-          data-action="event"
+            data-action="event"
 
-          data-index="${index}"
+            data-index="${index}"
 
-        >
+          >
 
-          <strong>
-            ${choice.label}
-          </strong>
+            <strong>
+              ${choice.label}
+            </strong>
 
-          <small>
-            ${choice.hint}
-          </small>
+            <small>
+              ${choice.hint}
+            </small>
 
-        </button>
+          </button>
 
-      `
+        `
+        )
 
-      ).join("")}
+        .join("")
+      }
 
     </div>
 
@@ -1807,6 +2322,10 @@ function renderEvent(){
 
 }
 
+
+/* ========================================
+   WEEK行動
+======================================== */
 
 function renderPlanning(){
 
@@ -1859,7 +2378,9 @@ function renderPlanning(){
       ${primary(
 
         state.week===4
+
           ? "デビューライブ当日へ →"
+
           : "次の１週間へ →",
 
         "advance"
@@ -1889,8 +2410,16 @@ function renderPlanning(){
   }
 
 
+  const rotation = [
+    "SARiNA",
+    "MiYU",
+    "KiLUA",
+    "RAiSA"
+  ];
+
+
   const member =
-    MEMBERS[
+    rotation[
       state.plan.length % 4
     ];
 
@@ -1908,7 +2437,7 @@ function renderPlanning(){
   ){
 
     text =
-      `ひとつ終わったね。
+`ひとつ終わったね。
 
 次はどうする？`;
 
@@ -1923,7 +2452,7 @@ function renderPlanning(){
   ){
 
     text =
-      `今週はあとひとつ。
+`今週はあとひとつ。
 
 最後は何を選ぶ？`;
 
@@ -1932,7 +2461,7 @@ function renderPlanning(){
 
   setScene(
 
-    member.name,
+    member,
 
     text,
 
@@ -1950,9 +2479,12 @@ function renderPlanning(){
     <div class="plan">
 
       ${[0,1,2]
+
         .map(
           i=>`
+
           <span
+
             class="
               slot
               ${
@@ -1961,9 +2493,13 @@ function renderPlanning(){
                   : ""
               }
             "
-          ></span>
+
+          >
+          </span>
+
         `
         )
+
         .join("")
       }
 
@@ -1973,6 +2509,7 @@ function renderPlanning(){
     <div class="actions">
 
       ${Object.entries(ACTIONS)
+
         .map(
           ([id,action])=>`
 
@@ -2004,7 +2541,9 @@ function renderPlanning(){
 
               ${
                 action.cost
+
                   ? yen(action.cost)
+
                   : "費用なし"
               }
 
@@ -2014,6 +2553,7 @@ function renderPlanning(){
 
         `
         )
+
         .join("")
       }
 
@@ -2068,31 +2608,34 @@ function doActivity(id){
     action.cost;
 
 
-  const effect =
-    {
-      ...action.effect
-    };
+  const effect = {
+    ...action.effect
+  };
 
 
   if(
     state.stats.energy<30
   ){
 
-    if(effect.vocal>0){
+    if(
+      effect.vocal>0
+    ){
 
       effect.vocal =
         Math.floor(
-          effect.vocal / 2
+          effect.vocal/2
         );
 
     }
 
 
-    if(effect.dance>0){
+    if(
+      effect.dance>0
+    ){
 
       effect.dance =
         Math.floor(
-          effect.dance / 2
+          effect.dance/2
         );
 
     }
@@ -2100,10 +2643,14 @@ function doActivity(id){
   }
 
 
-  applyEffect(effect);
+  applyEffect(
+    effect
+  );
 
 
-  state.plan.push(id);
+  state.plan.push(
+    id
+  );
 
 
   save();
@@ -2146,24 +2693,30 @@ function doActivity(id){
 }
 
 
+/* ========================================
+   グッズ
+======================================== */
+
 function openGoods(){
 
   const total =
 
     state.draft.tee
-    * GOODS.tee.cost
+    *
+    GOODS.tee.cost
 
     +
 
     state.draft.base
-    * GOODS.base.cost;
+    *
+    GOODS.base.cost;
 
 
   setScene(
 
     "MiYU",
 
-    `ライブの思い出を、
+`ライブの思い出を、
 持ち帰れるように。
 
 グッズも準備しておこう！`,
@@ -2182,6 +2735,7 @@ function openGoods(){
     <div class="goods">
 
       ${Object.entries(GOODS)
+
         .map(
           ([id,good])=>`
 
@@ -2230,7 +2784,9 @@ function openGoods(){
               data-delta="-10"
 
             >
+
               −
+
             </button>
 
 
@@ -2250,7 +2806,9 @@ function openGoods(){
               data-delta="10"
 
             >
+
               ＋
+
             </button>
 
           </div>
@@ -2259,6 +2817,7 @@ function openGoods(){
 
       `
         )
+
         .join("")
       }
 
@@ -2271,7 +2830,9 @@ function openGoods(){
     ${primary(
 
       total
+
         ? `${yen(total)}で発注する`
+
         : "枚数を選んでください",
 
       "order",
@@ -2308,6 +2869,39 @@ function openGoods(){
 }
 
 
+function deliverGoods(){
+
+  const delivered =
+    state.pending.filter(
+      item=>
+        item.week<=state.week
+    );
+
+
+  for(
+    const item
+    of delivered
+  ){
+
+    state.stock[item.id]
+      += item.qty;
+
+  }
+
+
+  state.pending =
+    state.pending.filter(
+      item=>
+        item.week>state.week
+    );
+
+}
+
+
+/* ========================================
+   ステータス
+======================================== */
+
 function openStats(){
 
   $("modalBox").innerHTML = `
@@ -2318,9 +2912,7 @@ function openStats(){
 
     <p>
 
-      WEEK
-      ${state.week}
-      / 04
+      WEEK ${state.week} / 04
 
       <br>
 
@@ -2358,13 +2950,12 @@ function openStats(){
 
     </ul>
 
+
     <button
       class="primary"
       data-modal-close
     >
-
       閉じる
-
     </button>
 
   `;
@@ -2376,6 +2967,10 @@ function openStats(){
 
 }
 
+
+/* ========================================
+   HELP
+======================================== */
 
 function openHelp(){
 
@@ -2399,7 +2994,8 @@ function openHelp(){
 
       行動によって、
 
-      歌唱・ダンス・認知・連携・体力・活動資金
+      歌唱・ダンス・認知・連携・
+      体力・活動資金
 
       が変化します。
 
@@ -2408,26 +3004,17 @@ function openHelp(){
     <p>
 
       体力が30未満になると、
-
-      ボーカル・ダンス練習の効果が半分になります。
-
-    </p>
-
-    <p>
-
-      グッズは発注した翌週に納品。
-
-      発注できるのは３週目までです。
+      ボーカル・ダンス練習の
+      効果が半分になります。
 
     </p>
+
 
     <button
       class="primary"
       data-modal-close
     >
-
       閉じる
-
     </button>
 
   `;
@@ -2440,16 +3027,21 @@ function openHelp(){
 }
 
 
+/* ========================================
+   デビューライブ前
+======================================== */
+
 function renderLiveReady(){
 
   setScene(
 
     "SARiNA",
 
-    `いよいよデビューライブ。
+`いよいよデビューライブ。
 
-今日のステージ、
-何を一番大切にする？`,
+私たちの最初の曲。
+
+ここから始まるよ。`,
 
     "DEBUT DAY",
 
@@ -2461,6 +3053,33 @@ function renderLiveReady(){
 
 
   controls.innerHTML = `
+
+    <div class="songUnlock">
+
+      <div class="songNew">
+        NEW SONG UNLOCKED
+      </div>
+
+      <div class="songTitle">
+        あくなき鼓動
+      </div>
+
+      <div class="songSub">
+        O-VER-KiLL
+      </div>
+
+      <button
+        class="songButton"
+        id="songButton"
+        data-action="song"
+      >
+
+        ▶ サビを聴く
+
+      </button>
+
+    </div>
+
 
     <div class="actions">
 
@@ -2475,7 +3094,8 @@ function renderLiveReady(){
         </strong>
 
         <small>
-          歌・ダンス・連携をバランスよく
+          歌・ダンス・連携を
+          バランスよく
         </small>
 
       </button>
@@ -2492,7 +3112,8 @@ function renderLiveReady(){
         </strong>
 
         <small>
-          歌唱力を活かしたステージ
+          歌唱力を活かした
+          ステージ
         </small>
 
       </button>
@@ -2509,7 +3130,8 @@ function renderLiveReady(){
         </strong>
 
         <small>
-          ダンスと熱量で会場を動かす
+          ダンスと熱量で
+          会場を動かす
         </small>
 
       </button>
@@ -2521,6 +3143,10 @@ function renderLiveReady(){
 }
 
 
+/* ========================================
+   ライブ
+======================================== */
+
 function calculateResult(){
 
   const stats =
@@ -2529,27 +3155,27 @@ function calculateResult(){
 
   let performance =
 
-    stats.vocal * .3
+    stats.vocal*.3
 
     +
 
-    stats.dance * .3
+    stats.dance*.3
 
     +
 
-    stats.bond * .25
+    stats.bond*.25
 
     +
 
-    stats.energy * .15;
+    stats.energy*.15;
 
 
   if(
     state.setlist==="vocal"
   ){
 
-    performance
-      += stats.vocal * .08;
+    performance +=
+      stats.vocal*.08;
 
   }
 
@@ -2558,8 +3184,8 @@ function calculateResult(){
     state.setlist==="dance"
   ){
 
-    performance
-      += stats.dance * .08;
+    performance +=
+      stats.dance*.08;
 
   }
 
@@ -2581,11 +3207,11 @@ function calculateResult(){
 
         +
 
-        stats.reach * 1.65
+        stats.reach*1.65
 
         +
 
-        stats.bond * .35
+        stats.bond*.35
 
       )
 
@@ -2604,7 +3230,7 @@ function calculateResult(){
         *
 
         (
-          performance / 100
+          performance/100
         )
 
         *
@@ -2617,7 +3243,7 @@ function calculateResult(){
 
 
   const ticketIncome =
-    attendance * 2000;
+    attendance*2000;
 
 
   const teeSold =
@@ -2626,7 +3252,7 @@ function calculateResult(){
       state.stock.tee,
 
       Math.round(
-        attendance * .18
+        attendance*.18
       )
 
     );
@@ -2638,7 +3264,7 @@ function calculateResult(){
       state.stock.base,
 
       Math.round(
-        attendance * .09
+        attendance*.09
       )
 
     );
@@ -2647,12 +3273,14 @@ function calculateResult(){
   const merchIncome =
 
     teeSold
-    * GOODS.tee.price
+    *
+    GOODS.tee.price
 
     +
 
     baseSold
-    * GOODS.base.price;
+    *
+    GOODS.base.price;
 
 
   state.stock.tee -=
@@ -2692,11 +3320,14 @@ function calculateResult(){
 
 function renderLive(){
 
+  stopSong();
+
+
   setScene(
 
     "SARiNA",
 
-    `始まるよ。
+`始まるよ。
 
 ４人で、
 この景色を変えよう。`,
@@ -2716,8 +3347,9 @@ function renderLive(){
 
       <div
         style="
-        font-size:12px;
-        color:var(--muted);
+        font-size:10px;
+        letter-spacing:3px;
+        color:var(--acid);
         "
       >
 
@@ -2727,13 +3359,13 @@ function renderLive(){
 
       <div
         style="
-        font-size:34px;
+        font-size:31px;
         font-weight:900;
-        margin-top:5px;
+        margin-top:7px;
         "
       >
 
-        O-VER-KiLL
+        あくなき鼓動
 
       </div>
 
@@ -2824,10 +3456,7 @@ function renderResult(){
         </strong>
 
         <small>
-
-          ${result.performance}
-          / 100
-
+          ${result.performance} / 100
         </small>
 
       </div>
@@ -2840,9 +3469,7 @@ function renderResult(){
         </strong>
 
         <small>
-
           ${result.fans}人
-
         </small>
 
       </div>
@@ -2855,11 +3482,7 @@ function renderResult(){
         </strong>
 
         <small>
-
-          ${yen(
-            result.ticketIncome
-          )}
-
+          ${yen(result.ticketIncome)}
         </small>
 
       </div>
@@ -2872,11 +3495,7 @@ function renderResult(){
         </strong>
 
         <small>
-
-          ${yen(
-            result.merchIncome
-          )}
-
+          ${yen(result.merchIncome)}
         </small>
 
       </div>
@@ -2896,6 +3515,10 @@ function renderResult(){
 
 }
 
+
+/* ========================================
+   RENDER
+======================================== */
 
 function render(){
 
@@ -2949,466 +3572,605 @@ function render(){
 }
 
 
-document.addEventListener(
-  "click",
-  event=>{
+/* ========================================
+   音楽
+======================================== */
 
-    if(
-      event.target.matches(
-        "[data-modal-close]"
-      )
-    ){
+function toggleSong(){
 
-      $("modal")
+  const button =
+    $("songButton");
+
+
+  if(
+    !songAudio.paused
+  ){
+
+    songAudio.pause();
+
+
+    if(button){
+
+      button.textContent =
+        "▶ サビを聴く";
+
+
+      button
         .classList
-        .remove("show");
-
-      return;
+        .remove("playing");
 
     }
 
 
-    const button =
-      event.target.closest(
-        "[data-action]"
-      );
+    return;
+
+  }
 
 
-    if(
-      !button
-      ||
-      button.disabled
-    ){
-
-      return;
-
-    }
+  songAudio.currentTime =
+    SONG_CHORUS_START;
 
 
-    const action =
-      button.dataset.action;
+  songAudio.play()
+    .then(()=>{
+
+      if(button){
+
+        button.textContent =
+          "■ 停止";
 
 
-    if(
-      action==="introNext"
-    ){
-
-      if(
-        state.intro
-        <
-        INTRO.length-1
-      ){
-
-        state.intro++;
+        button
+          .classList
+          .add("playing");
 
       }
 
-      else{
-
-        state.phase =
-          "planning";
-
-      }
-
-
-      save();
-
-      render();
-
-      return;
-
-    }
-
-
-    if(
-      action==="introBack"
-    ){
-
-      state.intro =
-        Math.max(
-          0,
-          state.intro-1
-        );
-
-
-      save();
-
-      render();
-
-      return;
-
-    }
-
-
-    if(
-      action==="activity"
-    ){
-
-      doActivity(
-        button.dataset.id
-      );
-
-      return;
-
-    }
-
-
-    if(
-      action==="continue"
-    ){
-
-      render();
-
-      return;
-
-    }
-
-
-    if(
-      action==="event"
-    ){
-
-      const currentEvent =
-        EVENTS[state.week];
-
-
-      const choice =
-        currentEvent
-          .choices[
-            Number(
-              button.dataset.index
-            )
-          ];
-
-
-      applyEffect(
-        choice.effect
-      );
-
-
-      state.events[state.week] =
-        true;
-
-
-      save();
-
-      renderHud();
-
+    })
+    .catch(()=>{
 
       showFeedback(
-        "あなたの選択が４人に届いた"
+        "再生できませんでした"
       );
 
+    });
 
-      setScene(
-
-        choice.result.member,
-
-        choice.result.text,
-
-        "EVENT RESULT",
-
-        "",
-
-        choice.result.expression
-
-      );
+}
 
 
-      controls.innerHTML =
-        primary(
-          "次へ →",
-          "continue"
-        );
-
-
-      return;
-
-    }
-
-
-    if(
-      action==="advance"
-    ){
-
-      state.plan = [];
-
+songAudio
+  .addEventListener(
+    "timeupdate",
+    ()=>{
 
       if(
-        state.week===4
+        songAudio.currentTime
+        >=
+        SONG_CHORUS_END
       ){
 
-        state.phase =
-          "liveReady";
+        songAudio.pause();
 
-      }
 
-      else{
+        songAudio.currentTime =
+          SONG_CHORUS_START;
 
-        state.week++;
 
-        deliverGoods();
+        const button =
+          $("songButton");
 
-      }
 
+        if(button){
 
-      save();
+          button.textContent =
+            "▶ もう一度聴く";
 
-      render();
 
-      return;
-
-    }
-
-
-    if(
-      action==="goods"
-    ){
-
-      openGoods();
-
-      return;
-
-    }
-
-
-    if(
-      action==="stats"
-    ){
-
-      openStats();
-
-      return;
-
-    }
-
-
-    if(
-      action==="qty"
-    ){
-
-      if(
-        state.week>3
-      ){
-
-        return;
-
-      }
-
-
-      const id =
-        button.dataset.id;
-
-
-      const delta =
-        Number(
-          button.dataset.delta
-        );
-
-
-      state.draft[id] =
-        clamp(
-
-          state.draft[id]
-          +
-          delta,
-
-          0,
-
-          100
-
-        );
-
-
-      save();
-
-      openGoods();
-
-      return;
-
-    }
-
-
-    if(
-      action==="order"
-    ){
-
-      const total =
-
-        state.draft.tee
-        * GOODS.tee.cost
-
-        +
-
-        state.draft.base
-        * GOODS.base.cost;
-
-
-      if(
-        !total
-        ||
-        total>state.cash
-        ||
-        state.week>3
-      ){
-
-        return;
-
-      }
-
-
-      state.cash -=
-        total;
-
-
-      for(
-        const id
-        of Object.keys(GOODS)
-      ){
-
-        const qty =
-          state.draft[id];
-
-
-        if(qty>0){
-
-          state.pending.push({
-
-            id,
-
-            qty,
-
-            week:
-              state.week+1
-
-          });
-
-
-          state.ordered[id] +=
-            qty;
+          button
+            .classList
+            .remove("playing");
 
         }
 
       }
 
-
-      state.draft = {
-        tee:0,
-        base:0
-      };
-
-
-      save();
-
-      renderHud();
-
-
-      showFeedback(
-        "グッズを発注しました"
-      );
-
-
-      setScene(
-
-        "MiYU",
-
-        `発注完了！
-
-届くのは来週。
-
-ライブで誰かが
-着てくれたら嬉しいね。`,
-
-        "MERCH ORDER",
-
-        "",
-
-        "smile"
-
-      );
-
-
-      controls.innerHTML =
-        primary(
-          "次へ →",
-          "continue"
-        );
-
-
-      return;
-
     }
+  );
 
 
-    if(
-      action==="setlist"
-    ){
+/* ========================================
+   CLICK
+======================================== */
 
-      state.setlist =
-        button.dataset.id;
+document
+  .addEventListener(
+    "click",
+    event=>{
 
-
-      state.phase =
-        "live";
-
-
-      save();
-
-      render();
-
-      return;
-
-    }
-
-
-    if(
-      action==="finish"
-    ){
-
-      calculateResult();
-
-
-      state.phase =
-        "result";
-
-
-      save();
-
-      render();
-
-      return;
-
-    }
-
-
-    if(
-      action==="restart"
-    ){
 
       if(
-        confirm(
-          "最初からやり直しますか？"
+        event.target.matches(
+          "[data-modal-close]"
         )
       ){
 
-        state =
-          freshState();
+        $("modal")
+          .classList
+          .remove("show");
+
+        return;
+
+      }
+
+
+      const button =
+        event.target.closest(
+          "[data-action]"
+        );
+
+
+      if(
+        !button
+        ||
+        button.disabled
+      ){
+
+        return;
+
+      }
+
+
+      const action =
+        button.dataset.action;
+
+
+      if(
+        action==="introNext"
+      ){
+
+        if(
+          state.intro
+          <
+          INTRO.length-1
+        ){
+
+          state.intro++;
+
+        }
+
+        else{
+
+          state.phase =
+            "planning";
+
+        }
 
 
         save();
 
         render();
 
+        return;
+
       }
 
 
-      return;
+      if(
+        action==="introBack"
+      ){
+
+        state.intro =
+          Math.max(
+            0,
+            state.intro-1
+          );
+
+
+        save();
+
+        render();
+
+        return;
+
+      }
+
+
+      if(
+        action==="activity"
+      ){
+
+        doActivity(
+          button.dataset.id
+        );
+
+        return;
+
+      }
+
+
+      if(
+        action==="continue"
+      ){
+
+        render();
+
+        return;
+
+      }
+
+
+      if(
+        action==="event"
+      ){
+
+        const currentEvent =
+          EVENTS[state.week];
+
+
+        const choice =
+          currentEvent
+            .choices[
+              Number(
+                button.dataset.index
+              )
+            ];
+
+
+        applyEffect(
+          choice.effect
+        );
+
+
+        state.events[state.week] =
+          true;
+
+
+        save();
+
+        renderHud();
+
+
+        showFeedback(
+          "あなたの選択が４人に届いた"
+        );
+
+
+        setScene(
+
+          choice.result.member,
+
+          choice.result.text,
+
+          "EVENT RESULT",
+
+          "",
+
+          choice.result.expression
+
+        );
+
+
+        controls.innerHTML =
+          primary(
+            "次へ →",
+            "continue"
+          );
+
+
+        return;
+
+      }
+
+
+      if(
+        action==="advance"
+      ){
+
+        state.plan = [];
+
+
+        if(
+          state.week===4
+        ){
+
+          state.phase =
+            "liveReady";
+
+        }
+
+        else{
+
+          state.week++;
+
+          deliverGoods();
+
+        }
+
+
+        save();
+
+        render();
+
+        return;
+
+      }
+
+
+      if(
+        action==="goods"
+      ){
+
+        openGoods();
+
+        return;
+
+      }
+
+
+      if(
+        action==="stats"
+      ){
+
+        openStats();
+
+        return;
+
+      }
+
+
+      if(
+        action==="qty"
+      ){
+
+        if(
+          state.week>3
+        ){
+
+          return;
+
+        }
+
+
+        const id =
+          button.dataset.id;
+
+
+        const delta =
+          Number(
+            button.dataset.delta
+          );
+
+
+        state.draft[id] =
+          clamp(
+
+            state.draft[id]
+            +
+            delta,
+
+            0,
+
+            100
+
+          );
+
+
+        save();
+
+        openGoods();
+
+        return;
+
+      }
+
+
+      if(
+        action==="order"
+      ){
+
+        const total =
+
+          state.draft.tee
+          *
+          GOODS.tee.cost
+
+          +
+
+          state.draft.base
+          *
+          GOODS.base.cost;
+
+
+        if(
+          !total
+
+          ||
+
+          total>state.cash
+
+          ||
+
+          state.week>3
+        ){
+
+          return;
+
+        }
+
+
+        state.cash -=
+          total;
+
+
+        for(
+          const id
+          of Object.keys(GOODS)
+        ){
+
+          const qty =
+            state.draft[id];
+
+
+          if(qty>0){
+
+            state.pending.push({
+
+              id,
+
+              qty,
+
+              week:
+                state.week+1
+
+            });
+
+
+            state.ordered[id] +=
+              qty;
+
+          }
+
+        }
+
+
+        state.draft = {
+          tee:0,
+          base:0
+        };
+
+
+        save();
+
+        renderHud();
+
+
+        showFeedback(
+          "グッズを発注しました"
+        );
+
+
+        setScene(
+
+          "MiYU",
+
+`発注完了！
+
+届くのは来週。
+
+ライブで誰かが
+着てくれたら嬉しいね。`,
+
+          "MERCH ORDER",
+
+          "",
+
+          "smile"
+
+        );
+
+
+        controls.innerHTML =
+          primary(
+            "次へ →",
+            "continue"
+          );
+
+
+        return;
+
+      }
+
+
+      if(
+        action==="song"
+      ){
+
+        toggleSong();
+
+        return;
+
+      }
+
+
+      if(
+        action==="setlist"
+      ){
+
+        stopSong();
+
+
+        state.setlist =
+          button.dataset.id;
+
+
+        state.phase =
+          "live";
+
+
+        save();
+
+        render();
+
+        return;
+
+      }
+
+
+      if(
+        action==="finish"
+      ){
+
+        calculateResult();
+
+
+        state.phase =
+          "result";
+
+
+        save();
+
+        render();
+
+        return;
+
+      }
+
+
+      if(
+        action==="restart"
+      ){
+
+        if(
+          confirm(
+            "最初からやり直しますか？"
+          )
+        ){
+
+          stopSong();
+
+
+          state =
+            freshState();
+
+
+          save();
+
+          render();
+
+        }
+
+
+        return;
+
+      }
 
     }
+  );
 
-  }
-);
 
+/* ========================================
+   HELP / RESET
+======================================== */
 
 $("help")
   .addEventListener(
@@ -3448,6 +4210,9 @@ $("reset")
           "保存データを消して最初からやり直しますか？"
         )
       ){
+
+        stopSong();
+
 
         state =
           freshState();
