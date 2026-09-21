@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101216">
+
 <title>O-VER-KiLL｜MANAGER'S STORY</title>
 
 <style>
@@ -18,7 +19,10 @@
   --acid:#d7ff63;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
+
 html,body{
   margin:0;
   min-height:100%;
@@ -26,13 +30,18 @@ html,body{
   color:var(--text);
   font-family:"Noto Sans JP",sans-serif;
 }
-body{overscroll-behavior:none}
+
+body{
+  overscroll-behavior:none;
+}
+
 button{
   font:inherit;
   color:inherit;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
+
 button:disabled{
   opacity:.35;
   cursor:not-allowed;
@@ -42,728 +51,1697 @@ button:disabled{
   width:min(100%,900px);
   min-height:100dvh;
   margin:auto;
-  padding:max(14px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));
+
+  padding:
+    max(14px,env(safe-area-inset-top))
+    16px
+    max(16px,env(safe-area-inset-bottom));
+
   display:flex;
   flex-direction:column;
 }
 
+
+/* =========================
+   HEADER
+========================= */
+
 .header{
   height:66px;
+
   display:flex;
   align-items:center;
   justify-content:space-between;
+
   border-bottom:1px solid var(--line);
 }
+
 .logo{
   font-size:23px;
   font-weight:900;
   font-style:italic;
   letter-spacing:-1px;
 }
+
 .logo span{
   display:block;
+
   margin-top:7px;
+
   color:var(--muted);
+
   font-size:9px;
   font-style:normal;
   letter-spacing:3px;
 }
+
 .help{
   width:42px;
   height:42px;
+
   border:1px solid var(--line);
   border-radius:50%;
+
   background:none;
+
   font-size:19px;
   font-weight:800;
 }
 
+
+/* =========================
+   HUD
+========================= */
+
 .hud{
   margin-top:12px;
   padding:12px;
+
   background:var(--panel);
+
   border:1px solid var(--line);
   border-radius:10px;
 }
+
 .hudTop{
   display:flex;
   justify-content:space-between;
   align-items:center;
+
   gap:8px;
 }
+
 .week{
   color:var(--acid);
+
   font-size:11px;
   font-weight:900;
   letter-spacing:1.5px;
 }
+
 .groupInfo{
   text-align:right;
+
   color:var(--muted);
+
   font-size:11px;
   line-height:1.6;
 }
+
 .groupInfo strong{
   color:#fff;
+
   font-size:14px;
 }
 
 .groupBarWrap{
   display:grid;
   grid-template-columns:1fr 1fr;
+
   gap:10px;
+
   margin-top:10px;
 }
+
 .groupStat label{
   display:flex;
   justify-content:space-between;
+
   color:var(--muted);
+
   font-size:10px;
 }
-.groupStat strong{color:#fff}
+
+.groupStat strong{
+  color:#fff;
+}
+
 .bar{
   height:5px;
+
   margin-top:5px;
+
   overflow:hidden;
+
   background:#303640;
+
   border-radius:999px;
 }
+
 .fill{
   width:0;
   height:100%;
+
   background:var(--acid);
+
   border-radius:999px;
+
   transition:width .55s ease;
 }
 
 .memberEnergyRow{
   display:grid;
   grid-template-columns:repeat(4,1fr);
+
   gap:8px;
+
   margin-top:12px;
 }
+
 .energyMini{
   padding:8px 8px 7px;
+
   background:#20242b;
+
   border:1px solid #313744;
   border-radius:8px;
 }
+
 .energyMini .top{
   display:flex;
   justify-content:space-between;
   align-items:center;
+
+  margin-bottom:5px;
+
   font-size:10px;
   font-weight:800;
-  margin-bottom:5px;
 }
+
 .energyMini .top span:last-child{
   color:#fff;
 }
+
 .energyMini .name{
   display:flex;
   align-items:center;
+
   gap:6px;
 }
+
 .dot{
   width:8px;
   height:8px;
+
   border-radius:50%;
+
   background:var(--member-color,#fff);
 }
+
+
+/* =========================
+   STAGE
+========================= */
 
 .stage{
   flex:1;
   min-height:0;
+
   margin-top:12px;
+
   display:flex;
   flex-direction:column;
+
   overflow:hidden;
+
   border:1px solid var(--line);
   border-radius:11px;
-  background:radial-gradient(circle at 50% 28%,#353b46 0,#20242b 40%,#111318 82%);
+
+  background:
+    radial-gradient(
+      circle at 50% 28%,
+      #353b46 0,
+      #20242b 40%,
+      #111318 82%
+    );
 }
 
 .stageTop{
   padding:13px 15px 5px;
+
   display:flex;
   justify-content:space-between;
+
   color:var(--muted);
+
   font-size:10px;
   letter-spacing:1px;
 }
-.stageTop b{color:var(--acid)}
+
+.stageTop b{
+  color:var(--acid);
+}
+
+
+/* =========================
+   VISUAL AREA
+========================= */
 
 .visualArea{
   height:365px;
+
   position:relative;
+
   overflow:hidden;
+
   display:flex;
   align-items:flex-end;
   justify-content:center;
+
+  --scene-accent:#6fb9ff;
+  --scene-accent-rgb:111,185,255;
+
+  background:
+    radial-gradient(
+      circle at 50% 28%,
+      #343b47 0,
+      #1c2028 42%,
+      #101318 85%
+    );
 }
+
+.visualArea::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  pointer-events:none;
+
+  opacity:1;
+
+  transition:all .35s ease;
+}
+
 .visualArea::after{
   content:"";
+
   position:absolute;
+
   left:10%;
   right:10%;
   bottom:-16px;
+
   height:90px;
-  background:radial-gradient(ellipse,rgba(0,0,0,.52),transparent 70%);
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(0,0,0,.52),
+      transparent 70%
+    );
+
   pointer-events:none;
 }
+
+
+/* =========================
+   MEMBER BACKGROUND
+========================= */
+
+.visualArea.scene-member::before{
+  background:
+
+    radial-gradient(
+      circle at 50% 14%,
+      rgba(255,255,255,.15),
+      transparent 20%
+    ),
+
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(var(--scene-accent-rgb),.18),
+      transparent 30%
+    ),
+
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,.03),
+      rgba(255,255,255,0) 20%
+    ),
+
+    repeating-linear-gradient(
+      to right,
+      transparent 0 88px,
+      rgba(255,255,255,.022) 88px 89px,
+      transparent 89px 176px
+    ),
+
+    linear-gradient(
+      to top,
+      rgba(0,0,0,.30),
+      rgba(0,0,0,0) 42%
+    );
+}
+
+
+/* =========================
+   PLANNING BACKGROUND
+========================= */
+
+.visualArea.scene-planning::before{
+  background:
+
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,.04),
+      rgba(255,255,255,0) 18%
+    ),
+
+    radial-gradient(
+      circle at 18% 22%,
+      rgba(111,185,255,.11),
+      transparent 20%
+    ),
+
+    radial-gradient(
+      circle at 82% 20%,
+      rgba(215,255,99,.10),
+      transparent 20%
+    ),
+
+    repeating-linear-gradient(
+      to right,
+      transparent 0 92px,
+      rgba(255,255,255,.018) 92px 93px,
+      transparent 93px 184px
+    ),
+
+    linear-gradient(
+      to top,
+      rgba(0,0,0,.32),
+      rgba(0,0,0,0) 35%
+    );
+}
+
+
+/* =========================
+   PHOTO BACKGROUND
+========================= */
+
+.visualArea.scene-photo::before{
+  background:
+
+    linear-gradient(
+      to bottom,
+      rgba(7,10,15,.22),
+      rgba(7,10,15,.15) 30%,
+      rgba(7,10,15,.55)
+    ),
+
+    radial-gradient(
+      circle at center,
+      rgba(255,255,255,.06),
+      rgba(255,255,255,0) 55%
+    );
+}
+
+
+/* =========================
+   VISUAL ELEMENTS
+========================= */
 
 .photoVisual,
 .managerVisual,
 .singleCharacter{
   position:absolute;
+
   inset:0;
+
   display:none;
+
+  z-index:1;
 }
+
 .photoVisual.show,
 .managerVisual.show,
 .singleCharacter.show{
   display:flex;
 }
 
+
+/* =========================
+   PHOTO
+========================= */
+
 .photoVisual{
   align-items:flex-end;
   justify-content:center;
+
   background-position:center center;
   background-size:cover;
   background-repeat:no-repeat;
 }
+
 .photoVisual::before{
   content:"";
+
   position:absolute;
+
   inset:0;
+
   background:
-    linear-gradient(to bottom,rgba(8,10,14,.30),rgba(8,10,14,.25) 35%,rgba(8,10,14,.68)),
-    radial-gradient(circle at center,rgba(255,255,255,.06),rgba(255,255,255,0) 52%);
+
+    linear-gradient(
+      to bottom,
+      rgba(8,10,14,.30),
+      rgba(8,10,14,.22) 35%,
+      rgba(8,10,14,.66)
+    ),
+
+    radial-gradient(
+      circle at center,
+      rgba(255,255,255,.06),
+      rgba(255,255,255,0) 52%
+    );
 }
+
 .photoOverlay{
   position:absolute;
+
   left:0;
   right:0;
   bottom:28px;
+
   z-index:2;
+
   padding:0 22px;
+
   text-align:left;
 }
+
 .photoTag{
   color:var(--acid);
+
   font-size:10px;
   font-weight:900;
   letter-spacing:2.4px;
 }
+
 .photoTitle{
   margin-top:8px;
+
   font-size:28px;
   font-weight:900;
   font-style:italic;
   letter-spacing:-1px;
 }
+
 .photoSub{
   margin-top:6px;
+
   color:#eef1f6;
+
   font-size:12px;
   font-weight:700;
 }
 
+
+/* =========================
+   MANAGER / STRATEGY ROOM
+========================= */
+
 .managerVisual{
   align-items:center;
   justify-content:center;
+
   text-align:center;
 }
+
+.managerVisual::before{
+  content:"";
+
+  position:absolute;
+
+  left:28px;
+  right:28px;
+  top:32px;
+  bottom:42px;
+
+  border-radius:16px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.06);
+
+  background:
+
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,.035),
+      rgba(255,255,255,.01)
+    ),
+
+    radial-gradient(
+      circle at 20% 18%,
+      rgba(111,185,255,.09),
+      transparent 18%
+    ),
+
+    radial-gradient(
+      circle at 80% 16%,
+      rgba(215,255,99,.08),
+      transparent 18%
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.02),
+    0 16px 40px rgba(0,0,0,.18);
+}
+
+.managerVisual::after{
+  content:"STRATEGY ROOM";
+
+  position:absolute;
+
+  top:46px;
+  left:46px;
+
+  color:rgba(255,255,255,.28);
+
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:3px;
+}
+
 .managerLogo{
-  margin-top:-34px;
+  position:relative;
+
+  z-index:2;
+
+  margin-top:-10px;
+
   font-size:36px;
   font-weight:900;
   font-style:italic;
   letter-spacing:-2px;
-  opacity:.86;
+
+  opacity:.88;
 }
+
 .managerLogo span{
   display:block;
+
   margin-top:10px;
+
   color:var(--muted);
+
   font-size:10px;
   font-style:normal;
   letter-spacing:4px;
 }
 
+
+/* =========================
+   CHARACTER
+========================= */
+
 .singleCharacter{
   align-items:flex-end;
   justify-content:center;
 }
+
+.singleCharacter::before{
+  content:"";
+
+  position:absolute;
+
+  left:50%;
+  top:48%;
+
+  width:250px;
+  height:250px;
+
+  transform:
+    translate(-50%,-50%);
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(var(--scene-accent-rgb),.26),
+      rgba(var(--scene-accent-rgb),0) 68%
+    );
+
+  filter:blur(12px);
+
+  z-index:0;
+}
+
+.singleCharacter::after{
+  content:"";
+
+  position:absolute;
+
+  left:50%;
+  bottom:28px;
+
+  width:160px;
+  height:160px;
+
+  transform:
+    translateX(-50%);
+
+  border-radius:50%;
+
+  border:
+    1px solid
+    rgba(255,255,255,.11);
+
+  box-shadow:
+    0 0 0 24px rgba(255,255,255,.028),
+    0 0 0 58px rgba(255,255,255,.012);
+
+  z-index:0;
+}
+
 .singleCharacter.enter .characterImg{
   animation:enter .35s ease both;
 }
+
 @keyframes enter{
+
   from{
     opacity:0;
-    transform:translateY(22px) scale(.95);
+
+    transform:
+      translateY(22px)
+      scale(.95);
   }
+
   to{
     opacity:1;
-    transform:translateY(0) scale(1);
+
+    transform:
+      translateY(0)
+      scale(1);
   }
+
 }
+
 .characterImg{
+  position:relative;
+
+  z-index:1;
+
   width:80%;
   height:100%;
+
   object-fit:contain;
   object-position:center bottom;
+
   display:block;
-  filter:drop-shadow(0 18px 20px rgba(0,0,0,.55));
+
+  filter:
+    drop-shadow(
+      0 18px 20px
+      rgba(0,0,0,.55)
+    );
 }
+
 .memberBadge{
   position:absolute;
+
   left:50%;
   bottom:8px;
-  transform:translateX(-50%);
+
+  transform:
+    translateX(-50%);
+
   z-index:3;
+
   padding:5px 12px;
+
   background:#0d1014e7;
-  border-top:2px solid var(--member,#fff);
+
+  border-top:
+    2px solid
+    var(--member,#fff);
+
   border-radius:6px;
+
   font-size:11px;
   font-weight:900;
   letter-spacing:.5px;
 }
 
+
+/* =========================
+   DIALOGUE
+========================= */
+
 .dialogue{
   min-height:122px;
+
   margin:0 12px 12px;
   padding:15px 16px 17px;
+
   position:relative;
+
   background:#f1f1eb;
   color:#16191e;
+
   border-radius:12px;
-  box-shadow:0 8px 24px rgba(0,0,0,.35);
+
+  box-shadow:
+    0 8px 24px
+    rgba(0,0,0,.35);
 }
+
 .dialogue::before{
   content:"";
+
   position:absolute;
+
   top:-10px;
   left:36px;
+
   width:20px;
   height:20px;
+
   background:#f1f1eb;
-  transform:rotate(45deg);
+
+  transform:
+    rotate(45deg);
 }
+
 .speaker{
   position:relative;
+
   z-index:2;
+
   margin-bottom:7px;
+
   font-size:11px;
   font-weight:900;
   letter-spacing:2px;
 }
+
 .dialogueText{
   position:relative;
+
   z-index:2;
+
   white-space:pre-line;
+
   font-size:15px;
   font-weight:500;
   line-height:1.75;
 }
 
+
+/* =========================
+   CONTROLS
+========================= */
+
 .controls{
   padding:0 10px 10px;
 }
+
 .plan{
   margin-bottom:9px;
+
   display:flex;
+
   gap:5px;
 }
+
 .slot{
   flex:1;
+
   height:4px;
+
   background:#343a44;
+
   border-radius:10px;
 }
+
 .slot.done{
   background:var(--acid);
 }
 
+
+/* =========================
+   MEMBER SELECT
+========================= */
+
 .memberGrid{
   display:grid;
   grid-template-columns:1fr 1fr;
+
   gap:8px;
 }
+
 .memberChoice{
   width:100%;
+
   padding:10px;
+
   text-align:left;
+
   border:1px solid #404753;
   border-radius:8px;
+
   background:#20242b;
 }
+
 .memberChoice.active{
   border-color:var(--acid);
-  box-shadow:0 0 0 1px rgba(215,255,99,.28) inset;
+
+  box-shadow:
+    0 0 0 1px
+    rgba(215,255,99,.28)
+    inset;
 }
+
 .memberChoice .head{
   display:flex;
   justify-content:space-between;
   align-items:center;
+
   margin-bottom:4px;
+
   font-size:12px;
   font-weight:900;
 }
+
 .memberChoice .role{
-  color:var(--muted);
-  font-size:10px;
   margin-bottom:8px;
+
+  color:var(--muted);
+
+  font-size:10px;
 }
+
 .memberChoice .tiny{
   display:grid;
   grid-template-columns:1fr 1fr;
+
   gap:4px 8px;
+
   color:#dfe2e8;
+
   font-size:10px;
 }
+
 .memberChoice .energyLine{
   margin-top:7px;
 }
 
+
+/* =========================
+   ACTIONS
+========================= */
+
 .actions{
   display:grid;
   grid-template-columns:1fr 1fr;
+
   gap:8px;
 }
+
 .choice{
   width:100%;
+
   padding:11px;
+
   text-align:left;
+
   border:1px solid #434954;
   border-radius:8px;
+
   background:#20242b;
 }
+
+.choice:active{
+  background:#292f38;
+}
+
 .choice strong{
   display:block;
+
   font-size:13px;
 }
+
 .choice small{
   display:block;
+
   margin-top:4px;
+
   color:var(--muted);
+
   font-size:10px;
   line-height:1.45;
 }
+
 .row{
   margin-top:8px;
+
   display:grid;
   grid-template-columns:1fr 1fr;
+
   gap:8px;
 }
+
 .primary{
   width:100%;
+
   min-height:48px;
+
   padding:11px;
+
   border:none;
   border-radius:8px;
+
   background:var(--acid);
   color:#12160b;
+
   font-weight:900;
 }
+
 .secondary{
   width:100%;
+
   min-height:44px;
+
   border:1px solid var(--line);
   border-radius:8px;
+
   background:#1a1e24;
+
   font-weight:700;
 }
+
+
+/* =========================
+   SONG
+========================= */
 
 .songUnlock{
   margin-bottom:10px;
   padding:16px;
+
   text-align:center;
-  border:1px solid rgba(215,255,99,.35);
+
+  border:
+    1px solid
+    rgba(215,255,99,.35);
+
   border-radius:10px;
-  background:linear-gradient(145deg,rgba(215,255,99,.08),rgba(255,255,255,.015));
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(215,255,99,.08),
+      rgba(255,255,255,.015)
+    );
 }
+
 .songNew{
   color:var(--acid);
+
   font-size:9px;
   font-weight:900;
   letter-spacing:3px;
 }
+
 .songTitle{
   margin-top:7px;
+
   font-size:23px;
   font-weight:900;
 }
+
 .songSub{
   margin-top:3px;
+
   color:var(--muted);
+
   font-size:10px;
 }
+
 .songButton{
   width:100%;
+
   margin-top:12px;
   padding:11px;
-  border:1px solid rgba(215,255,99,.55);
+
+  border:
+    1px solid
+    rgba(215,255,99,.55);
+
   border-radius:8px;
+
   background:#151a13;
   color:var(--acid);
+
   font-weight:800;
 }
+
 .songButton.playing{
   background:var(--acid);
   color:#111;
 }
 
+
+/* =========================
+   RESULT
+========================= */
+
 .result{
   padding:10px 0 6px;
+
   text-align:center;
 }
+
 .resultNumber{
   font-size:50px;
   font-weight:900;
 }
+
 .resultNumber small{
   color:var(--muted);
+
   font-size:14px;
 }
+
 .resultGrid{
   display:grid;
   grid-template-columns:1fr 1fr;
+
   gap:8px;
 }
+
 .resultCard{
   padding:11px;
+
   border:1px solid var(--line);
   border-radius:8px;
+
   background:#20242b;
 }
+
 .resultCard strong{
   display:block;
+
   font-size:13px;
 }
+
 .resultCard small{
   display:block;
+
   margin-top:4px;
+
   color:var(--muted);
+
   font-size:10px;
 }
+
+
+/* =========================
+   FOOTER
+========================= */
 
 .footer{
   display:flex;
   justify-content:space-between;
+
   padding-top:10px;
+
   color:#737b86;
+
   font-size:10px;
 }
+
 .footer button{
   padding:0;
+
   border:none;
+
   background:none;
   color:#737b86;
+
   text-decoration:underline;
 }
 
+
+/* =========================
+   FEEDBACK
+========================= */
+
 .feedback{
   position:fixed;
+
   top:80px;
   left:50%;
+
   z-index:30;
-  transform:translate(-50%,-10px);
+
+  transform:
+    translate(-50%,-10px);
+
   padding:8px 14px;
+
   border-radius:999px;
+
   background:var(--acid);
   color:#111;
+
   font-size:11px;
   font-weight:900;
+
   opacity:0;
+
   pointer-events:none;
+
   transition:.2s;
 }
+
 .feedback.show{
   opacity:1;
-  transform:translate(-50%,0);
+
+  transform:
+    translate(-50%,0);
 }
+
+
+/* =========================
+   MODAL
+========================= */
 
 .modal{
   position:fixed;
+
   inset:0;
+
   z-index:50;
+
   display:none;
   align-items:center;
   justify-content:center;
+
   padding:20px;
+
   background:#05070bdf;
+
   backdrop-filter:blur(8px);
 }
-.modal.show{display:flex}
+
+.modal.show{
+  display:flex;
+}
+
 .modalBox{
   width:min(100%,460px);
+
   max-height:85dvh;
+
   overflow:auto;
+
   padding:20px;
+
   border:1px solid #555d69;
   border-radius:12px;
+
   background:#1d2128;
 }
+
 .modalBox h2{
   margin-top:0;
 }
+
 .modalBox p,
 .modalBox li{
   color:#cad0d8;
+
   font-size:13px;
   line-height:1.8;
 }
+
 .statusBlock{
   padding:11px;
+
   margin-bottom:10px;
+
   border:1px solid #343a46;
   border-radius:10px;
+
   background:#222730;
 }
+
 .statusBlock h3{
   margin:0 0 8px;
+
   font-size:14px;
 }
+
 .statusMini{
   display:grid;
   grid-template-columns:1fr 1fr;
+
   gap:4px 10px;
-  font-size:12px;
+
   color:#eff2f7;
+
+  font-size:12px;
 }
 
+
+/* =========================
+   RESPONSIVE
+========================= */
+
 @media(max-height:760px){
-  .visualArea{height:300px}
+
+  .visualArea{
+    height:300px;
+  }
+
 }
+
 @media(min-width:700px){
-  .visualArea{height:520px}
-  .characterImg{width:62%}
+
+  .visualArea{
+    height:520px;
+  }
+
+  .characterImg{
+    width:62%;
+  }
+
 }
 </style>
 </head>
+
+
 <body>
 
+
 <div class="app">
-  <header class="header">
-    <div class="logo">
-      O-VER-KiLL
-      <span>MANAGER'S STORY</span>
+
+
+<header class="header">
+
+  <div class="logo">
+
+    O-VER-KiLL
+
+    <span>
+      MANAGER'S STORY
+    </span>
+
+  </div>
+
+
+  <button
+    class="help"
+    id="help"
+  >
+    ?
+  </button>
+
+</header>
+
+
+<section class="hud">
+
+  <div class="hudTop">
+
+    <div
+      class="week"
+      id="weekLabel"
+    >
+      WEEK 1 / 04
     </div>
-    <button class="help" id="help">?</button>
-  </header>
 
-  <section class="hud">
-    <div class="hudTop">
-      <div class="week" id="weekLabel">WEEK 1 / 04</div>
-      <div class="groupInfo">
-        認知 <strong id="reachLabel">10</strong><br>
-        活動資金 <strong id="cashLabel">¥220,000</strong>
-      </div>
+
+    <div class="groupInfo">
+
+      認知
+
+      <strong id="reachLabel">
+        10
+      </strong>
+
+      <br>
+
+      活動資金
+
+      <strong id="cashLabel">
+        ¥220,000
+      </strong>
+
     </div>
 
-    <div class="groupBarWrap">
-      <div class="groupStat">
-        <label><span>認知</span><strong id="reachValue">10</strong></label>
-        <div class="bar"><div class="fill" id="reachBar"></div></div>
-      </div>
-      <div class="groupStat">
-        <label><span>ライブ総合期待</span><strong id="livePotential">59</strong></label>
-        <div class="bar"><div class="fill" id="liveBar"></div></div>
-      </div>
-    </div>
+  </div>
 
-    <div class="memberEnergyRow" id="memberEnergyRow"></div>
-  </section>
 
-  <section class="stage">
-    <div class="stageTop">
-      <b id="stageLabel">FIRST MEETING</b>
-      <span id="progressLabel">1 / 6</span>
-    </div>
+  <div class="groupBarWrap">
 
-    <div class="visualArea">
-      <div class="photoVisual" id="photoVisual">
-        <div class="photoOverlay">
-          <div class="photoTag" id="photoTag">DEBUT LIVE</div>
-          <div class="photoTitle" id="photoTitle">O-VER-KiLL</div>
-          <div class="photoSub" id="photoSub">ここから、物語が始まる。</div>
+    <div class="groupStat">
+
+      <label>
+
+        <span>
+          認知
+        </span>
+
+        <strong id="reachValue">
+          10
+        </strong>
+
+      </label>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          id="reachBar"
+        >
         </div>
+
       </div>
 
-      <div class="managerVisual" id="managerVisual">
-        <div class="managerLogo">
+    </div>
+
+
+    <div class="groupStat">
+
+      <label>
+
+        <span>
+          ライブ総合期待
+        </span>
+
+        <strong id="livePotential">
+          59
+        </strong>
+
+      </label>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          id="liveBar"
+        >
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div
+    class="memberEnergyRow"
+    id="memberEnergyRow"
+  >
+  </div>
+
+</section>
+
+
+<section class="stage">
+
+
+  <div class="stageTop">
+
+    <b id="stageLabel">
+      FIRST MEETING
+    </b>
+
+    <span id="progressLabel">
+      1 / 7
+    </span>
+
+  </div>
+
+
+  <div class="visualArea">
+
+
+    <div
+      class="photoVisual"
+      id="photoVisual"
+    >
+
+      <div class="photoOverlay">
+
+        <div
+          class="photoTag"
+          id="photoTag"
+        >
+          DEBUT LIVE
+        </div>
+
+        <div
+          class="photoTitle"
+          id="photoTitle"
+        >
           O-VER-KiLL
-          <span>THE BEGINNING</span>
         </div>
+
+        <div
+          class="photoSub"
+          id="photoSub"
+        >
+          ここから、物語が始まる。
+        </div>
+
       </div>
 
-      <div class="singleCharacter" id="singleCharacter">
-        <img class="characterImg" id="characterImg" alt="">
-        <div class="memberBadge" id="memberBadge"></div>
+    </div>
+
+
+    <div
+      class="managerVisual"
+      id="managerVisual"
+    >
+
+      <div class="managerLogo">
+
+        O-VER-KiLL
+
+        <span>
+          THE BEGINNING
+        </span>
+
       </div>
+
     </div>
 
-    <div class="dialogue">
-      <div class="speaker" id="speaker">MANAGER</div>
-      <div class="dialogueText" id="dialogueText"></div>
+
+    <div
+      class="singleCharacter"
+      id="singleCharacter"
+    >
+
+      <img
+        class="characterImg"
+        id="characterImg"
+        alt=""
+      >
+
+      <div
+        class="memberBadge"
+        id="memberBadge"
+      >
+      </div>
+
     </div>
 
-    <div class="controls" id="controls"></div>
-  </section>
 
-  <footer class="footer">
-    <span>非公式ファンゲーム・体験版</span>
-    <button id="reset">最初から</button>
-  </footer>
+  </div>
+
+
+  <div class="dialogue">
+
+    <div
+      class="speaker"
+      id="speaker"
+    >
+      MANAGER
+    </div>
+
+    <div
+      class="dialogueText"
+      id="dialogueText"
+    >
+    </div>
+
+  </div>
+
+
+  <div
+    class="controls"
+    id="controls"
+  >
+  </div>
+
+
+</section>
+
+
+<footer class="footer">
+
+  <span>
+    非公式ファンゲーム・体験版
+  </span>
+
+  <button id="reset">
+    最初から
+  </button>
+
+</footer>
+
+
 </div>
 
-<div class="feedback" id="feedback"></div>
 
-<div class="modal" id="modal">
-  <div class="modalBox" id="modalBox"></div>
+<div
+  class="feedback"
+  id="feedback"
+>
 </div>
 
-<audio id="songAudio" src="./akunaki-kodou.mp3" preload="metadata"></audio>
+
+<div
+  class="modal"
+  id="modal"
+>
+
+  <div
+    class="modalBox"
+    id="modalBox"
+  >
+  </div>
+
+</div>
+
+
+<audio
+  id="songAudio"
+  src="./akunaki-kodou.mp3"
+  preload="metadata"
+>
+</audio>
+
 
 <script>
-const DEBUT_PHOTO = "./debut-live.webp";
-const SONG_CHORUS_START = 0;
-const SONG_CHORUS_END = 30;
+
+/* ========================================
+   FILES
+======================================== */
+
+const DEBUT_PHOTO =
+  "./debut-live.webp";
+
+
+const SONG_CHORUS_START =
+  0;
+
+
+const SONG_CHORUS_END =
+  30;
+
+
+/* ========================================
+   MEMBERS
+======================================== */
 
 const MEMBERS = {
+
   sarina:{
+
     id:"sarina",
+
     name:"SARiNA",
+
     color:"#65df90",
+
     role:"歌◎ / 連携◎ / ダンス△",
-    stats:{vocal:78,dance:48,bond:74,energy:72}
+
+    stats:{
+      vocal:78,
+      dance:48,
+      bond:74,
+      energy:72
+    }
+
   },
+
+
   miyu:{
+
     id:"miyu",
+
     name:"MiYU",
+
     color:"#6fb9ff",
+
     role:"歌◎ / バランス型",
-    stats:{vocal:74,dance:54,bond:68,energy:76}
+
+    stats:{
+      vocal:74,
+      dance:54,
+      bond:68,
+      energy:76
+    }
+
   },
+
+
   kilua:{
+
     id:"kilua",
+
     name:"KiLUA",
+
     color:"#ff737f",
+
     role:"ダンス◎ / 連携△ / 歌△",
-    stats:{vocal:52,dance:84,bond:40,energy:80}
+
+    stats:{
+      vocal:52,
+      dance:84,
+      bond:40,
+      energy:80
+    }
+
   },
+
+
   raisa:{
+
     id:"raisa",
+
     name:"RAiSA",
+
     color:"#ffdc69",
+
     role:"歌△ / ダンス△ / 成長枠",
-    stats:{vocal:42,dance:44,bond:58,energy:70}
+
+    stats:{
+      vocal:42,
+      dance:44,
+      bond:58,
+      energy:70
+    }
+
   }
+
 };
 
+
+/* ========================================
+   CHARACTER IMAGES
+======================================== */
+
 const CHAR_IMAGES = {
+
   sarina:{
     normal:"./sarina_normal.png",
     smile:"./sarina_smile.png",
@@ -771,6 +1749,7 @@ const CHAR_IMAGES = {
     troubled:"./sarina_troubled.png",
     cry:"./sarina_cry.png"
   },
+
   miyu:{
     normal:"./miyu_normal.png",
     smile:"./miyu_smile.png",
@@ -778,6 +1757,7 @@ const CHAR_IMAGES = {
     troubled:"./miyu_troubled.png",
     cry:"./miyu_cry.png"
   },
+
   kilua:{
     normal:"./kilua_normal.png",
     smile:"./kilua_smile.png",
@@ -785,6 +1765,7 @@ const CHAR_IMAGES = {
     troubled:"./kilua_troubled.png",
     cry:"./kilua_cry.png"
   },
+
   raisa:{
     normal:"./raisa_normal.png",
     smile:"./raisa_smile.png",
@@ -792,993 +1773,3562 @@ const CHAR_IMAGES = {
     troubled:"./raisa_troubled.png",
     cry:"./raisa_cry.png"
   }
+
 };
 
+
+/* ========================================
+   INTRO
+======================================== */
+
 const INTRO = [
+
   {
+
     member:"MANAGER",
+
     visual:"photo",
+
     title:"DEBUT LIVE",
+
     photoTitle:"O-VER-KiLL",
-    photoSub:"豊洲公園。4人の物語は、ここから始まる。",
-    text:`豊洲公園。
+
+    photoSub:
+      "豊洲公園。4人の物語は、ここから始まる。",
+
+    text:
+`豊洲公園。
 
 O-VER-KiLLの
 デビューライブ当日。
 
 まだ何者でもない4人が、
 最初のステージに立った。`
+
   },
+
+
   {
+
     member:"MANAGER",
+
     visual:"logo",
-    text:`2,000名が応募した
+
+    text:
+`2,000名が応募した
 オーディション。
 
 その中から、
 4人が選ばれた。`
+
   },
+
+
   {
+
     member:"sarina",
+
     expression:"normal",
-    text:`SARiNAです。
+
+    text:
+`SARiNAです。
 
 ここから絶対、
 大きくなってみせる。`
+
   },
+
+
   {
+
     member:"miyu",
+
     expression:"smile",
-    text:`MiYUです！
+
+    text:
+`MiYUです！
 
 4人なら、
 面白い景色を
 見せられる気がする。`
+
   },
+
+
   {
+
     member:"kilua",
+
     expression:"angry",
-    text:`KiLUA。
+
+    text:
+`KiLUA。
 
 やるなら本気。
+
 中途半端は嫌い。`
+
   },
+
+
   {
+
     member:"raisa",
+
     expression:"smile",
-    text:`RAiSAです。
+
+    text:
+`RAiSAです。
 
 まだ知られてないなら、
 これから知ってもらえばいいよね。`
+
   },
+
+
   {
+
     member:"MANAGER",
+
     visual:"logo",
-    text:`デビューライブまで
+
+    text:
+`デビューライブまで
 あと4週間。
 
 あなたは今日から
 この4人のマネージャーだ。`
+
   }
+
 ];
 
+
+/* ========================================
+   ACTIONS
+======================================== */
+
 const ACTIONS = {
+
   vocal:{
+
     name:"ボーカル練習",
+
     desc:"歌唱力を伸ばす",
+
     cost:6000
+
   },
+
+
   dance:{
+
     name:"ダンス練習",
+
     desc:"ダンス力を伸ばす",
+
     cost:6000
+
   },
+
+
   meeting:{
+
     name:"ミーティング",
+
     desc:"連携を深める",
+
     cost:2000
+
   },
+
+
   sns:{
+
     name:"SNS告知",
+
     desc:"認知を広げる",
+
     cost:1500
+
   },
+
+
   rest:{
+
     name:"休養",
+
     desc:"体力を回復する",
+
     cost:0
+
   }
+
 };
 
-const STORAGE_KEY = "overkill_debut_v7_individual";
+
+/* ========================================
+   STORAGE
+======================================== */
+
+const STORAGE_KEY =
+  "overkill_debut_v8_background";
+
 
 function deepClone(obj){
-  return JSON.parse(JSON.stringify(obj));
+
+  return JSON.parse(
+    JSON.stringify(obj)
+  );
+
 }
+
 
 function freshState(){
+
   const memberState = {};
-  Object.values(MEMBERS).forEach(member=>{
-    memberState[member.id] = deepClone(member.stats);
-  });
+
+
+  Object
+    .values(MEMBERS)
+    .forEach(member=>{
+
+      memberState[member.id] =
+        deepClone(
+          member.stats
+        );
+
+    });
+
 
   return {
+
     phase:"intro",
+
     intro:0,
+
     week:1,
+
     cash:220000,
+
     reach:10,
+
     selectedMember:null,
+
     plan:[],
+
     members:memberState,
+
     setlist:"balanced",
+
     result:null
+
   };
+
 }
+
 
 function load(){
+
   try{
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return data ? {...freshState(), ...data} : freshState();
-  }catch(e){
-    return freshState();
+
+    const data =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_KEY
+        )
+      );
+
+
+    return data
+
+      ? {
+          ...freshState(),
+          ...data
+        }
+
+      : freshState();
+
   }
+
+  catch(e){
+
+    return freshState();
+
+  }
+
 }
 
-let state = load();
+
+let state =
+  load();
+
 
 function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(state)
+  );
+
 }
 
-function $(id){ return document.getElementById(id); }
 
-const photoVisual = $("photoVisual");
-const photoTag = $("photoTag");
-const photoTitle = $("photoTitle");
-const photoSub = $("photoSub");
-const managerVisual = $("managerVisual");
-const singleCharacter = $("singleCharacter");
-const characterImg = $("characterImg");
-const memberBadge = $("memberBadge");
-const speaker = $("speaker");
-const dialogueText = $("dialogueText");
-const stageLabel = $("stageLabel");
-const progressLabel = $("progressLabel");
-const controls = $("controls");
-const feedback = $("feedback");
-const songAudio = $("songAudio");
+/* ========================================
+   DOM
+======================================== */
 
-photoVisual.style.backgroundImage = `url('${DEBUT_PHOTO}')`;
+function $(id){
+
+  return document.getElementById(id);
+
+}
+
+
+const photoVisual =
+  $("photoVisual");
+
+
+const photoTag =
+  $("photoTag");
+
+
+const photoTitle =
+  $("photoTitle");
+
+
+const photoSub =
+  $("photoSub");
+
+
+const managerVisual =
+  $("managerVisual");
+
+
+const singleCharacter =
+  $("singleCharacter");
+
+
+const characterImg =
+  $("characterImg");
+
+
+const memberBadge =
+  $("memberBadge");
+
+
+const speaker =
+  $("speaker");
+
+
+const dialogueText =
+  $("dialogueText");
+
+
+const stageLabel =
+  $("stageLabel");
+
+
+const progressLabel =
+  $("progressLabel");
+
+
+const controls =
+  $("controls");
+
+
+const feedback =
+  $("feedback");
+
+
+const songAudio =
+  $("songAudio");
+
+
+photoVisual.style.backgroundImage =
+  `url('${DEBUT_PHOTO}')`;
+
+
+/* ========================================
+   HELPERS
+======================================== */
 
 function yen(n){
-  return "¥" + Math.round(n).toLocaleString("ja-JP");
+
+  return "¥"
+    +
+    Math.round(n)
+      .toLocaleString("ja-JP");
+
 }
-function clamp(value,min=0,max=100){
-  return Math.max(min, Math.min(max, value));
+
+
+function clamp(
+  value,
+  min=0,
+  max=100
+){
+
+  return Math.max(
+    min,
+    Math.min(
+      max,
+      value
+    )
+  );
+
 }
-function memberName(id){
-  return MEMBERS[id].name;
-}
+
+
 function avg(values){
-  return values.reduce((a,b)=>a+b,0) / values.length;
+
+  return values.reduce(
+    (a,b)=>a+b,
+    0
+  )
+  /
+  values.length;
+
 }
+
+
+function hexToRgb(hex){
+
+  const value =
+    hex
+      .replace("#","")
+      .trim();
+
+
+  const full =
+    value.length===3
+
+      ? value
+          .split("")
+          .map(v=>v+v)
+          .join("")
+
+      : value;
+
+
+  const num =
+    parseInt(
+      full,
+      16
+    );
+
+
+  return {
+
+    r:
+      (num >> 16)
+      &
+      255,
+
+    g:
+      (num >> 8)
+      &
+      255,
+
+    b:
+      num
+      &
+      255
+
+  };
+
+}
+
+
+function adjustMember(
+  id,
+  key,
+  amount
+){
+
+  state.members[id][key] =
+    clamp(
+      state.members[id][key]
+      +
+      amount
+    );
+
+}
+
+
+function getActionEfficiency(
+  member
+){
+
+  if(
+    member.energy>=60
+  ){
+
+    return 1;
+
+  }
+
+
+  if(
+    member.energy>=35
+  ){
+
+    return .8;
+
+  }
+
+
+  return .6;
+
+}
+
+
 function getLivePotential(){
-  const members = Object.keys(state.members);
-  const vocal = avg(members.map(id=>state.members[id].vocal));
-  const dance = avg(members.map(id=>state.members[id].dance));
-  const bond = avg(members.map(id=>state.members[id].bond));
-  const energy = avg(members.map(id=>state.members[id].energy));
-  return clamp(Math.round(vocal*0.3 + dance*0.28 + bond*0.22 + energy*0.1 + state.reach*0.1));
+
+  const ids =
+    Object.keys(
+      state.members
+    );
+
+
+  const vocal =
+    avg(
+      ids.map(
+        id=>
+          state.members[id].vocal
+      )
+    );
+
+
+  const dance =
+    avg(
+      ids.map(
+        id=>
+          state.members[id].dance
+      )
+    );
+
+
+  const bond =
+    avg(
+      ids.map(
+        id=>
+          state.members[id].bond
+      )
+    );
+
+
+  const energy =
+    avg(
+      ids.map(
+        id=>
+          state.members[id].energy
+      )
+    );
+
+
+  return clamp(
+
+    Math.round(
+
+      vocal*.3
+
+      +
+
+      dance*.28
+
+      +
+
+      bond*.22
+
+      +
+
+      energy*.1
+
+      +
+
+      state.reach*.1
+
+    )
+
+  );
+
 }
-function getActionEfficiency(member){
-  if(member.energy >= 60) return 1;
-  if(member.energy >= 35) return 0.8;
-  return 0.6;
-}
-function adjustMember(id, key, amount){
-  state.members[id][key] = clamp(state.members[id][key] + amount);
-}
+
+
 function showFeedback(text){
-  feedback.textContent = text;
-  feedback.classList.add("show");
-  clearTimeout(showFeedback.timer);
-  showFeedback.timer = setTimeout(()=>feedback.classList.remove("show"), 1300);
+
+  feedback.textContent =
+    text;
+
+
+  feedback
+    .classList
+    .add("show");
+
+
+  clearTimeout(
+    showFeedback.timer
+  );
+
+
+  showFeedback.timer =
+    setTimeout(
+      ()=>{
+
+        feedback
+          .classList
+          .remove("show");
+
+      },
+      1300
+    );
+
 }
+
+
 function stopSong(){
+
   songAudio.pause();
-  songAudio.currentTime = SONG_CHORUS_START;
-  const button = $("songButton");
+
+
+  songAudio.currentTime =
+    SONG_CHORUS_START;
+
+
+  const button =
+    $("songButton");
+
+
   if(button){
-    button.textContent = "▶ サビを聴く";
-    button.classList.remove("playing");
+
+    button.textContent =
+      "▶ サビを聴く";
+
+
+    button
+      .classList
+      .remove("playing");
+
   }
+
 }
 
-function setVisual(memberOrManager, expression="normal", visual="character", photoInfo=null){
-  photoVisual.classList.remove("show");
-  managerVisual.classList.remove("show");
-  singleCharacter.classList.remove("show");
-  singleCharacter.classList.remove("enter");
 
-  if(visual === "photo"){
-    photoVisual.classList.add("show");
-    photoTag.textContent = photoInfo?.tag || "DEBUT LIVE";
-    photoTitle.textContent = photoInfo?.title || "O-VER-KiLL";
-    photoSub.textContent = photoInfo?.sub || "ここから、物語が始まる。";
+/* ========================================
+   BACKGROUND THEME
+======================================== */
+
+function setSceneTheme(
+  type="planning",
+  memberId=null
+){
+
+  const visualArea =
+    document
+      .querySelector(
+        ".visualArea"
+      );
+
+
+  visualArea
+    .classList
+    .remove(
+      "scene-member",
+      "scene-planning",
+      "scene-photo"
+    );
+
+
+  if(
+    type==="photo"
+  ){
+
+    visualArea
+      .classList
+      .add(
+        "scene-photo"
+      );
+
+    return;
+
+  }
+
+
+  if(
+    type==="member"
+    &&
+    memberId
+    &&
+    MEMBERS[memberId]
+  ){
+
+    const color =
+      MEMBERS[memberId].color;
+
+
+    const rgb =
+      hexToRgb(
+        color
+      );
+
+
+    visualArea.style.setProperty(
+      "--scene-accent",
+      color
+    );
+
+
+    visualArea.style.setProperty(
+      "--scene-accent-rgb",
+      `${rgb.r},${rgb.g},${rgb.b}`
+    );
+
+
+    visualArea
+      .classList
+      .add(
+        "scene-member"
+      );
+
+
+    return;
+
+  }
+
+
+  visualArea
+    .classList
+    .add(
+      "scene-planning"
+    );
+
+}
+
+
+/* ========================================
+   VISUAL
+======================================== */
+
+function setVisual(
+  memberOrManager,
+  expression="normal",
+  visual="character",
+  photoInfo=null
+){
+
+  photoVisual
+    .classList
+    .remove("show");
+
+
+  managerVisual
+    .classList
+    .remove("show");
+
+
+  singleCharacter
+    .classList
+    .remove("show");
+
+
+  singleCharacter
+    .classList
+    .remove("enter");
+
+
+  if(
+    visual==="photo"
+  ){
+
+    setSceneTheme(
+      "photo"
+    );
+
+
+    photoVisual
+      .classList
+      .add("show");
+
+
+    photoTag.textContent =
+      photoInfo?.tag
+      ||
+      "DEBUT LIVE";
+
+
+    photoTitle.textContent =
+      photoInfo?.title
+      ||
+      "O-VER-KiLL";
+
+
+    photoSub.textContent =
+      photoInfo?.sub
+      ||
+      "ここから、物語が始まる。";
+
+
+    return;
+
+  }
+
+
+  if(
+    visual==="logo"
+    ||
+    memberOrManager==="MANAGER"
+  ){
+
+    setSceneTheme(
+      "planning"
+    );
+
+
+    managerVisual
+      .classList
+      .add("show");
+
+
+    return;
+
+  }
+
+
+  const member =
+    MEMBERS[
+      memberOrManager
+    ];
+
+
+  if(!member){
     return;
   }
 
-  if(visual === "logo" || memberOrManager === "MANAGER"){
-    managerVisual.classList.add("show");
-    return;
-  }
 
-  const member = MEMBERS[memberOrManager];
-  if(!member) return;
+  setSceneTheme(
+    "member",
+    member.id
+  );
 
-  singleCharacter.classList.add("show");
-  characterImg.src = CHAR_IMAGES[member.id][expression] || CHAR_IMAGES[member.id].normal;
-  characterImg.alt = member.name;
-  memberBadge.textContent = member.name;
-  memberBadge.style.setProperty("--member", member.color);
-  memberBadge.style.borderTopColor = member.color;
+
+  singleCharacter
+    .classList
+    .add("show");
+
+
+  characterImg.src =
+
+    CHAR_IMAGES[member.id][expression]
+
+    ||
+
+    CHAR_IMAGES[member.id].normal;
+
+
+  characterImg.alt =
+    member.name;
+
+
+  memberBadge.textContent =
+    member.name;
+
+
+  memberBadge.style.setProperty(
+    "--member",
+    member.color
+  );
+
+
+  memberBadge.style.borderTopColor =
+    member.color;
+
 
   requestAnimationFrame(()=>{
-    singleCharacter.classList.add("enter");
+
+    singleCharacter
+      .classList
+      .add("enter");
+
   });
+
 }
 
-function setScene({speakerName, text, label, progress, visual="character", memberId=null, expression="normal", photoInfo=null}){
-  speaker.textContent = speakerName;
-  dialogueText.textContent = text;
-  stageLabel.textContent = label;
-  progressLabel.textContent = progress || "";
-  setVisual(memberId || speakerName, expression, visual, photoInfo);
+
+/* ========================================
+   SCENE
+======================================== */
+
+function setScene({
+
+  speakerName,
+
+  text,
+
+  label,
+
+  progress,
+
+  visual="character",
+
+  memberId=null,
+
+  expression="normal",
+
+  photoInfo=null
+
+}){
+
+  speaker.textContent =
+    speakerName;
+
+
+  dialogueText.textContent =
+    text;
+
+
+  stageLabel.textContent =
+    label;
+
+
+  progressLabel.textContent =
+    progress
+    ||
+    "";
+
+
+  setVisual(
+
+    memberId
+    ||
+    speakerName,
+
+    expression,
+
+    visual,
+
+    photoInfo
+
+  );
+
 }
+
+
+/* ========================================
+   HUD
+======================================== */
 
 function renderHud(){
-  $("weekLabel").textContent =
-    state.phase === "result" ? "DEBUT REPORT" :
-    state.phase === "liveReady" ? "DEBUT DAY" :
-    state.phase === "live" ? "DEBUT LIVE" :
-    `WEEK ${state.week} / 04`;
 
-  $("cashLabel").textContent = yen(state.cash);
-  $("reachLabel").textContent = state.reach;
-  $("reachValue").textContent = state.reach;
-  $("livePotential").textContent = getLivePotential();
+  $("weekLabel").textContent =
+
+    state.phase==="result"
+
+      ? "DEBUT REPORT"
+
+      : state.phase==="liveReady"
+
+      ? "DEBUT DAY"
+
+      : state.phase==="live"
+
+      ? "DEBUT LIVE"
+
+      : `WEEK ${state.week} / 04`;
+
+
+  $("cashLabel").textContent =
+    yen(state.cash);
+
+
+  $("reachLabel").textContent =
+    state.reach;
+
+
+  $("reachValue").textContent =
+    state.reach;
+
+
+  $("livePotential").textContent =
+    getLivePotential();
+
 
   requestAnimationFrame(()=>{
-    $("reachBar").style.width = state.reach + "%";
-    $("liveBar").style.width = getLivePotential() + "%";
+
+    $("reachBar").style.width =
+      state.reach
+      +
+      "%";
+
+
+    $("liveBar").style.width =
+      getLivePotential()
+      +
+      "%";
+
   });
 
-  $("memberEnergyRow").innerHTML = Object.values(MEMBERS).map(member=>{
-    const energy = state.members[member.id].energy;
-    return `
-      <div class="energyMini" style="--member-color:${member.color}">
-        <div class="top">
-          <div class="name"><span class="dot"></span><span>${member.name}</span></div>
-          <span>${energy}</span>
-        </div>
-        <div class="bar"><div class="fill" style="width:${energy}%"></div></div>
-      </div>
-    `;
-  }).join("");
+
+  $("memberEnergyRow").innerHTML =
+
+    Object
+      .values(MEMBERS)
+
+      .map(member=>{
+
+        const energy =
+          state
+            .members[
+              member.id
+            ]
+            .energy;
+
+
+        return `
+
+          <div
+            class="energyMini"
+            style="
+              --member-color:
+              ${member.color}
+            "
+          >
+
+            <div class="top">
+
+              <div class="name">
+
+                <span class="dot"></span>
+
+                <span>
+                  ${member.name}
+                </span>
+
+              </div>
+
+              <span>
+                ${energy}
+              </span>
+
+            </div>
+
+
+            <div class="bar">
+
+              <div
+                class="fill"
+                style="
+                  width:${energy}%
+                "
+              >
+              </div>
+
+            </div>
+
+          </div>
+
+        `;
+
+      })
+
+      .join("");
+
 }
+
+
+/* ========================================
+   INTRO
+======================================== */
 
 function renderIntro(){
-  const scene = INTRO[state.intro];
 
-  if(scene.visual === "photo"){
+  const scene =
+    INTRO[
+      state.intro
+    ];
+
+
+  if(
+    scene.visual==="photo"
+  ){
+
     setScene({
-      speakerName:"MANAGER",
-      text:scene.text,
-      label:"FIRST MEETING",
-      progress:`${state.intro+1} / ${INTRO.length}`,
-      visual:"photo",
+
+      speakerName:
+        "MANAGER",
+
+      text:
+        scene.text,
+
+      label:
+        "FIRST MEETING",
+
+      progress:
+        `${state.intro+1} / ${INTRO.length}`,
+
+      visual:
+        "photo",
+
       photoInfo:{
-        tag:scene.title || "DEBUT LIVE",
-        title:scene.photoTitle || "O-VER-KiLL",
-        sub:scene.photoSub || "ここから、物語が始まる。"
+
+        tag:
+          scene.title
+          ||
+          "DEBUT LIVE",
+
+        title:
+          scene.photoTitle
+          ||
+          "O-VER-KiLL",
+
+        sub:
+          scene.photoSub
+          ||
+          "ここから、物語が始まる。"
+
       }
+
     });
-  }else if(scene.visual === "logo"){
-    setScene({
-      speakerName:"MANAGER",
-      text:scene.text,
-      label:"FIRST MEETING",
-      progress:`${state.intro+1} / ${INTRO.length}`,
-      visual:"logo"
-    });
-  }else{
-    setScene({
-      speakerName:MEMBERS[scene.member].name,
-      text:scene.text,
-      label:"FIRST MEETING",
-      progress:`${state.intro+1} / ${INTRO.length}`,
-      visual:"character",
-      memberId:scene.member,
-      expression:scene.expression || "normal"
-    });
+
   }
 
+
+  else if(
+    scene.visual==="logo"
+  ){
+
+    setScene({
+
+      speakerName:
+        "MANAGER",
+
+      text:
+        scene.text,
+
+      label:
+        "FIRST MEETING",
+
+      progress:
+        `${state.intro+1} / ${INTRO.length}`,
+
+      visual:
+        "logo"
+
+    });
+
+  }
+
+
+  else{
+
+    setScene({
+
+      speakerName:
+        MEMBERS[
+          scene.member
+        ].name,
+
+      text:
+        scene.text,
+
+      label:
+        "FIRST MEETING",
+
+      progress:
+        `${state.intro+1} / ${INTRO.length}`,
+
+      visual:
+        "character",
+
+      memberId:
+        scene.member,
+
+      expression:
+        scene.expression
+        ||
+        "normal"
+
+    });
+
+  }
+
+
   controls.innerHTML = `
+
     <div class="row">
-      <button class="secondary" data-action="introBack" ${state.intro===0?"disabled":""}>‹ 戻る</button>
-      <button class="primary" data-action="introNext">${state.intro===INTRO.length-1 ? "物語を始める →" : "次へ →"}</button>
+
+      <button
+        class="secondary"
+        data-action="introBack"
+        ${
+          state.intro===0
+            ? "disabled"
+            : ""
+        }
+      >
+
+        ‹ 戻る
+
+      </button>
+
+
+      <button
+        class="primary"
+        data-action="introNext"
+      >
+
+        ${
+          state.intro
+          ===
+          INTRO.length-1
+
+            ? "物語を始める →"
+
+            : "次へ →"
+        }
+
+      </button>
+
     </div>
+
   `;
+
 }
 
+
+/* ========================================
+   MEMBER SELECT
+======================================== */
+
 function renderMemberSelect(){
-  const step = state.plan.length + 1;
+
+  const step =
+    state.plan.length
+    +
+    1;
+
 
   setScene({
-    speakerName:"MANAGER",
-    text:`今週の行動 ${step} / 3。
+
+    speakerName:
+      "MANAGER",
+
+    text:
+`今週の行動 ${step} / 3。
 
 今日は誰を中心に
 動かしますか？`,
-    label:`WEEK ${state.week}`,
-    progress:`行動 ${step} / 3`,
-    visual:"logo"
+
+    label:
+      `WEEK ${state.week}`,
+
+    progress:
+      `行動 ${step} / 3`,
+
+    visual:
+      "logo"
+
   });
 
+
   controls.innerHTML = `
+
     <div class="plan">
-      ${[0,1,2].map(i=>`<span class="slot ${i<state.plan.length?"done":""}"></span>`).join("")}
+
+      ${[0,1,2]
+
+        .map(
+          i=>`
+
+          <span
+            class="
+              slot
+              ${
+                i<state.plan.length
+                  ? "done"
+                  : ""
+              }
+            "
+          >
+          </span>
+
+        `
+        )
+
+        .join("")
+      }
+
     </div>
+
 
     <div class="memberGrid">
-      ${Object.values(MEMBERS).map(member=>{
-        const stat = state.members[member.id];
-        return `
-          <button class="memberChoice" data-action="pickMember" data-id="${member.id}">
-            <div class="head">
-              <span>${member.name}</span>
-              <span style="color:${member.color}">●</span>
-            </div>
-            <div class="role">${member.role}</div>
-            <div class="tiny">
-              <div>歌唱 ${stat.vocal}</div>
-              <div>ダンス ${stat.dance}</div>
-              <div>連携 ${stat.bond}</div>
-              <div>体力 ${stat.energy}</div>
-            </div>
-            <div class="energyLine">
-              <div class="bar"><div class="fill" style="width:${stat.energy}%"></div></div>
-            </div>
-          </button>
-        `;
-      }).join("")}
+
+      ${Object
+        .values(MEMBERS)
+
+        .map(member=>{
+
+          const stat =
+            state.members[
+              member.id
+            ];
+
+
+          return `
+
+            <button
+              class="memberChoice"
+              data-action="pickMember"
+              data-id="${member.id}"
+            >
+
+              <div class="head">
+
+                <span>
+                  ${member.name}
+                </span>
+
+                <span
+                  style="
+                    color:${member.color}
+                  "
+                >
+                  ●
+                </span>
+
+              </div>
+
+
+              <div class="role">
+                ${member.role}
+              </div>
+
+
+              <div class="tiny">
+
+                <div>
+                  歌唱
+                  ${stat.vocal}
+                </div>
+
+                <div>
+                  ダンス
+                  ${stat.dance}
+                </div>
+
+                <div>
+                  連携
+                  ${stat.bond}
+                </div>
+
+                <div>
+                  体力
+                  ${stat.energy}
+                </div>
+
+              </div>
+
+
+              <div class="energyLine">
+
+                <div class="bar">
+
+                  <div
+                    class="fill"
+                    style="
+                      width:${stat.energy}%
+                    "
+                  >
+                  </div>
+
+                </div>
+
+              </div>
+
+            </button>
+
+          `;
+
+        })
+
+        .join("")
+      }
+
     </div>
+
 
     <div class="row">
-      <button class="secondary" data-action="stats">ステータス</button>
-      <button class="secondary" data-action="helpStep">コツ</button>
+
+      <button
+        class="secondary"
+        data-action="stats"
+      >
+
+        ステータス
+
+      </button>
+
+
+      <button
+        class="secondary"
+        data-action="helpStep"
+      >
+
+        コツ
+
+      </button>
+
     </div>
+
   `;
+
 }
 
+
+/* ========================================
+   ACTION SELECT
+======================================== */
+
 function renderActionSelect(){
-  const member = MEMBERS[state.selectedMember];
-  const stat = state.members[state.selectedMember];
-  const efficiency = getActionEfficiency(stat);
 
-  let mood = "normal";
-  let message = `今日は、どう動こうか？`;
+  const member =
+    MEMBERS[
+      state.selectedMember
+    ];
 
-  if(stat.energy < 35){
-    mood = "troubled";
-    message = `ちょっと体力が落ちてるかも。
+
+  const stat =
+    state.members[
+      state.selectedMember
+    ];
+
+
+  const efficiency =
+    getActionEfficiency(
+      stat
+    );
+
+
+  let mood =
+    "normal";
+
+
+  let message =
+    "今日は、どう動こうか？";
+
+
+  if(
+    stat.energy<35
+  ){
+
+    mood =
+      "troubled";
+
+
+    message =
+`ちょっと体力が
+落ちてるかも。
 
 無理しすぎないように、
 考えて動きたい。`;
-  }else if(stat.energy >= 70){
-    mood = "smile";
-    message = `今日は動けそう。
+
+  }
+
+
+  else if(
+    stat.energy>=70
+  ){
+
+    mood =
+      "smile";
+
+
+    message =
+`今日は動けそう。
 
 やるなら、
 しっかり積み上げたいね。`;
+
   }
 
+
   setScene({
-    speakerName:member.name,
-    text:message,
-    label:`WEEK ${state.week}`,
-    progress:`行動 ${state.plan.length+1} / 3`,
-    visual:"character",
-    memberId:member.id,
-    expression:mood
+
+    speakerName:
+      member.name,
+
+    text:
+      message,
+
+    label:
+      `WEEK ${state.week}`,
+
+    progress:
+      `行動 ${state.plan.length+1} / 3`,
+
+    visual:
+      "character",
+
+    memberId:
+      member.id,
+
+    expression:
+      mood
+
   });
 
+
   controls.innerHTML = `
+
     <div class="plan">
-      ${[0,1,2].map(i=>`<span class="slot ${i<state.plan.length?"done":""}"></span>`).join("")}
+
+      ${[0,1,2]
+
+        .map(
+          i=>`
+
+          <span
+            class="
+              slot
+              ${
+                i<state.plan.length
+                  ? "done"
+                  : ""
+              }
+            "
+          >
+          </span>
+
+        `
+        )
+
+        .join("")
+      }
+
     </div>
 
-    <div style="color:#99a1ac;font-size:11px;margin-bottom:8px;">
-      体力による練習効率：<strong style="color:#fff">${Math.round(efficiency*100)}%</strong>
+
+    <div
+      style="
+        color:#99a1ac;
+        font-size:11px;
+        margin-bottom:8px;
+      "
+    >
+
+      体力による練習効率：
+
+      <strong
+        style="
+          color:#fff
+        "
+      >
+
+        ${Math.round(efficiency*100)}%
+
+      </strong>
+
     </div>
+
 
     <div class="actions">
-      ${Object.entries(ACTIONS).map(([id,action])=>{
-        return `
-          <button class="choice" data-action="activity" data-id="${id}" ${state.cash<action.cost?"disabled":""}>
-            <strong>${action.name}</strong>
-            <small>${action.desc} ・ ${action.cost ? yen(action.cost) : "費用なし"}</small>
+
+      ${Object
+        .entries(ACTIONS)
+
+        .map(
+          ([id,action])=>`
+
+          <button
+            class="choice"
+            data-action="activity"
+            data-id="${id}"
+            ${
+              state.cash<action.cost
+                ? "disabled"
+                : ""
+            }
+          >
+
+            <strong>
+              ${action.name}
+            </strong>
+
+            <small>
+
+              ${action.desc}
+
+              ・
+
+              ${
+                action.cost
+
+                  ? yen(
+                      action.cost
+                    )
+
+                  : "費用なし"
+              }
+
+            </small>
+
           </button>
-        `;
-      }).join("")}
+
+        `
+        )
+
+        .join("")
+      }
+
     </div>
+
 
     <div class="row">
-      <button class="secondary" data-action="backMember">メンバー選択へ</button>
-      <button class="secondary" data-action="stats">ステータス</button>
+
+      <button
+        class="secondary"
+        data-action="backMember"
+      >
+
+        メンバー選択へ
+
+      </button>
+
+
+      <button
+        class="secondary"
+        data-action="stats"
+      >
+
+        ステータス
+
+      </button>
+
     </div>
+
   `;
+
 }
 
+
+/* ========================================
+   WEEK SUMMARY
+======================================== */
+
 function renderPlanningSummary(){
+
   setScene({
-    speakerName:"SARiNA",
-    text:`今週もおつかれさま。
+
+    speakerName:
+      "SARiNA",
+
+    text:
+`今週もおつかれさま。
 
 この積み重ねが、
 きっと本番につながる。`,
-    label:`WEEK ${state.week}`,
-    progress:"3 / 3",
-    visual:"character",
-    memberId:"sarina",
-    expression:"smile"
+
+    label:
+      `WEEK ${state.week}`,
+
+    progress:
+      "3 / 3",
+
+    visual:
+      "character",
+
+    memberId:
+      "sarina",
+
+    expression:
+      "smile"
+
   });
 
+
   controls.innerHTML = `
+
     <div class="plan">
+
       <span class="slot done"></span>
+
       <span class="slot done"></span>
+
       <span class="slot done"></span>
+
     </div>
-    <button class="primary" data-action="advance">${state.week===4 ? "デビューライブ当日へ →" : "次の1週間へ →"}</button>
+
+
+    <button
+      class="primary"
+      data-action="advance"
+    >
+
+      ${
+        state.week===4
+
+          ? "デビューライブ当日へ →"
+
+          : "次の1週間へ →"
+      }
+
+    </button>
+
+
     <div class="row">
-      <button class="secondary" data-action="stats">ステータス</button>
-      <button class="secondary" data-action="history">今週の行動</button>
+
+      <button
+        class="secondary"
+        data-action="stats"
+      >
+
+        ステータス
+
+      </button>
+
+
+      <button
+        class="secondary"
+        data-action="history"
+      >
+
+        今週の行動
+
+      </button>
+
     </div>
+
   `;
+
 }
+
+
+/* ========================================
+   PLANNING
+======================================== */
 
 function renderPlanning(){
-  if(state.plan.length >= 3){
+
+  if(
+    state.plan.length>=3
+  ){
+
     renderPlanningSummary();
+
     return;
+
   }
 
-  if(!state.selectedMember){
+
+  if(
+    !state.selectedMember
+  ){
+
     renderMemberSelect();
+
     return;
+
   }
+
 
   renderActionSelect();
+
 }
 
-function doActivity(actionId){
-  const memberId = state.selectedMember;
-  const meta = MEMBERS[memberId];
-  const member = state.members[memberId];
-  const action = ACTIONS[actionId];
-  if(!action) return;
-  if(state.cash < action.cost) return;
 
-  state.cash -= action.cost;
+/* ========================================
+   ACTIVITY
+======================================== */
 
-  const efficiency = getActionEfficiency(member);
+function doActivity(
+  actionId
+){
 
-  let resultText = "";
-  let expression = "smile";
+  const memberId =
+    state.selectedMember;
 
-  if(actionId === "vocal"){
-    const gain = Math.round(8 * efficiency);
-    adjustMember(memberId, "vocal", gain);
-    adjustMember(memberId, "energy", -8);
-    state.reach = clamp(state.reach + 1);
-    resultText = `${meta.name}は
+
+  const meta =
+    MEMBERS[
+      memberId
+    ];
+
+
+  const member =
+    state.members[
+      memberId
+    ];
+
+
+  const action =
+    ACTIONS[
+      actionId
+    ];
+
+
+  if(!action){
+    return;
+  }
+
+
+  if(
+    state.cash<action.cost
+  ){
+    return;
+  }
+
+
+  state.cash -=
+    action.cost;
+
+
+  const efficiency =
+    getActionEfficiency(
+      member
+    );
+
+
+  let resultText =
+    "";
+
+
+  let expression =
+    "smile";
+
+
+  if(
+    actionId==="vocal"
+  ){
+
+    const gain =
+      Math.round(
+        8*efficiency
+      );
+
+
+    adjustMember(
+      memberId,
+      "vocal",
+      gain
+    );
+
+
+    adjustMember(
+      memberId,
+      "energy",
+      -8
+    );
+
+
+    state.reach =
+      clamp(
+        state.reach+1
+      );
+
+
+    resultText =
+`${meta.name}は
 ボーカル練習に集中した。
 
 歌唱が伸びた。`;
-    expression = "smile";
+
+
+    expression =
+      "smile";
+
   }
 
-  if(actionId === "dance"){
-    const gain = Math.round(8 * efficiency);
-    adjustMember(memberId, "dance", gain);
-    adjustMember(memberId, "energy", -9);
-    state.reach = clamp(state.reach + 1);
-    resultText = `${meta.name}は
+
+  if(
+    actionId==="dance"
+  ){
+
+    const gain =
+      Math.round(
+        8*efficiency
+      );
+
+
+    adjustMember(
+      memberId,
+      "dance",
+      gain
+    );
+
+
+    adjustMember(
+      memberId,
+      "energy",
+      -9
+    );
+
+
+    state.reach =
+      clamp(
+        state.reach+1
+      );
+
+
+    resultText =
+`${meta.name}は
 ダンス練習を重ねた。
 
 動きのキレが増した。`;
-    expression = meta.id === "kilua" ? "smile" : "normal";
+
+
+    expression =
+      meta.id==="kilua"
+        ? "smile"
+        : "normal";
+
   }
 
-  if(actionId === "meeting"){
-    const gain = Math.round(7 * efficiency);
-    adjustMember(memberId, "bond", gain);
-    adjustMember(memberId, "energy", -4);
-    Object.keys(state.members).forEach(id=>{
-      if(id !== memberId){
-        adjustMember(id, "bond", 1);
-      }
-    });
-    resultText = `${meta.name}を中心に
+
+  if(
+    actionId==="meeting"
+  ){
+
+    const gain =
+      Math.round(
+        7*efficiency
+      );
+
+
+    adjustMember(
+      memberId,
+      "bond",
+      gain
+    );
+
+
+    adjustMember(
+      memberId,
+      "energy",
+      -4
+    );
+
+
+    Object
+      .keys(
+        state.members
+      )
+
+      .forEach(id=>{
+
+        if(
+          id!==memberId
+        ){
+
+          adjustMember(
+            id,
+            "bond",
+            1
+          );
+
+        }
+
+      });
+
+
+    resultText =
+`${meta.name}を中心に
 ミーティングを行った。
 
 4人の方向性が
 少し揃ってきた。`;
-    expression = "smile";
+
+
+    expression =
+      "smile";
+
   }
 
-  if(actionId === "sns"){
-    adjustMember(memberId, "energy", -4);
-    adjustMember(memberId, "bond", 2);
-    state.reach = clamp(state.reach + 8);
-    resultText = `${meta.name}が前に出て
+
+  if(
+    actionId==="sns"
+  ){
+
+    adjustMember(
+      memberId,
+      "energy",
+      -4
+    );
+
+
+    adjustMember(
+      memberId,
+      "bond",
+      2
+    );
+
+
+    state.reach =
+      clamp(
+        state.reach+8
+      );
+
+
+    resultText =
+`${meta.name}が前に出て
 SNS告知を行った。
 
 グループの認知が
 広がっていく。`;
-    expression = "smile";
+
+
+    expression =
+      "smile";
+
   }
 
-  if(actionId === "rest"){
-    adjustMember(memberId, "energy", 18);
-    resultText = `${meta.name}は
+
+  if(
+    actionId==="rest"
+  ){
+
+    adjustMember(
+      memberId,
+      "energy",
+      18
+    );
+
+
+    resultText =
+`${meta.name}は
 しっかり休養をとった。
 
 体力が回復した。`;
-    expression = "smile";
+
+
+    expression =
+      "smile";
+
   }
 
+
   state.plan.push({
+
     memberId,
+
     actionId
+
   });
 
-  state.selectedMember = null;
+
+  state.selectedMember =
+    null;
+
+
   save();
+
+
   renderHud();
-  showFeedback(`${meta.name}：${action.name}`);
+
+
+  showFeedback(
+    `${meta.name}：${action.name}`
+  );
+
+
   setScene({
-    speakerName:meta.name,
-    text:resultText,
-    label:`WEEK ${state.week}`,
-    progress:`${state.plan.length} / 3`,
-    visual:"character",
+
+    speakerName:
+      meta.name,
+
+    text:
+      resultText,
+
+    label:
+      `WEEK ${state.week}`,
+
+    progress:
+      `${state.plan.length} / 3`,
+
+    visual:
+      "character",
+
     memberId,
+
     expression
+
   });
+
 
   controls.innerHTML = `
-    <button class="primary" data-action="continue">次へ →</button>
+
+    <button
+      class="primary"
+      data-action="continue"
+    >
+
+      次へ →
+
+    </button>
+
   `;
+
 }
 
+
+/* ========================================
+   LIVE READY
+======================================== */
+
 function renderLiveReady(){
+
   setScene({
-    speakerName:"SARiNA",
-    text:`いよいよデビューライブ。
+
+    speakerName:
+      "SARiNA",
+
+    text:
+`いよいよデビューライブ。
 
 最初の曲、
 ここから始まるよ。`,
-    label:"DEBUT DAY",
-    progress:"",
-    visual:"character",
-    memberId:"sarina",
-    expression:"smile"
+
+    label:
+      "DEBUT DAY",
+
+    progress:
+      "",
+
+    visual:
+      "character",
+
+    memberId:
+      "sarina",
+
+    expression:
+      "smile"
+
   });
 
+
   controls.innerHTML = `
+
     <div class="songUnlock">
-      <div class="songNew">NEW SONG UNLOCKED</div>
-      <div class="songTitle">あくなき鼓動</div>
-      <div class="songSub">O-VER-KiLL</div>
-      <button class="songButton" id="songButton" data-action="song">▶ サビを聴く</button>
+
+      <div class="songNew">
+        NEW SONG UNLOCKED
+      </div>
+
+      <div class="songTitle">
+        あくなき鼓動
+      </div>
+
+      <div class="songSub">
+        O-VER-KiLL
+      </div>
+
+
+      <button
+        class="songButton"
+        id="songButton"
+        data-action="song"
+      >
+
+        ▶ サビを聴く
+
+      </button>
+
     </div>
+
 
     <div class="actions">
-      <button class="choice" data-action="setlist" data-id="balanced">
-        <strong>総合力で魅せる</strong>
-        <small>歌・ダンス・連携をバランスよく活かす</small>
+
+
+      <button
+        class="choice"
+        data-action="setlist"
+        data-id="balanced"
+      >
+
+        <strong>
+          総合力で魅せる
+        </strong>
+
+        <small>
+          歌・ダンス・連携を
+          バランスよく活かす
+        </small>
+
       </button>
-      <button class="choice" data-action="setlist" data-id="vocal">
-        <strong>歌で届ける</strong>
-        <small>ボーカル寄りの構成で勝負する</small>
+
+
+      <button
+        class="choice"
+        data-action="setlist"
+        data-id="vocal"
+      >
+
+        <strong>
+          歌で届ける
+        </strong>
+
+        <small>
+          ボーカル寄りの構成で
+          勝負する
+        </small>
+
       </button>
-      <button class="choice" data-action="setlist" data-id="dance">
-        <strong>勢いで巻き込む</strong>
-        <small>ダンスと熱量を前面に出す</small>
+
+
+      <button
+        class="choice"
+        data-action="setlist"
+        data-id="dance"
+      >
+
+        <strong>
+          勢いで巻き込む
+        </strong>
+
+        <small>
+          ダンスと熱量を
+          前面に出す
+        </small>
+
       </button>
-      <button class="choice" data-action="stats">
-        <strong>最終ステータス確認</strong>
-        <small>4人の数値を確認する</small>
+
+
+      <button
+        class="choice"
+        data-action="stats"
+      >
+
+        <strong>
+          最終ステータス確認
+        </strong>
+
+        <small>
+          4人の数値を確認する
+        </small>
+
       </button>
+
+
     </div>
+
   `;
+
 }
+
+
+/* ========================================
+   RESULT CALC
+======================================== */
 
 function calculateResult(){
-  const ids = Object.keys(state.members);
-  const vocal = avg(ids.map(id=>state.members[id].vocal));
-  const dance = avg(ids.map(id=>state.members[id].dance));
-  const bond = avg(ids.map(id=>state.members[id].bond));
-  const energy = avg(ids.map(id=>state.members[id].energy));
 
-  let performance = vocal*0.30 + dance*0.28 + bond*0.22 + energy*0.10 + state.reach*0.10;
+  const ids =
+    Object.keys(
+      state.members
+    );
 
-  if(state.setlist === "vocal") performance += vocal*0.08;
-  if(state.setlist === "dance") performance += dance*0.08;
 
-  performance = clamp(Math.round(performance));
+  const vocal =
+    avg(
+      ids.map(
+        id=>
+          state.members[id].vocal
+      )
+    );
 
-  const attendance = Math.max(35, Math.round(30 + state.reach*1.8 + bond*0.45));
-  const fans = Math.max(6, Math.round(attendance * (performance/100) * 0.55));
-  const ticketIncome = attendance * 2000;
 
-  state.cash += ticketIncome;
+  const dance =
+    avg(
+      ids.map(
+        id=>
+          state.members[id].dance
+      )
+    );
 
-  const memberScores = ids.map(id=>{
-    const m = state.members[id];
-    return {
-      id,
-      score: Math.round(m.vocal*0.3 + m.dance*0.3 + m.bond*0.2 + m.energy*0.2)
-    };
-  }).sort((a,b)=>b.score-a.score);
+
+  const bond =
+    avg(
+      ids.map(
+        id=>
+          state.members[id].bond
+      )
+    );
+
+
+  const energy =
+    avg(
+      ids.map(
+        id=>
+          state.members[id].energy
+      )
+    );
+
+
+  let performance =
+
+    vocal*.30
+
+    +
+
+    dance*.28
+
+    +
+
+    bond*.22
+
+    +
+
+    energy*.10
+
+    +
+
+    state.reach*.10;
+
+
+  if(
+    state.setlist==="vocal"
+  ){
+
+    performance +=
+      vocal*.08;
+
+  }
+
+
+  if(
+    state.setlist==="dance"
+  ){
+
+    performance +=
+      dance*.08;
+
+  }
+
+
+  performance =
+    clamp(
+      Math.round(
+        performance
+      )
+    );
+
+
+  const attendance =
+    Math.max(
+
+      35,
+
+      Math.round(
+
+        30
+
+        +
+
+        state.reach*1.8
+
+        +
+
+        bond*.45
+
+      )
+
+    );
+
+
+  const fans =
+    Math.max(
+
+      6,
+
+      Math.round(
+
+        attendance
+
+        *
+
+        (
+          performance/100
+        )
+
+        *
+
+        .55
+
+      )
+
+    );
+
+
+  const ticketIncome =
+    attendance
+    *
+    2000;
+
+
+  state.cash +=
+    ticketIncome;
+
+
+  const memberScores =
+
+    ids
+
+      .map(id=>{
+
+        const m =
+          state.members[id];
+
+
+        return {
+
+          id,
+
+          score:
+            Math.round(
+
+              m.vocal*.3
+
+              +
+
+              m.dance*.3
+
+              +
+
+              m.bond*.2
+
+              +
+
+              m.energy*.2
+
+            )
+
+        };
+
+      })
+
+      .sort(
+        (a,b)=>
+          b.score-a.score
+      );
+
 
   state.result = {
+
     performance,
+
     attendance,
+
     fans,
+
     ticketIncome,
-    mvp: memberScores[0].id
+
+    mvp:
+      memberScores[0].id
+
   };
+
 }
 
+
+/* ========================================
+   LIVE
+======================================== */
+
 function renderLive(){
+
   stopSong();
 
+
   setScene({
-    speakerName:"SARiNA",
-    text:`始まるよ。
+
+    speakerName:
+      "SARiNA",
+
+    text:
+`始まるよ。
 
 4人で、
 この景色を変えよう。`,
-    label:"ON STAGE",
-    progress:"",
-    visual:"photo",
+
+    label:
+      "ON STAGE",
+
+    progress:
+      "",
+
+    visual:
+      "photo",
+
     photoInfo:{
-      tag:"DEBUT LIVE",
-      title:"あくなき鼓動",
-      sub:"豊洲公園。最初のステージへ。"
+
+      tag:
+        "DEBUT LIVE",
+
+      title:
+        "あくなき鼓動",
+
+      sub:
+        "豊洲公園。最初のステージへ。"
+
     }
+
   });
 
+
   controls.innerHTML = `
+
     <div class="result">
-      <div style="font-size:10px;letter-spacing:3px;color:var(--acid);">DEBUT LIVE</div>
-      <div style="font-size:31px;font-weight:900;margin-top:7px;">あくなき鼓動</div>
+
+      <div
+        style="
+          font-size:10px;
+          letter-spacing:3px;
+          color:var(--acid);
+        "
+      >
+
+        DEBUT LIVE
+
+      </div>
+
+
+      <div
+        style="
+          font-size:31px;
+          font-weight:900;
+          margin-top:7px;
+        "
+      >
+
+        あくなき鼓動
+
+      </div>
+
     </div>
-    <button class="primary" data-action="finish">ライブ結果を見る →</button>
+
+
+    <button
+      class="primary"
+      data-action="finish"
+    >
+
+      ライブ結果を見る →
+
+    </button>
+
   `;
+
 }
 
+
+/* ========================================
+   RESULT
+======================================== */
+
 function renderResult(){
-  const result = state.result;
-  const success = result.performance >= 75;
-  const mvp = MEMBERS[result.mvp];
+
+  const result =
+    state.result;
+
+
+  const success =
+    result.performance>=75;
+
+
+  const mvp =
+    MEMBERS[
+      result.mvp
+    ];
+
 
   setScene({
-    speakerName:"SARiNA",
-    text: success
+
+    speakerName:
+      "SARiNA",
+
+    text:
+
+      success
+
       ? `初めてのライブ、
 ちゃんと届いた気がする。
 
 ここからもっと
 大きくなっていこう。`
+
       : `まだまだここから。
 
 でも、
 最初の一歩は踏み出せた。`,
-    label:"DEBUT REPORT",
-    progress:"",
-    visual:"character",
-    memberId:"sarina",
-    expression: success ? "smile" : "cry"
+
+    label:
+      "DEBUT REPORT",
+
+    progress:
+      "",
+
+    visual:
+      "character",
+
+    memberId:
+      "sarina",
+
+    expression:
+      success
+        ? "smile"
+        : "cry"
+
   });
+
 
   controls.innerHTML = `
+
     <div class="result">
-      <div class="resultNumber">${result.attendance}<small>人</small></div>
-      <div style="font-size:11px;color:var(--muted);">デビューライブ動員</div>
+
+      <div class="resultNumber">
+
+        ${result.attendance}
+
+        <small>
+          人
+        </small>
+
+      </div>
+
+
+      <div
+        style="
+          font-size:11px;
+          color:var(--muted);
+        "
+      >
+
+        デビューライブ動員
+
+      </div>
+
     </div>
+
 
     <div class="resultGrid">
+
+
       <div class="resultCard">
-        <strong>ライブ評価</strong>
-        <small>${result.performance} / 100</small>
+
+        <strong>
+          ライブ評価
+        </strong>
+
+        <small>
+          ${result.performance} / 100
+        </small>
+
       </div>
+
+
       <div class="resultCard">
-        <strong>また来たい</strong>
-        <small>${result.fans}人</small>
+
+        <strong>
+          また来たい
+        </strong>
+
+        <small>
+          ${result.fans}人
+        </small>
+
       </div>
+
+
       <div class="resultCard">
-        <strong>チケット売上</strong>
-        <small>${yen(result.ticketIncome)}</small>
+
+        <strong>
+          チケット売上
+        </strong>
+
+        <small>
+          ${yen(result.ticketIncome)}
+        </small>
+
       </div>
+
+
       <div class="resultCard">
-        <strong>MVP</strong>
-        <small>${mvp.name}</small>
+
+        <strong>
+          MVP
+        </strong>
+
+        <small>
+          ${mvp.name}
+        </small>
+
       </div>
+
+
     </div>
+
 
     <div class="row">
-      <button class="primary" data-action="restart">もう一度はじめる</button>
-      <button class="secondary" data-action="stats">最終ステータス</button>
+
+      <button
+        class="primary"
+        data-action="restart"
+      >
+
+        もう一度はじめる
+
+      </button>
+
+
+      <button
+        class="secondary"
+        data-action="stats"
+      >
+
+        最終ステータス
+
+      </button>
+
     </div>
+
   `;
+
 }
+
+
+/* ========================================
+   STATS MODAL
+======================================== */
 
 function openStats(){
+
   $("modalBox").innerHTML = `
-    <h2>4人の現在地</h2>
+
+    <h2>
+      4人の現在地
+    </h2>
+
+
     <p>
-      WEEK ${state.week} / 04<br>
-      認知：${state.reach}<br>
-      活動資金：${yen(state.cash)}
+
+      WEEK
+      ${state.week}
+      / 04
+
+      <br>
+
+      認知：
+      ${state.reach}
+
+      <br>
+
+      活動資金：
+      ${yen(state.cash)}
+
     </p>
 
-    ${Object.values(MEMBERS).map(member=>{
-      const stat = state.members[member.id];
-      return `
-        <div class="statusBlock">
-          <h3 style="color:${member.color};">${member.name}</h3>
-          <div style="font-size:11px;color:#aeb6c2;margin-bottom:8px;">${member.role}</div>
-          <div class="statusMini">
-            <div>歌唱：${stat.vocal}</div>
-            <div>ダンス：${stat.dance}</div>
-            <div>連携：${stat.bond}</div>
-            <div>体力：${stat.energy}</div>
+
+    ${Object
+      .values(MEMBERS)
+
+      .map(member=>{
+
+        const stat =
+          state.members[
+            member.id
+          ];
+
+
+        return `
+
+          <div class="statusBlock">
+
+            <h3
+              style="
+                color:${member.color};
+              "
+            >
+
+              ${member.name}
+
+            </h3>
+
+
+            <div
+              style="
+                font-size:11px;
+                color:#aeb6c2;
+                margin-bottom:8px;
+              "
+            >
+
+              ${member.role}
+
+            </div>
+
+
+            <div class="statusMini">
+
+              <div>
+                歌唱：
+                ${stat.vocal}
+              </div>
+
+              <div>
+                ダンス：
+                ${stat.dance}
+              </div>
+
+              <div>
+                連携：
+                ${stat.bond}
+              </div>
+
+              <div>
+                体力：
+                ${stat.energy}
+              </div>
+
+            </div>
+
           </div>
-        </div>
-      `;
-    }).join("")}
 
-    <button class="primary" data-modal-close>閉じる</button>
+        `;
+
+      })
+
+      .join("")
+    }
+
+
+    <button
+      class="primary"
+      data-modal-close
+    >
+
+      閉じる
+
+    </button>
+
   `;
-  $("modal").classList.add("show");
+
+
+  $("modal")
+    .classList
+    .add("show");
+
 }
 
-function openHelp(){
-  $("modalBox").innerHTML = `
-    <h2>遊び方</h2>
-    <p>
-      今回は4人それぞれに
-      個別ステータスがあります。
-    </p>
-    <ul>
-      <li>歌唱：歌の強さ</li>
-      <li>ダンス：パフォーマンス力</li>
-      <li>連携：4人のまとまり</li>
-      <li>体力：今どれだけ動けるか</li>
-    </ul>
-    <p>
-      体力が低いほど、
-      練習効率は下がります。
-    </p>
-    <p>
-      次の段階で
-      成功率・失敗・怪我要素を
-      足していくと、
-      さらにゲーム性が上がります。
-    </p>
-    <button class="primary" data-modal-close>閉じる</button>
-  `;
-  $("modal").classList.add("show");
-}
+
+/* ========================================
+   HISTORY
+======================================== */
 
 function openHistory(){
+
   $("modalBox").innerHTML = `
-    <h2>今週の行動</h2>
+
+    <h2>
+      今週の行動
+    </h2>
+
+
     ${
       state.plan.length
-      ? state.plan.map((item,index)=>`
-        <div class="statusBlock">
-          <h3>${index+1}. ${MEMBERS[item.memberId].name}</h3>
-          <div style="font-size:12px;color:#dbe0e8;">${ACTIONS[item.actionId].name}</div>
-        </div>
-      `).join("")
-      : `<p>まだ行動していません。</p>`
+
+      ? state.plan
+
+          .map(
+            (item,index)=>`
+
+            <div class="statusBlock">
+
+              <h3>
+
+                ${index+1}.
+
+                ${MEMBERS[item.memberId].name}
+
+              </h3>
+
+
+              <div
+                style="
+                  font-size:12px;
+                  color:#dbe0e8;
+                "
+              >
+
+                ${ACTIONS[item.actionId].name}
+
+              </div>
+
+            </div>
+
+          `
+          )
+
+          .join("")
+
+      : `
+
+        <p>
+          まだ行動していません。
+        </p>
+
+      `
     }
-    <button class="primary" data-modal-close>閉じる</button>
+
+
+    <button
+      class="primary"
+      data-modal-close
+    >
+
+      閉じる
+
+    </button>
+
   `;
-  $("modal").classList.add("show");
+
+
+  $("modal")
+    .classList
+    .add("show");
+
 }
+
+
+/* ========================================
+   HELP
+======================================== */
+
+function openHelp(){
+
+  $("modalBox").innerHTML = `
+
+    <h2>
+      遊び方
+    </h2>
+
+
+    <p>
+
+      4人それぞれに
+      個別ステータスがあります。
+
+    </p>
+
+
+    <ul>
+
+      <li>
+        歌唱：歌の強さ
+      </li>
+
+      <li>
+        ダンス：パフォーマンス力
+      </li>
+
+      <li>
+        連携：4人のまとまり
+      </li>
+
+      <li>
+        体力：今どれだけ動けるか
+      </li>
+
+    </ul>
+
+
+    <p>
+
+      体力が低いほど、
+      練習効率は下がります。
+
+    </p>
+
+
+    <button
+      class="primary"
+      data-modal-close
+    >
+
+      閉じる
+
+    </button>
+
+  `;
+
+
+  $("modal")
+    .classList
+    .add("show");
+
+}
+
+
+/* ========================================
+   SONG
+======================================== */
 
 function toggleSong(){
-  const button = $("songButton");
-  if(!songAudio.paused){
+
+  const button =
+    $("songButton");
+
+
+  if(
+    !songAudio.paused
+  ){
+
     songAudio.pause();
+
+
     if(button){
-      button.textContent = "▶ サビを聴く";
-      button.classList.remove("playing");
+
+      button.textContent =
+        "▶ サビを聴く";
+
+
+      button
+        .classList
+        .remove("playing");
+
     }
+
+
     return;
+
   }
 
-  songAudio.currentTime = SONG_CHORUS_START;
-  songAudio.play().then(()=>{
-    if(button){
-      button.textContent = "■ 停止";
-      button.classList.add("playing");
-    }
-  }).catch(()=>{
-    showFeedback("再生できませんでした");
-  });
+
+  songAudio.currentTime =
+    SONG_CHORUS_START;
+
+
+  songAudio.play()
+
+    .then(()=>{
+
+      if(button){
+
+        button.textContent =
+          "■ 停止";
+
+
+        button
+          .classList
+          .add("playing");
+
+      }
+
+    })
+
+    .catch(()=>{
+
+      showFeedback(
+        "再生できませんでした"
+      );
+
+    });
+
 }
 
-songAudio.addEventListener("timeupdate", ()=>{
-  if(songAudio.currentTime >= SONG_CHORUS_END){
-    songAudio.pause();
-    songAudio.currentTime = SONG_CHORUS_START;
-    const button = $("songButton");
-    if(button){
-      button.textContent = "▶ もう一度聴く";
-      button.classList.remove("playing");
+
+songAudio.addEventListener(
+
+  "timeupdate",
+
+  ()=>{
+
+    if(
+      songAudio.currentTime
+      >=
+      SONG_CHORUS_END
+    ){
+
+      songAudio.pause();
+
+
+      songAudio.currentTime =
+        SONG_CHORUS_START;
+
+
+      const button =
+        $("songButton");
+
+
+      if(button){
+
+        button.textContent =
+          "▶ もう一度聴く";
+
+
+        button
+          .classList
+          .remove("playing");
+
+      }
+
     }
+
   }
-});
+
+);
+
+
+/* ========================================
+   RENDER
+======================================== */
 
 function render(){
+
   renderHud();
 
-  if(state.phase === "intro") renderIntro();
-  if(state.phase === "planning") renderPlanning();
-  if(state.phase === "liveReady") renderLiveReady();
-  if(state.phase === "live") renderLive();
-  if(state.phase === "result") renderResult();
+
+  if(
+    state.phase==="intro"
+  ){
+
+    renderIntro();
+
+  }
+
+
+  if(
+    state.phase==="planning"
+  ){
+
+    renderPlanning();
+
+  }
+
+
+  if(
+    state.phase==="liveReady"
+  ){
+
+    renderLiveReady();
+
+  }
+
+
+  if(
+    state.phase==="live"
+  ){
+
+    renderLive();
+
+  }
+
+
+  if(
+    state.phase==="result"
+  ){
+
+    renderResult();
+
+  }
+
 }
 
-document.addEventListener("click", (event)=>{
-  if(event.target.matches("[data-modal-close]")){
-    $("modal").classList.remove("show");
-    return;
-  }
 
-  const button = event.target.closest("[data-action]");
-  if(!button || button.disabled) return;
+/* ========================================
+   CLICK EVENTS
+======================================== */
 
-  const action = button.dataset.action;
+document.addEventListener(
 
-  if(action === "introNext"){
-    if(state.intro < INTRO.length - 1){
-      state.intro++;
-    }else{
-      state.phase = "planning";
+  "click",
+
+  event=>{
+
+
+    if(
+      event.target.matches(
+        "[data-modal-close]"
+      )
+    ){
+
+      $("modal")
+        .classList
+        .remove("show");
+
+      return;
+
     }
-    save();
-    render();
-    return;
-  }
 
-  if(action === "introBack"){
-    state.intro = Math.max(0, state.intro - 1);
-    save();
-    render();
-    return;
-  }
 
-  if(action === "pickMember"){
-    state.selectedMember = button.dataset.id;
-    save();
-    render();
-    return;
-  }
+    const button =
+      event.target.closest(
+        "[data-action]"
+      );
 
-  if(action === "backMember"){
-    state.selectedMember = null;
-    save();
-    render();
-    return;
-  }
 
-  if(action === "activity"){
-    doActivity(button.dataset.id);
-    return;
-  }
+    if(
+      !button
+      ||
+      button.disabled
+    ){
 
-  if(action === "continue"){
-    render();
-    return;
-  }
+      return;
 
-  if(action === "advance"){
-    state.plan = [];
-    state.selectedMember = null;
-    if(state.week === 4){
-      state.phase = "liveReady";
-    }else{
-      state.week++;
     }
-    save();
-    render();
-    return;
-  }
 
-  if(action === "song"){
-    toggleSong();
-    return;
-  }
 
-  if(action === "setlist"){
-    state.setlist = button.dataset.id;
-    state.phase = "live";
-    save();
-    render();
-    return;
-  }
+    const action =
+      button.dataset.action;
 
-  if(action === "finish"){
-    calculateResult();
-    state.phase = "result";
-    save();
-    render();
-    return;
-  }
 
-  if(action === "stats"){
-    openStats();
-    return;
-  }
+    /* INTRO */
 
-  if(action === "helpStep"){
-    openHelp();
-    return;
-  }
+    if(
+      action==="introNext"
+    ){
 
-  if(action === "history"){
-    openHistory();
-    return;
-  }
+      if(
+        state.intro
+        <
+        INTRO.length-1
+      ){
 
-  if(action === "restart"){
-    if(confirm("最初からやり直しますか？")){
-      stopSong();
-      state = freshState();
+        state.intro++;
+
+      }
+
+      else{
+
+        state.phase =
+          "planning";
+
+      }
+
+
       save();
+
       render();
+
+      return;
+
     }
-    return;
-  }
-});
 
-$("help").addEventListener("click", openHelp);
 
-$("reset").addEventListener("click", ()=>{
-  if(confirm("保存データを消して最初からやり直しますか？")){
-    stopSong();
-    state = freshState();
-    save();
-    render();
-  }
-});
+    if(
+      action==="introBack"
+    ){
 
-$("modal").addEventListener("click", (event)=>{
-  if(event.target === $("modal")){
-    $("modal").classList.remove("show");
+      state.intro =
+        Math.max(
+          0,
+          state.intro-1
+        );
+
+
+      save();
+
+      render();
+
+      return;
+
+    }
+
+
+    /* MEMBER */
+
+    if(
+      action==="pickMember"
+    ){
+
+      state.selectedMember =
+        button.dataset.id;
+
+
+      save();
+
+      render();
+
+      return;
+
+    }
+
+
+    if(
+      action==="backMember"
+    ){
+
+      state.selectedMember =
+        null;
+
+
+      save();
+
+      render();
+
+      return;
+
+    }
+
+
+    /* ACTIVITY */
+
+    if(
+      action==="activity"
+    ){
+
+      doActivity(
+        button.dataset.id
+      );
+
+      return;
+
+    }
+
+
+    if(
+      action==="continue"
+    ){
+
+      render();
+
+      return;
+
+    }
+
+
+    /* ADVANCE WEEK */
+
+    if(
+      action==="advance"
+    ){
+
+      state.plan =
+        [];
+
+
+      state.selectedMember =
+        null;
+
+
+      if(
+        state.week===4
+      ){
+
+        state.phase =
+          "liveReady";
+
+      }
+
+      else{
+
+        state.week++;
+
+      }
+
+
+      save();
+
+      render();
+
+      return;
+
+    }
+
+
+    /* SONG */
+
+    if(
+      action==="song"
+    ){
+
+      toggleSong();
+
+      return;
+
+    }
+
+
+    /* LIVE */
+
+    if(
+      action==="setlist"
+    ){
+
+      state.setlist =
+        button.dataset.id;
+
+
+      state.phase =
+        "live";
+
+
+      save();
+
+      render();
+
+      return;
+
+    }
+
+
+    if(
+      action==="finish"
+    ){
+
+      calculateResult();
+
+
+      state.phase =
+        "result";
+
+
+      save();
+
+      render();
+
+      return;
+
+    }
+
+
+    /* MODALS */
+
+    if(
+      action==="stats"
+    ){
+
+      openStats();
+
+      return;
+
+    }
+
+
+    if(
+      action==="helpStep"
+    ){
+
+      openHelp();
+
+      return;
+
+    }
+
+
+    if(
+      action==="history"
+    ){
+
+      openHistory();
+
+      return;
+
+    }
+
+
+    /* RESTART */
+
+    if(
+      action==="restart"
+    ){
+
+      if(
+        confirm(
+          "最初からやり直しますか？"
+        )
+      ){
+
+        stopSong();
+
+
+        state =
+          freshState();
+
+
+        save();
+
+        render();
+
+      }
+
+
+      return;
+
+    }
+
   }
-});
+
+);
+
+
+/* ========================================
+   HELP / RESET
+======================================== */
+
+$("help")
+  .addEventListener(
+    "click",
+    openHelp
+  );
+
+
+$("reset")
+  .addEventListener(
+
+    "click",
+
+    ()=>{
+
+      if(
+        confirm(
+          "保存データを消して最初からやり直しますか？"
+        )
+      ){
+
+        stopSong();
+
+
+        state =
+          freshState();
+
+
+        save();
+
+        render();
+
+      }
+
+    }
+
+  );
+
+
+$("modal")
+  .addEventListener(
+
+    "click",
+
+    event=>{
+
+      if(
+        event.target
+        ===
+        $("modal")
+      ){
+
+        $("modal")
+          .classList
+          .remove("show");
+
+      }
+
+    }
+
+  );
+
 
 render();
+
 </script>
+
 </body>
 </html>
