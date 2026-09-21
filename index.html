@@ -2,8 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#15131c">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#111118">
+
 <title>O-VER-KiLL｜MANAGER'S STORY</title>
 
 <style>
@@ -12,25 +13,31 @@
 :root{
   --bg:#111118;
   --panel:#1c1b25;
+  --text:#fff;
+  --muted:#aaa6b4;
   --line:#393744;
-  --text:#f8f7fb;
-  --muted:#aaa7b5;
   --acid:#ddff63;
+  --pink:#ff8ba2;
+  --blue:#72bdff;
+  --green:#69e09a;
+  --yellow:#ffdc69;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
-html,body{
+html,
+body{
   margin:0;
-  min-height:100%;
-  background:
-    radial-gradient(circle at 50% 0%,#262131 0,#111118 48%);
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#101017;
   color:var(--text);
   font-family:"Noto Sans JP",sans-serif;
-}
-
-body{
-  overscroll-behavior:none;
+  -webkit-user-select:none;
+  user-select:none;
 }
 
 button{
@@ -38,2964 +45,448 @@ button{
   -webkit-tap-highlight-color:transparent;
 }
 
-.app{
-  width:min(100%,820px);
-  min-height:100dvh;
-  margin:auto;
-  padding:
-    max(10px,env(safe-area-inset-top))
-    12px
-    max(14px,env(safe-area-inset-bottom));
+.screen{
+  position:fixed;
+  inset:0;
+  display:none;
+}
+
+.screen.active{
   display:flex;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+#loadingScreen{
+  z-index:100;
   flex-direction:column;
-}
-
-/* HEADER */
-
-.header{
-  height:58px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.logo{
-  font-size:21px;
-  line-height:1;
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-1px;
-}
-
-.logo small{
-  display:block;
-  margin-top:8px;
-  color:#888494;
-  font-size:8px;
-  font-style:normal;
-  letter-spacing:3px;
-}
-
-.headerButton{
-  width:38px;
-  height:38px;
-  border:1px solid #3e3b49;
-  border-radius:50%;
-  background:#201e28;
-  color:#fff;
-  font-weight:900;
-}
-
-/* HUD */
-
-.hud{
-  padding:10px 11px;
-  border:1px solid #393744;
-  border-radius:12px;
-  background:rgba(27,26,34,.92);
-}
-
-.hudTop{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:10px;
-}
-
-.weekLabel{
-  color:var(--acid);
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:1.4px;
-}
-
-.days{
-  margin-top:3px;
-  color:#fff;
-  font-size:15px;
-  font-weight:900;
-}
-
-.money{
-  text-align:right;
-  color:#9693a0;
-  font-size:9px;
-}
-
-.money strong{
-  display:block;
-  margin-top:2px;
-  color:#fff;
-  font-size:14px;
-}
-
-.groupRow{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:9px;
-}
-
-.statLine{
-  font-size:9px;
-  color:#9996a4;
-}
-
-.statLineTop{
-  display:flex;
-  justify-content:space-between;
-}
-
-.statLineTop b{
-  color:#fff;
-}
-
-.bar{
-  height:4px;
-  margin-top:5px;
-  overflow:hidden;
-  border-radius:999px;
-  background:#353340;
-}
-
-.fill{
-  height:100%;
-  border-radius:999px;
-  background:var(--acid);
-  transition:width .5s ease;
-}
-
-.energyRow{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:5px;
-  margin-top:9px;
-}
-
-.energy{
-  padding:6px;
-  border-radius:7px;
-  background:#25232d;
-}
-
-.energyTop{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  font-size:8px;
-  font-weight:800;
-}
-
-.dot{
-  display:inline-block;
-  width:6px;
-  height:6px;
-  margin-right:3px;
-  border-radius:50%;
-}
-
-/* GAME */
-
-.game{
-  flex:1;
-  min-height:0;
-  margin-top:10px;
-  overflow:hidden;
-  border:1px solid #393744;
-  border-radius:15px;
-  background:#171720;
-  display:flex;
-  flex-direction:column;
-  position:relative;
-}
-
-.sceneHead{
-  height:38px;
-  padding:0 13px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:#1d1c25;
-  border-bottom:1px solid #34323e;
-  color:#918e9b;
-  font-size:9px;
-  letter-spacing:1.2px;
-}
-
-.sceneHead b{
-  color:var(--acid);
-}
-
-/* VISUAL */
-
-.visual{
-  position:relative;
-  height:365px;
-  overflow:hidden;
-  flex-shrink:0;
-  background:#22242d;
-  transition:background .35s ease;
-}
-
-.visual.scene-studio{
-  background:
-    linear-gradient(to bottom,rgba(255,255,255,.08),transparent 20%),
-    repeating-linear-gradient(
-      to right,
-      rgba(255,255,255,.035) 0 1px,
-      transparent 1px 95px
-    ),
-    linear-gradient(
-      to bottom,
-      #393d47 0 58%,
-      #272a31 58% 60%,
-      #202127 60%
-    );
-}
-
-.visual.scene-studio::after{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:42%;
-  z-index:0;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(255,255,255,.025) 0 1px,
-      transparent 1px 70px
-    ),
-    linear-gradient(to bottom,#26262c,#18181e);
-  transform:perspective(500px) rotateX(58deg);
-  transform-origin:bottom;
-}
-
-.visual.scene-lounge{
-  background:
-    radial-gradient(circle at 18% 25%,rgba(255,198,102,.16),transparent 25%),
-    radial-gradient(circle at 82% 30%,rgba(125,166,255,.12),transparent 25%),
-    linear-gradient(to bottom,#302d39,#1e1d25 62%,#17161c);
-}
-
-.visual.scene-city{
-  background:
-    linear-gradient(to bottom,rgba(85,130,190,.18),transparent 45%),
-    linear-gradient(135deg,#39414d 0 35%,#2a3038 35% 55%,#20252b 55%);
-}
-
-.visual.scene-sns{
-  background:
-    radial-gradient(circle at 50% 40%,rgba(135,112,255,.26),transparent 34%),
-    linear-gradient(145deg,#25203b,#151620);
-}
-
-.visual.scene-photo{
-  background:#111;
-}
-
-.visual.scene-manager{
-  background:
-    radial-gradient(circle at 50% 35%,rgba(221,255,99,.12),transparent 30%),
-    linear-gradient(to bottom,#292a33,#17181e);
-}
-
-/* fake environment */
-
-.mirror{
-  display:none;
-}
-
-.scene-studio .mirror{
-  display:block;
-  position:absolute;
-  z-index:0;
-  left:7%;
-  right:7%;
-  top:8%;
-  height:50%;
-  border:4px solid #464a55;
-  background:
-    linear-gradient(125deg,rgba(255,255,255,.09),rgba(255,255,255,.015));
-  box-shadow:
-    inset 0 0 25px rgba(255,255,255,.04);
-}
-
-.scene-studio .mirror::after{
-  content:"DANCE STUDIO";
-  position:absolute;
-  top:10px;
-  right:12px;
-  color:rgba(255,255,255,.12);
-  font-weight:900;
-  font-size:9px;
-  letter-spacing:2px;
-}
-
-.speakerBox{
-  display:none;
-}
-
-.scene-studio .speakerBox{
-  display:block;
-  position:absolute;
-  left:16px;
-  bottom:20px;
-  width:46px;
-  height:70px;
-  z-index:1;
-  border-radius:5px;
-  background:#101116;
-  border:2px solid #32343c;
-}
-
-.scene-studio .speakerBox::before,
-.scene-studio .speakerBox::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  border:2px solid #3e4149;
-  border-radius:50%;
-}
-
-.scene-studio .speakerBox::before{
-  width:24px;
-  height:24px;
-  top:8px;
-}
-
-.scene-studio .speakerBox::after{
-  width:14px;
-  height:14px;
-  bottom:8px;
-}
-
-/* character aura */
-
-.aura{
-  position:absolute;
-  z-index:1;
-  left:50%;
-  top:46%;
-  width:270px;
-  height:270px;
-  transform:translate(-50%,-50%);
-  border-radius:50%;
-  background:
-    radial-gradient(
-      circle,
-      rgba(var(--char-rgb),.22),
-      rgba(var(--char-rgb),0) 68%
-    );
-  filter:blur(10px);
-  display:none;
-}
-
-.visual.hasCharacter .aura{
-  display:block;
-}
-
-.character{
-  position:absolute;
-  z-index:3;
-  left:50%;
-  bottom:0;
-  width:82%;
-  height:98%;
-  object-fit:contain;
-  object-position:center bottom;
-  transform:translateX(-50%);
-  filter:drop-shadow(0 17px 14px rgba(0,0,0,.45));
-  display:none;
-}
-
-.character.show{
-  display:block;
-  animation:pop .28s ease both;
-}
-
-@keyframes pop{
-  from{
-    opacity:0;
-    transform:translateX(-50%) translateY(20px) scale(.94);
-  }
-  to{
-    opacity:1;
-    transform:translateX(-50%) translateY(0) scale(1);
-  }
-}
-
-.reaction{
-  position:absolute;
-  z-index:4;
-  right:18%;
-  top:19%;
-  font-size:35px;
-  opacity:0;
-  transform:scale(.5);
-}
-
-.reaction.show{
-  animation:reaction .6s ease both;
-}
-
-@keyframes reaction{
-  0%{opacity:0;transform:scale(.4) rotate(-10deg)}
-  45%{opacity:1;transform:scale(1.2) rotate(6deg)}
-  100%{opacity:1;transform:scale(1)}
-}
-
-/* photo */
-
-.photo{
-  position:absolute;
-  inset:0;
-  z-index:1;
-  display:none;
-  background-size:cover;
-  background-position:center;
-}
-
-.photo.show{
-  display:block;
-}
-
-.photo::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,.15),rgba(0,0,0,.12) 45%,rgba(0,0,0,.72));
-}
-
-.photoText{
-  position:absolute;
-  z-index:2;
-  left:20px;
-  right:20px;
-  bottom:22px;
-}
-
-.photoTag{
-  color:var(--acid);
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:2px;
-}
-
-.photoTitle{
-  margin-top:5px;
-  font-size:29px;
-  font-weight:900;
-  font-style:italic;
-}
-
-.photoSub{
-  margin-top:5px;
-  font-size:11px;
-  font-weight:700;
-}
-
-/* manager */
-
-.managerMark{
-  position:absolute;
-  inset:0;
-  display:none;
-  z-index:2;
   align-items:center;
   justify-content:center;
+  overflow:hidden;
+
+  background:
+    radial-gradient(circle at 50% 20%,rgba(221,255,99,.18),transparent 34%),
+    radial-gradient(circle at 15% 75%,rgba(112,189,255,.18),transparent 30%),
+    radial-gradient(circle at 85% 72%,rgba(255,139,162,.16),transparent 30%),
+    linear-gradient(160deg,#252233,#111118);
+}
+
+.loadingStars{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.loadingStars span{
+  position:absolute;
+  font-size:28px;
+  opacity:.7;
+  animation:floatStar 2.6s ease-in-out infinite;
+}
+
+.loadingStars span:nth-child(1){
+  top:9%;
+  left:12%;
+}
+
+.loadingStars span:nth-child(2){
+  top:18%;
+  right:14%;
+  animation-delay:.4s;
+}
+
+.loadingStars span:nth-child(3){
+  bottom:19%;
+  left:16%;
+  animation-delay:.8s;
+}
+
+.loadingStars span:nth-child(4){
+  bottom:12%;
+  right:11%;
+  animation-delay:1.2s;
+}
+
+@keyframes floatStar{
+  0%,100%{
+    transform:translateY(0) rotate(-7deg);
+  }
+  50%{
+    transform:translateY(-12px) rotate(7deg);
+  }
+}
+
+.loadingLogo{
   text-align:center;
-}
-
-.managerMark.show{
-  display:flex;
-}
-
-.managerMark div{
-  font-size:32px;
-  font-style:italic;
   font-weight:900;
-  letter-spacing:-1px;
+  font-style:italic;
+  font-size:31px;
+  letter-spacing:-2px;
+  z-index:2;
 }
 
-.managerMark span{
+.loadingLogo small{
   display:block;
   margin-top:9px;
-  color:#858391;
+  color:#b1adbb;
   font-size:9px;
   font-style:normal;
   letter-spacing:4px;
 }
 
-/* TALK */
-
-.talkArea{
-  padding:0 10px 10px;
+.loadingCharacterWrap{
   position:relative;
-  z-index:8;
-  margin-top:-2px;
+  width:230px;
+  height:270px;
+  margin-top:16px;
 }
 
-.talk{
-  min-height:116px;
-  padding:14px 15px 15px;
-  border-radius:13px;
-  background:#f6f3ec;
-  color:#17171d;
-  box-shadow:0 6px 24px rgba(0,0,0,.34);
-  position:relative;
+.loadingCharacter{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  filter:drop-shadow(0 18px 22px rgba(0,0,0,.45));
+  animation:loadingBounce .9s ease-in-out infinite alternate;
 }
 
-.talk::before{
+@keyframes loadingBounce{
+  from{
+    transform:translateY(4px) scale(.98);
+  }
+  to{
+    transform:translateY(-7px) scale(1.02);
+  }
+}
+
+.loadingSpeech{
+  min-height:42px;
+  padding:8px 18px;
+  margin-top:-4px;
+  border-radius:999px;
+  background:#fff;
+  color:#16151c;
+  font-size:11px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8px 25px rgba(0,0,0,.23);
+  z-index:3;
+}
+
+.loadingBarOuter{
+  width:min(78vw,330px);
+  height:18px;
+  margin-top:18px;
+  padding:3px;
+  border:2px solid rgba(255,255,255,.8);
+  border-radius:999px;
+  background:rgba(0,0,0,.25);
+  overflow:hidden;
+}
+
+.loadingBarInner{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:
+    linear-gradient(
+      90deg,
+      #75c8ff,
+      #79efbe,
+      #ddff63,
+      #ffd86d,
+      #ff90ad
+    );
+  transition:width .12s linear;
+}
+
+.loadingPercent{
+  margin-top:7px;
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+#titleScreen{
+  z-index:90;
+  flex-direction:column;
+  justify-content:flex-end;
+  align-items:center;
+  overflow:hidden;
+  background:#000;
+}
+
+.titlePhoto{
+  position:absolute;
+  inset:0;
+  background:url("./debut-live.webp") center/cover no-repeat;
+}
+
+.titlePhoto::after{
   content:"";
   position:absolute;
-  top:-9px;
-  left:33px;
-  width:19px;
-  height:19px;
-  transform:rotate(45deg);
-  background:#f6f3ec;
+  inset:0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.15),
+      rgba(0,0,0,.12) 38%,
+      rgba(8,8,12,.80) 82%,
+      #111118
+    );
 }
 
-.name{
+.titleSpark{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 17% 14%,rgba(221,255,99,.15),transparent 17%),
+    radial-gradient(circle at 81% 24%,rgba(255,139,162,.14),transparent 18%);
+  pointer-events:none;
+}
+
+.titleContent{
   position:relative;
-  z-index:1;
-  margin-bottom:7px;
+  z-index:3;
+  width:100%;
+  padding:0 23px max(30px,env(safe-area-inset-bottom));
+  text-align:center;
+}
+
+.titleMini{
+  color:var(--acid);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:4px;
+}
+
+.titleMain{
+  margin-top:6px;
+  font-size:40px;
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:-3px;
+  text-shadow:0 7px 30px rgba(0,0,0,.55);
+}
+
+.titleSub{
+  margin-top:5px;
+  color:#ddd9e5;
+  font-size:10px;
+  letter-spacing:5px;
+}
+
+.startButton{
+  width:100%;
+  height:62px;
+  margin-top:23px;
+  border:0;
+  border-radius:18px;
+  background:
+    linear-gradient(
+      135deg,
+      #e4ff68,
+      #c8ff4d
+    );
+  color:#12130d;
+  font-size:17px;
+  font-weight:900;
+  box-shadow:
+    0 10px 30px rgba(213,255,93,.21),
+    inset 0 -3px 0 rgba(0,0,0,.10);
+  animation:startPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes startPulse{
+  50%{
+    transform:scale(1.018);
+    box-shadow:0 12px 34px rgba(213,255,93,.31);
+  }
+}
+
+.continueButton{
+  margin-top:10px;
+  border:0;
+  background:none;
+  color:#bbb7c5;
+  font-size:11px;
+  text-decoration:underline;
+}
+
+
+/* =========================================================
+   PROLOGUE
+========================================================= */
+
+#prologueScreen{
+  z-index:80;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#050508;
+}
+
+.prologueImage{
+  position:absolute;
+  inset:0;
+  background:url("./debut-live.webp") center/cover no-repeat;
+  opacity:0;
+  transform:scale(1.05);
+  transition:
+    opacity 1.5s ease,
+    transform 4s ease;
+}
+
+.prologueImage.show{
+  opacity:.72;
+  transform:scale(1);
+}
+
+.prologueShade{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.42),
+      rgba(0,0,0,.18) 45%,
+      rgba(0,0,0,.75)
+    );
+}
+
+.prologueText{
+  position:relative;
+  z-index:2;
+  width:86%;
+  text-align:center;
+  white-space:pre-line;
+  font-size:18px;
+  font-weight:700;
+  line-height:2;
+  text-shadow:0 4px 16px rgba(0,0,0,.7);
+}
+
+.prologueHint{
+  position:absolute;
+  z-index:3;
+  bottom:max(35px,env(safe-area-inset-bottom));
+  font-size:10px;
+  color:rgba(255,255,255,.65);
+  animation:hintBlink 1.2s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   GAME
+========================================================= */
+
+#gameScreen{
+  z-index:70;
+  flex-direction:column;
+  overflow:hidden;
+  background:#15141c;
+}
+
+.gameTop{
+  height:max(52px,calc(40px + env(safe-area-inset-top)));
+  flex-shrink:0;
+  padding:
+    max(10px,env(safe-area-inset-top))
+    13px
+    7px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  background:#17161e;
+  border-bottom:1px solid #34323d;
+}
+
+.chapter{
+  color:var(--acid);
   font-size:10px;
   font-weight:900;
   letter-spacing:1.7px;
 }
 
-.text{
+.topButtons{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.miniStatus{
+  border:1px solid #46434f;
+  border-radius:999px;
+  background:#25232c;
+  color:#fff;
+  padding:6px 11px;
+  font-size:9px;
+  font-weight:800;
+}
+
+.scene{
   position:relative;
-  z-index:1;
-  white-space:pre-line;
-  font-size:15px;
-  font-weight:500;
-  line-height:1.65;
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+  background:#24252d;
 }
 
-.tapHint{
-  margin-top:8px;
-  text-align:right;
-  color:#96919b;
-  font-size:9px;
-  animation:blink 1.2s ease infinite;
-}
-
-@keyframes blink{
-  50%{opacity:.35}
-}
-
-/* choices */
-
-.choices{
-  display:none;
-  padding:0 10px 11px;
-  gap:7px;
-}
-
-.choices.show{
-  display:grid;
-}
-
-.choice{
-  width:100%;
-  padding:12px 13px;
-  border:1px solid #4b4856;
-  border-radius:10px;
-  background:#24232d;
-  color:#fff;
-  text-align:left;
-}
-
-.choice:active{
-  transform:scale(.985);
-  background:#302e39;
-}
-
-.choice b{
-  display:block;
-  font-size:12px;
-}
-
-.choice span{
-  display:block;
-  margin-top:4px;
-  color:#aaa7b4;
-  font-size:9px;
-  line-height:1.5;
-}
-
-/* result overlay */
-
-.resultOverlay{
+.environment{
   position:absolute;
-  z-index:40;
   inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(10,9,14,.88);
-  backdrop-filter:blur(6px);
+  transition:background .35s ease;
 }
 
-.resultOverlay.show{
-  display:flex;
-  animation:fade .25s ease;
-}
-
-@keyframes fade{
-  from{opacity:0}
-  to{opacity:1}
-}
-
-.resultPanel{
-  width:min(100%,420px);
-  padding:19px;
-  border:1px solid #55515f;
-  border-radius:15px;
-  background:#22212a;
-  box-shadow:0 20px 50px rgba(0,0,0,.45);
-}
-
-.resultTitle{
-  text-align:center;
-  color:var(--acid);
-  font-weight:900;
-  font-size:10px;
-  letter-spacing:3px;
-}
-
-.resultHeadline{
-  margin-top:6px;
-  text-align:center;
-  font-size:20px;
-  font-weight:900;
-}
-
-.changeList{
-  margin-top:15px;
-  display:grid;
-  gap:7px;
-}
-
-.change{
-  display:grid;
-  grid-template-columns:1.4fr 1fr auto;
-  align-items:center;
-  gap:8px;
-  padding:8px 9px;
-  border-radius:8px;
-  background:#2c2a35;
-  font-size:10px;
-}
-
-.change .who{
-  font-weight:900;
-}
-
-.change .beforeAfter{
-  color:#b8b5c0;
-}
-
-.change .delta{
-  font-size:13px;
-  font-weight:900;
-}
-
-.delta.plus{color:#cfff63}
-.delta.minus{color:#ff8d96}
-
-.resultTap{
-  margin-top:15px;
-  text-align:center;
-  color:#94919d;
-  font-size:9px;
-}
-
-/* week end */
-
-.weekResult{
-  display:none;
-  position:absolute;
-  z-index:50;
-  inset:0;
-  overflow:auto;
-  padding:22px 17px;
+.environment.studio{
   background:
-    radial-gradient(circle at 50% 15%,rgba(221,255,99,.10),transparent 30%),
-    #14131b;
+    linear-gradient(to bottom,rgba(255,255,255,.07),transparent 20%),
+    repeating-linear-gradient(
+      to right,
+      rgba(255,255,255,.03) 0 1px,
+      transparent 1px 105px
+    ),
+    linear-gradient(
+      to bottom,
+      #454953 0 55%,
+      #262831 55% 57%,
+      #1a1b21 57%
+    );
 }
 
-.weekResult.show{
-  display:block;
+.environment.studio::before{
+  content:"";
+  position:absolute;
+  left:7%;
+  right:7%;
+  top:8%;
+  height:42%;
+  border:4px solid rgba(255,255,255,.08);
+  background:
+    linear-gradient(
+      120deg,
+      rgba(255,255,255,.10),
+      rgba(255,255,255,.015)
+    );
 }
 
-.weekResultTag{
-  color:var(--acid);
-  font-size:9px;
+.environment.studio::after{
+  content:"DANCE STUDIO";
+  position:absolute;
+  right:10%;
+  top:11%;
+  color:rgba(255,255,255,.12);
+  font-size:10px;
   font-weight:900;
-  letter-spacing:3px;
-}
-
-.weekResult h2{
-  margin:10px 0 6px;
-  font-size:27px;
-  line-height:1.25;
-}
-
-.weekResultSub{
-  color:#9b98a5;
-  font-size:11px;
-}
-
-.summaryBox{
-  margin-top:18px;
-  padding:12px;
-  border:1px solid #383642;
-  border-radius:12px;
-  background:#201f28;
-}
-
-.summaryTitle{
-  margin-bottom:9px;
-  color:#8e8b98;
-  font-size:9px;
-  letter-spacing:2px;
-}
-
-.summaryRow{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  padding:7px 0;
-  border-bottom:1px solid #302e39;
-  font-size:11px;
-}
-
-.summaryRow:last-child{
-  border:none;
-}
-
-.summaryRow b{
-  text-align:right;
-}
-
-.daysBig{
-  margin-top:25px;
-  text-align:center;
-  color:#fff;
-  font-size:13px;
-}
-
-.daysBig strong{
-  display:block;
-  margin-top:3px;
-  color:var(--acid);
-  font-size:35px;
-}
-
-.weekEndHint{
-  margin-top:17px;
-  text-align:center;
-  color:#777482;
-  font-size:9px;
-  animation:blink 1.2s infinite;
-}
-
-/* modal */
-
-.modal{
-  position:fixed;
-  z-index:100;
-  inset:0;
-  display:none;
-  padding:18px;
-  align-items:center;
-  justify-content:center;
-  background:rgba(5,5,9,.86);
-  backdrop-filter:blur(7px);
-}
-
-.modal.show{
-  display:flex;
-}
-
-.modalBox{
-  width:min(100%,430px);
-  max-height:85dvh;
-  overflow:auto;
-  padding:18px;
-  border:1px solid #45424e;
-  border-radius:13px;
-  background:#201f28;
-}
-
-.modalBox h2{
-  margin:0 0 13px;
-}
-
-.memberStatus{
-  margin-top:8px;
-  padding:10px;
-  border-radius:9px;
-  background:#292731;
-}
-
-.memberStatus h3{
-  margin:0 0 7px;
-  font-size:13px;
-}
-
-.memberStats{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:4px;
-  font-size:11px;
-}
-
-.closeButton{
-  width:100%;
-  margin-top:14px;
-  padding:11px;
-  border:0;
-  border-radius:9px;
-  background:var(--acid);
-  color:#111;
-  font-weight:900;
-}
-
-footer{
-  display:flex;
-  justify-content:space-between;
-  padding-top:8px;
-  color:#6e6b77;
-  font-size:9px;
-}
-
-footer button{
-  border:0;
-  padding:0;
-  background:none;
-  color:#7c7884;
-  text-decoration:underline;
-}
-
-@media(max-height:760px){
-  .visual{height:310px}
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="app">
-
-<header class="header">
-  <div class="logo">
-    O-VER-KiLL
-    <small>MANAGER'S STORY</small>
-  </div>
-  <button class="headerButton" id="statusButton">＋</button>
-</header>
-
-<section class="hud">
-
-  <div class="hudTop">
-    <div>
-      <div class="weekLabel" id="weekLabel">WEEK 1</div>
-      <div class="days">デビューまであと <span id="dayLabel">28</span>日</div>
-    </div>
-
-    <div class="money">
-      活動資金
-      <strong id="cashLabel">¥220,000</strong>
-    </div>
-  </div>
-
-  <div class="groupRow">
-
-    <div class="statLine">
-      <div class="statLineTop">
-        <span>認知</span>
-        <b id="reachLabel">10</b>
-      </div>
-      <div class="bar">
-        <div class="fill" id="reachBar"></div>
-      </div>
-    </div>
-
-    <div class="statLine">
-      <div class="statLineTop">
-        <span>連携</span>
-        <b id="bondLabel">60</b>
-      </div>
-      <div class="bar">
-        <div class="fill" id="bondBar"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="energyRow" id="energyRow"></div>
-
-</section>
-
-<section class="game" id="game">
-
-  <div class="sceneHead">
-    <b id="sceneTitle">PROLOGUE</b>
-    <span id="sceneCounter"></span>
-  </div>
-
-  <div class="visual scene-photo" id="visual">
-
-    <div class="mirror"></div>
-    <div class="speakerBox"></div>
-    <div class="aura"></div>
-
-    <div class="photo" id="photo">
-      <div class="photoText">
-        <div class="photoTag" id="photoTag">DEBUT LIVE</div>
-        <div class="photoTitle" id="photoTitle">O-VER-KiLL</div>
-        <div class="photoSub" id="photoSub">豊洲公園</div>
-      </div>
-    </div>
-
-    <div class="managerMark" id="managerMark">
-      <div>
-        O-VER-KiLL
-        <span>THE BEGINNING</span>
-      </div>
-    </div>
-
-    <img class="character" id="character" alt="">
-
-    <div class="reaction" id="reaction"></div>
-
-  </div>
-
-  <div class="talkArea" id="talkArea">
-    <div class="talk" id="talk">
-      <div class="name" id="speakerName">MANAGER</div>
-      <div class="text" id="dialogue"></div>
-      <div class="tapHint" id="tapHint">画面をタップ</div>
-    </div>
-  </div>
-
-  <div class="choices" id="choices"></div>
-
-  <div class="resultOverlay" id="resultOverlay">
-    <div class="resultPanel" id="resultPanel"></div>
-  </div>
-
-  <div class="weekResult" id="weekResult"></div>
-
-</section>
-
-<footer>
-  <span>非公式ファンゲーム・体験版</span>
-  <button id="resetButton">最初から</button>
-</footer>
-
-</div>
-
-<div class="modal" id="modal">
-  <div class="modalBox" id="modalBox"></div>
-</div>
-
-<audio id="songAudio" src="./akunaki-kodou.mp3" preload="metadata"></audio>
-
-<script>
-
-/* =========================
-   ASSETS
-========================= */
-
-const DEBUT_PHOTO = "./debut-live.webp";
-
-const CHAR_IMAGES = {
-  sarina:{
-    normal:"./sarina_normal.png",
-    smile:"./sarina_smile.png",
-    angry:"./sarina_angry.png",
-    troubled:"./sarina_troubled.png",
-    cry:"./sarina_cry.png"
-  },
-  miyu:{
-    normal:"./miyu_normal.png",
-    smile:"./miyu_smile.png",
-    angry:"./miyu_angry.png",
-    troubled:"./miyu_troubled.png",
-    cry:"./miyu_cry.png"
-  },
-  kilua:{
-    normal:"./kilua_normal.png",
-    smile:"./kilua_smile.png",
-    angry:"./kilua_angry.png",
-    troubled:"./kilua_troubled.png",
-    cry:"./kilua_cry.png"
-  },
-  raisa:{
-    normal:"./raisa_normal.png",
-    smile:"./raisa_smile.png",
-    angry:"./raisa_angry.png",
-    troubled:"./raisa_troubled.png",
-    cry:"./raisa_cry.png"
-  }
-};
-
-const MEMBERS = {
-  sarina:{
-    name:"SARiNA",
-    color:"#67e095",
-    rgb:"103,224,149"
-  },
-  miyu:{
-    name:"MiYU",
-    color:"#70baff",
-    rgb:"112,186,255"
-  },
-  kilua:{
-    name:"KiLUA",
-    color:"#ff737f",
-    rgb:"255,115,127"
-  },
-  raisa:{
-    name:"RAiSA",
-    color:"#ffdc68",
-    rgb:"255,220,104"
-  }
-};
-
-
-/* =========================
-   STATE
-========================= */
-
-const STORAGE_KEY = "overkill_story_week1_v1";
-
-function createInitialMembers(){
-  return {
-    sarina:{vocal:78,dance:48,bond:74,energy:72},
-    miyu:{vocal:74,dance:54,bond:68,energy:76},
-    kilua:{vocal:52,dance:84,bond:40,energy:80},
-    raisa:{vocal:42,dance:44,bond:58,energy:70}
-  };
-}
-
-function freshState(){
-  return {
-    node:"p0",
-    cash:220000,
-    reach:10,
-    members:createInitialMembers(),
-
-    flags:{
-      kilua_teaching:false,
-      team_conflict:false,
-      team_bond:false,
-      week1_promotion:null,
-      danceChoice:null
-    },
-
-    weekStart:{
-      reach:10,
-      members:createInitialMembers()
-    },
-
-    weekFinished:false
-  };
-}
-
-function loadState(){
-  try{
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || freshState();
-  }catch{
-    return freshState();
-  }
-}
-
-let state = loadState();
-
-function save(){
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-}
-
-
-/* =========================
-   DOM
-========================= */
-
-const $ = id => document.getElementById(id);
-
-const visual = $("visual");
-const photo = $("photo");
-const photoTag = $("photoTag");
-const photoTitle = $("photoTitle");
-const photoSub = $("photoSub");
-
-const managerMark = $("managerMark");
-const character = $("character");
-const reaction = $("reaction");
-
-const speakerName = $("speakerName");
-const dialogue = $("dialogue");
-const sceneTitle = $("sceneTitle");
-const sceneCounter = $("sceneCounter");
-const tapHint = $("tapHint");
-
-const talk = $("talk");
-const choices = $("choices");
-
-const resultOverlay = $("resultOverlay");
-const resultPanel = $("resultPanel");
-
-const weekResult = $("weekResult");
-
-photo.style.backgroundImage = `url('${DEBUT_PHOTO}')`;
-
-
-/* =========================
-   STORY
-========================= */
-
-const STORY = {
-
-  p0:{
-    scene:"PROLOGUE",
-    bg:"photo",
-    speaker:"MANAGER",
-    text:`豊洲公園。
-
-O-VER-KiLLの
-デビューライブ当日。`,
-    photo:{
-      tag:"DEBUT LIVE",
-      title:"O-VER-KiLL",
-      sub:"豊洲公園"
-    },
-    next:"p1"
-  },
-
-  p1:{
-    scene:"PROLOGUE",
-    bg:"photo",
-    speaker:"MANAGER",
-    text:`まだ何者でもない4人が、
-初めて同じステージに立った。`,
-    photo:{
-      tag:"DEBUT LIVE",
-      title:"O-VER-KiLL",
-      sub:"4人の物語は、ここから始まる。"
-    },
-    next:"p2"
-  },
-
-  p2:{
-    scene:"4週間前――",
-    bg:"manager",
-    speaker:"MANAGER",
-    text:`これは、
-その4週間前の話。`,
-    next:"s1"
-  },
-
-  s1:{
-    scene:"WEEK 1｜初レッスン",
-    bg:"studio",
-    member:"sarina",
-    expression:"normal",
-    speaker:"SARiNA",
-    text:`今日からちゃんと
-4人で合わせるんだよね。`,
-    next:"s2"
-  },
-
-  s2:{
-    scene:"WEEK 1｜初レッスン",
-    bg:"studio",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`なんか急に
-グループっぽくなってきた笑`,
-    reaction:"✨",
-    next:"s3"
-  },
-
-  s3:{
-    scene:"WEEK 1｜初レッスン",
-    bg:"studio",
-    member:"raisa",
-    expression:"troubled",
-    speaker:"RAiSA",
-    text:`私、
-ついていけるかな……`,
-    reaction:"💧",
-    next:"s4"
-  },
-
-  s4:{
-    scene:"WEEK 1｜初レッスン",
-    bg:"studio",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`大丈夫。
-
-じゃあ最初から通そう。`,
-    next:"s5"
-  },
-
-  s5:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`5、6、7、8！`,
-    next:"s6"
-  },
-
-  s6:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"sarina",
-    expression:"troubled",
-    speaker:"SARiNA",
-    text:`……待って待って！`,
-    reaction:"💦",
-    next:"s7"
-  },
-
-  s7:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"miyu",
-    expression:"troubled",
-    speaker:"MiYU",
-    text:`そこ、もう一回！
-
-KiLUA速いって笑`,
-    next:"s8"
-  },
-
-  s8:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`でもこれくらいで入らないと
-次、間に合わないよ？`,
-    next:"s9"
-  },
-
-  s9:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"sarina",
-    expression:"angry",
-    speaker:"SARiNA",
-    text:`いや待って。
-
-まだ分かってないから。`,
-    reaction:"💢",
-    next:"s10"
-  },
-
-  s10:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"angry",
-    speaker:"KiLUA",
-    text:`でも何回も止めてたら
-終わらなくない？`,
-    next:"s11"
-  },
-
-  s11:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"miyu",
-    expression:"angry",
-    speaker:"MiYU",
-    text:`KiLUAはできるけど、
-私たちはまだ
-教わってないじゃん。`,
-    next:"s12"
-  },
-
-  s12:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"troubled",
-    speaker:"KiLUA",
-    text:`……見たら分かると思った。`,
-    next:"choiceDance"
-  },
-
-  choiceDance:{
-    scene:"MANAGER DECISION",
-    bg:"studio",
-    speaker:"MANAGER",
-    text:`スタジオの空気が
-少し張りつめてきた。
-
-どうする？`,
-    choices:[
-      {
-        text:"KiLUAに教え方を変えてもらう",
-        sub:"できることと、教えることは別だ。",
-        action:"danceTeach",
-        next:"a1"
-      },
-      {
-        text:"今日はKiLUAのペースで続ける",
-        sub:"本番速度に慣れることを優先する。",
-        action:"dancePush",
-        next:"b1"
-      },
-      {
-        text:"8カウントずつ振付を分解する",
-        sub:"誰が悪いではなく、4人で確認する。",
-        action:"danceSplit",
-        next:"c1"
-      },
-      {
-        text:"一度休憩する",
-        sub:"この空気のまま続けない。",
-        action:"danceRest",
-        next:"d1"
-      }
-    ]
-  },
-
-  /* A */
-
-  a1:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"troubled",
-    speaker:"KiLUA",
-    text:`……教え方？`,
-    next:"a2"
-  },
-
-  a2:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    speaker:"MANAGER",
-    text:`KiLUAには自然でも、
-3人にはまだ自然じゃない。
-
-一回ゆっくり説明しよう。`,
-    next:"a3"
-  },
-
-  a3:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`……分かった。
-
-ここ。
-足からじゃなくて、
-先に肩。`,
-    next:"a4"
-  },
-
-  a4:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`あっ！
-
-今ので分かった！`,
-    reaction:"✨",
-    next:"a5"
-  },
-
-  a5:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"sarina",
-    expression:"smile",
-    speaker:"SARiNA",
-    text:`最初からそれ言ってよ笑`,
-    next:"a6"
-  },
-
-  a6:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"troubled",
-    speaker:"KiLUA",
-    text:`教えるの……
-
-むず。`,
-    reaction:"💧",
-    result:"danceTeachResult",
-    next:"afterDance1"
-  },
-
-  /* B */
-
-  b1:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    speaker:"MANAGER",
-    text:`今日はKiLUAのペースでいこう。
-
-まずは本番速度を知る。`,
-    next:"b2"
-  },
-
-  b2:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"smile",
-    speaker:"KiLUA",
-    text:`OK。
-
-じゃあ止めないよ。`,
-    next:"b3"
-  },
-
-  b3:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"sarina",
-    expression:"troubled",
-    speaker:"SARiNA",
-    text:`キッツ……！`,
-    reaction:"💦",
-    next:"b4"
-  },
-
-  b4:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"raisa",
-    expression:"troubled",
-    speaker:"RAiSA",
-    text:`無理無理無理！`,
-    reaction:"💦",
-    next:"b5"
-  },
-
-  b5:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`……でも
-さっきより揃ってる。`,
-    next:"b6"
-  },
-
-  b6:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"sarina",
-    expression:"angry",
-    speaker:"SARiNA",
-    text:`揃ったけど……
-
-その言い方
-腹立つな笑`,
-    reaction:"💢",
-    result:"dancePushResult",
-    next:"afterDance1"
-  },
-
-  /* C */
-
-  c1:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    speaker:"MANAGER",
-    text:`一旦、
-誰が悪いとかじゃなくて
-振付を分解しよう。
-
-8カウントずつ。`,
-    next:"c2"
-  },
-
-  c2:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"sarina",
-    expression:"smile",
-    speaker:"SARiNA",
-    text:`それなら分かる。`,
-    next:"c3"
-  },
-
-  c3:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`やろやろ。`,
-    next:"c4"
-  },
-
-  c4:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"raisa",
-    expression:"smile",
-    speaker:"RAiSA",
-    text:`助かる……！`,
-    next:"c5"
-  },
-
-  c5:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`じゃあここまで。
-
-まず8カウント。`,
-    next:"c6"
-  },
-
-  c6:{
-    scene:"DANCE LESSON",
-    bg:"studio",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`あ、揃った！`,
-    reaction:"✨",
-    result:"danceSplitResult",
-    next:"afterDance1"
-  },
-
-  /* D */
-
-  d1:{
-    scene:"BREAK",
-    bg:"studio",
-    speaker:"MANAGER",
-    text:`5分休憩。`,
-    next:"d2"
-  },
-
-  d2:{
-    scene:"BREAK",
-    bg:"studio",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`まだできるけど。`,
-    next:"d3"
-  },
-
-  d3:{
-    scene:"BREAK",
-    bg:"studio",
-    member:"sarina",
-    expression:"angry",
-    speaker:"SARiNA",
-    text:`できるできないじゃなくて、
-今ちょっと空気悪い。`,
-    next:"d4"
-  },
-
-  d4:{
-    scene:"BREAK",
-    bg:"studio",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`まあ水飲も。
-
-KiLUAさ、
-教えるの初めて？`,
-    next:"d5"
-  },
-
-  d5:{
-    scene:"BREAK",
-    bg:"studio",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`うん。`,
-    next:"d6"
-  },
-
-  d6:{
-    scene:"BREAK",
-    bg:"studio",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`だったら
-最初から言ってよ笑`,
-    reaction:"😂",
-    result:"danceRestResult",
-    next:"afterDance1"
-  },
-
-  /* merge */
-
-  afterDance1:{
-    scene:"練習後",
-    bg:"lounge",
-    member:"miyu",
-    expression:"troubled",
-    speaker:"MiYU",
-    text:`……疲れた。`,
-    next:"afterDance2"
-  },
-
-  afterDance2:{
-    scene:"練習後",
-    bg:"lounge",
-    member:"raisa",
-    expression:"troubled",
-    speaker:"RAiSA",
-    text:`足ない。`,
-    next:"afterDance3"
-  },
-
-  afterDance3:{
-    scene:"練習後",
-    bg:"lounge",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`まだできる。`,
-    next:"afterDance4"
-  },
-
-  afterDance4:{
-    scene:"練習後",
-    bg:"lounge",
-    member:"sarina",
-    expression:"smile",
-    speaker:"SARiNA",
-    text:`KiLUAだけ
-体力おかしいでしょ笑`,
-    reaction:"😂",
-    next:"afterDance5"
-  },
-
-  afterDance5:{
-    scene:"練習後",
-    bg:"lounge",
-    member:"sarina",
-    expression:"normal",
-    speaker:"SARiNA",
-    text:`でもさ。
-
-ダンスだけやってても
-誰にも知られてないよね。`,
-    next:"afterDance6"
-  },
-
-  afterDance6:{
-    scene:"練習後",
-    bg:"lounge",
-    member:"miyu",
-    expression:"normal",
-    speaker:"MiYU",
-    text:`それはそう。`,
-    next:"afterDance7"
-  },
-
-  afterDance7:{
-    scene:"練習後",
-    bg:"lounge",
-    member:"raisa",
-    expression:"normal",
-    speaker:"RAiSA",
-    text:`今フォロワー何人？`,
-    next:"afterDance8"
-  },
-
-  afterDance8:{
-    scene:"練習後",
-    bg:"lounge",
-    member:"kilua",
-    expression:"troubled",
-    speaker:"KiLUA",
-    text:`……少な。`,
-    next:"choiceSecond"
-  },
-
-  choiceSecond:{
-    scene:"MANAGER DECISION",
-    bg:"lounge",
-    speaker:"MANAGER",
-    text:`残りの時間。
-
-何に使う？`,
-    choices:[
-      {
-        text:"SNSを動かす",
-        sub:"レッスン動画を投稿して認知を広げる。",
-        action:"promoSNS",
-        next:"sns1"
-      },
-      {
-        text:"チラシを配りに行く",
-        sub:"街に出て直接知ってもらう。",
-        action:"promoFlyer",
-        next:"fly1"
-      },
-      {
-        text:"ボーカルも合わせる",
-        sub:"今日は基礎を優先する。認知は増えない。",
-        action:"promoVocal",
-        next:"vocal1"
-      },
-      {
-        text:"今日はここで終わる",
-        sub:"無理をせず、次に備える。",
-        action:"promoRest",
-        next:"rest1"
-      }
-    ]
-  },
-
-  /* SNS */
-
-  sns1:{
-    scene:"SNS作戦",
-    bg:"sns",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`じゃあ動画撮ろうよ！`,
-    reaction:"📱",
-    next:"sns2"
-  },
-
-  sns2:{
-    scene:"SNS作戦",
-    bg:"sns",
-    member:"kilua",
-    expression:"troubled",
-    speaker:"KiLUA",
-    text:`今？
-
-汗やばいけど。`,
-    next:"sns3"
-  },
-
-  sns3:{
-    scene:"SNS作戦",
-    bg:"sns",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`逆にレッスン感あって
-よくない？`,
-    next:"sns4"
-  },
-
-  sns4:{
-    scene:"SNS作戦",
-    bg:"sns",
-    member:"raisa",
-    expression:"troubled",
-    speaker:"RAiSA",
-    text:`私、
-前髪死んでる……`,
-    reaction:"💦",
-    next:"sns5"
-  },
-
-  sns5:{
-    scene:"SNS作戦",
-    bg:"sns",
-    member:"sarina",
-    expression:"smile",
-    speaker:"SARiNA",
-    text:`撮るよー！`,
-    reaction:"📸",
-    next:"sns6"
-  },
-
-  sns6:{
-    scene:"SNS作戦",
-    bg:"sns",
-    member:"raisa",
-    expression:"smile",
-    speaker:"RAiSA",
-    text:`……増えてる！
-
-ほんとに見てる人いる！`,
-    reaction:"✨",
-    result:"snsResult",
-    next:"weekEnd1"
-  },
-
-  /* flyer */
-
-  fly1:{
-    scene:"FLYER MISSION",
-    bg:"city",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`お願いしますー！
-
-今度ライブやります！`,
-    reaction:"📣",
-    next:"fly2"
-  },
-
-  fly2:{
-    scene:"FLYER MISSION",
-    bg:"city",
-    member:"raisa",
-    expression:"troubled",
-    speaker:"RAiSA",
-    text:`……え。
-
-こんなに
-無視される？`,
-    reaction:"💧",
-    next:"fly3"
-  },
-
-  fly3:{
-    scene:"FLYER MISSION",
-    bg:"city",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`普通じゃない？`,
-    next:"fly4"
-  },
-
-  fly4:{
-    scene:"FLYER MISSION",
-    bg:"city",
-    member:"sarina",
-    expression:"normal",
-    speaker:"SARiNA",
-    text:`もっと声出そ。
-
-知られてないなら、
-知ってもらうしかない。`,
-    next:"fly5"
-  },
-
-  fly5:{
-    scene:"FLYER MISSION",
-    bg:"city",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`あっ！
-
-ありがとうございます！`,
-    reaction:"✨",
-    next:"fly6"
-  },
-
-  fly6:{
-    scene:"FLYER MISSION",
-    bg:"city",
-    member:"raisa",
-    expression:"smile",
-    speaker:"RAiSA",
-    text:`今の一枚、
-めっちゃ嬉しいんだけど。`,
-    result:"flyerResult",
-    next:"weekEnd1"
-  },
-
-  /* vocal */
-
-  vocal1:{
-    scene:"VOCAL LESSON",
-    bg:"studio",
-    member:"sarina",
-    expression:"smile",
-    speaker:"SARiNA",
-    text:`じゃあ歌合わせよう。`,
-    reaction:"🎤",
-    next:"vocal2"
-  },
-
-  vocal2:{
-    scene:"VOCAL LESSON",
-    bg:"studio",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`やっと私のターン。`,
-    next:"vocal3"
-  },
-
-  vocal3:{
-    scene:"VOCAL LESSON",
-    bg:"studio",
-    member:"kilua",
-    expression:"troubled",
-    speaker:"KiLUA",
-    text:`ダンスより
-歌の方がキツいんだけど。`,
-    reaction:"💦",
-    next:"vocal4"
-  },
-
-  vocal4:{
-    scene:"VOCAL LESSON",
-    bg:"studio",
-    member:"raisa",
-    expression:"troubled",
-    speaker:"RAiSA",
-    text:`わかる……`,
-    next:"vocal5"
-  },
-
-  vocal5:{
-    scene:"VOCAL LESSON",
-    bg:"studio",
-    member:"sarina",
-    expression:"smile",
-    speaker:"SARiNA",
-    text:`じゃあここから！`,
-    result:"vocalResult",
-    next:"weekEnd1"
-  },
-
-  /* rest */
-
-  rest1:{
-    scene:"TODAY'S END",
-    bg:"lounge",
-    member:"miyu",
-    expression:"normal",
-    speaker:"MiYU",
-    text:`今日はもう帰ろ。`,
-    next:"rest2"
-  },
-
-  rest2:{
-    scene:"TODAY'S END",
-    bg:"lounge",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`まだ時間あるけど。`,
-    next:"rest3"
-  },
-
-  rest3:{
-    scene:"TODAY'S END",
-    bg:"lounge",
-    member:"sarina",
-    expression:"normal",
-    speaker:"SARiNA",
-    text:`明日動けなくなったら
-意味ないよ。`,
-    next:"rest4"
-  },
-
-  rest4:{
-    scene:"TODAY'S END",
-    bg:"lounge",
-    member:"raisa",
-    expression:"smile",
-    speaker:"RAiSA",
-    text:`それ。`,
-    next:"rest5"
-  },
-
-  rest5:{
-    scene:"TODAY'S END",
-    bg:"lounge",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`……分かった。`,
-    result:"restResult",
-    next:"weekEnd1"
-  },
-
-  /* week ending */
-
-  weekEnd1:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"raisa",
-    expression:"troubled",
-    speaker:"RAiSA",
-    text:`1週間長かった……`,
-    next:"weekEnd2"
-  },
-
-  weekEnd2:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`まだ1週目なんだけど笑`,
-    reaction:"😂",
-    next:"weekEnd3"
-  },
-
-  weekEnd3:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`でも最初よりは
-合ってきた。`,
-    next:"weekEnd4"
-  },
-
-  weekEnd4:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"sarina",
-    expression:"normal",
-    speaker:"SARiNA",
-    text:`うん。
-
-まだ4人とも
-全然違うけど。`,
-    next:"weekEnd5"
-  },
-
-  weekEnd5:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"sarina",
-    expression:"smile",
-    speaker:"SARiNA",
-    text:`それを合わせてくのが
-グループなのかもね。`,
-    next:"weekEnd6"
-  },
-
-  weekEnd6:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"kilua",
-    expression:"normal",
-    speaker:"KiLUA",
-    text:`……たぶん。`,
-    next:"weekEnd7"
-  },
-
-  weekEnd7:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"miyu",
-    expression:"smile",
-    speaker:"MiYU",
-    text:`珍しく素直。`,
-    next:"weekEnd8"
-  },
-
-  weekEnd8:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"kilua",
-    expression:"angry",
-    speaker:"KiLUA",
-    text:`うるさい。`,
-    reaction:"💢",
-    next:"weekEnd9"
-  },
-
-  weekEnd9:{
-    scene:"WEEK 1｜夜",
-    bg:"lounge",
-    member:"raisa",
-    expression:"smile",
-    speaker:"RAiSA",
-    text:`笑`,
-    reaction:"😂",
-    next:"showWeekResult"
-  }
-
-};
-
-
-/* =========================
-   RESULTS
-========================= */
-
-const RESULT_HANDLERS = {
-
-  danceTeachResult(){
-    state.flags.danceChoice = "teach";
-    state.flags.kilua_teaching = true;
-    state.flags.team_bond = true;
-
-    return applyChanges([
-      ["kilua","dance",3],
-      ["kilua","bond",6],
-      ["kilua","energy",-7],
-
-      ["sarina","dance",5],
-      ["sarina","energy",-7],
-
-      ["miyu","dance",5],
-      ["miyu","energy",-7],
-
-      ["raisa","dance",4],
-      ["raisa","energy",-7]
-    ],"LESSON RESULT","教えることも、練習。");
-  },
-
-  dancePushResult(){
-    state.flags.danceChoice = "push";
-    state.flags.team_conflict = true;
-
-    return applyChanges([
-      ["sarina","dance",7],
-      ["sarina","energy",-12],
-      ["sarina","bond",-2],
-
-      ["miyu","dance",7],
-      ["miyu","energy",-12],
-      ["miyu","bond",-2],
-
-      ["kilua","dance",4],
-      ["kilua","energy",-8],
-
-      ["raisa","dance",5],
-      ["raisa","energy",-13],
-      ["raisa","bond",-2]
-    ],"LESSON RESULT","能力は伸びた。でも、少し無理をした。");
-  },
-
-  danceSplitResult(){
-    state.flags.danceChoice = "split";
-    state.flags.team_bond = true;
-
-    return applyChanges([
-      ["sarina","dance",4],
-      ["sarina","bond",3],
-      ["sarina","energy",-7],
-
-      ["miyu","dance",4],
-      ["miyu","bond",3],
-      ["miyu","energy",-7],
-
-      ["kilua","dance",4],
-      ["kilua","bond",3],
-      ["kilua","energy",-7],
-
-      ["raisa","dance",4],
-      ["raisa","bond",3],
-      ["raisa","energy",-7]
-    ],"LESSON RESULT","少しずつ合わせれば、4人でもできる。");
-  },
-
-  danceRestResult(){
-    state.flags.danceChoice = "rest";
-    state.flags.team_bond = true;
-
-    return applyChanges([
-      ["sarina","dance",2],
-      ["sarina","bond",4],
-      ["sarina","energy",-3],
-
-      ["miyu","dance",3],
-      ["miyu","bond",4],
-      ["miyu","energy",-3],
-
-      ["kilua","dance",2],
-      ["kilua","bond",4],
-      ["kilua","energy",-3],
-
-      ["raisa","dance",2],
-      ["raisa","bond",4],
-      ["raisa","energy",-3]
-    ],"LESSON RESULT","止まったから見えたこともある。");
-  },
-
-  snsResult(){
-    state.flags.week1_promotion = "sns";
-    return applyChanges([
-      ["GROUP","reach",8],
-      ["miyu","bond",2],
-      ["sarina","energy",-3],
-      ["miyu","energy",-3],
-      ["kilua","energy",-3],
-      ["raisa","energy",-3]
-    ],"SNS RESULT","知らない誰かに、初めて届いた。");
-  },
-
-  flyerResult(){
-    state.flags.week1_promotion = "flyer";
-    return applyChanges([
-      ["GROUP","reach",12],
-      ["sarina","energy",-7],
-      ["miyu","energy",-7],
-      ["kilua","energy",-7],
-      ["raisa","energy",-7]
-    ],"FLYER RESULT","一枚ずつ、名前を知ってもらう。");
-  },
-
-  vocalResult(){
-    state.flags.week1_promotion = "vocal";
-    return applyChanges([
-      ["sarina","vocal",5],
-      ["sarina","energy",-6],
-
-      ["miyu","vocal",5],
-      ["miyu","energy",-6],
-
-      ["kilua","vocal",4],
-      ["kilua","energy",-6],
-
-      ["raisa","vocal",4],
-      ["raisa","energy",-6]
-    ],"VOCAL RESULT","認知は増えない。でも、歌は確実に良くなった。");
-  },
-
-  restResult(){
-    state.flags.week1_promotion = "rest";
-    return applyChanges([
-      ["sarina","energy",8],
-      ["miyu","energy",8],
-      ["kilua","energy",8],
-      ["raisa","energy",8]
-    ],"RECOVERY","休むことも、デビューまでの仕事。");
-  }
-
-};
-
-
-/* =========================
-   HELPERS
-========================= */
-
-function clamp(v){
-  return Math.max(0,Math.min(100,v));
-}
-
-function yen(v){
-  return "¥"+v.toLocaleString("ja-JP");
-}
-
-function averageBond(){
-  const ids = Object.keys(state.members);
-  return Math.round(
-    ids.reduce((sum,id)=>sum+state.members[id].bond,0) / ids.length
-  );
-}
-
-function metricLabel(metric){
-  return {
-    vocal:"歌唱",
-    dance:"ダンス",
-    bond:"連携",
-    energy:"体力",
-    reach:"認知"
-  }[metric] || metric;
-}
-
-function applyChanges(changes,title,headline){
-
-  const display = [];
-
-  changes.forEach(([target,metric,delta])=>{
-
-    if(target==="GROUP"){
-
-      const before = state.reach;
-      state.reach = clamp(state.reach + delta);
-
-      display.push({
-        who:"GROUP",
-        metric,
-        before,
-        after:state.reach,
-        delta
-      });
-
-      return;
-    }
-
-    const before = state.members[target][metric];
-
-    state.members[target][metric] =
-      clamp(before + delta);
-
-    display.push({
-      who:MEMBERS[target].name,
-      metric,
-      before,
-      after:state.members[target][metric],
-      delta
-    });
-
-  });
-
-  save();
-  renderHud();
-
-  return {
-    title,
-    headline,
-    changes:display
-  };
-}
-
-
-/* =========================
-   ACTION FLAGS
-========================= */
-
-function runChoiceAction(action){
-
-  if(action==="danceTeach"){
-    state.flags.danceChoice="teach";
-  }
-
-  if(action==="dancePush"){
-    state.flags.danceChoice="push";
-  }
-
-  if(action==="danceSplit"){
-    state.flags.danceChoice="split";
-  }
-
-  if(action==="danceRest"){
-    state.flags.danceChoice="rest";
-  }
-
-  if(action==="promoSNS"){
-    state.flags.week1_promotion="sns";
-  }
-
-  if(action==="promoFlyer"){
-    state.flags.week1_promotion="flyer";
-  }
-
-  if(action==="promoVocal"){
-    state.flags.week1_promotion="vocal";
-  }
-
-  if(action==="promoRest"){
-    state.flags.week1_promotion="rest";
-  }
-
-  save();
-}
-
-
-/* =========================
-   HUD
-========================= */
-
-function renderHud(){
-
-  $("cashLabel").textContent = yen(state.cash);
-
-  $("reachLabel").textContent = state.reach;
-  $("bondLabel").textContent = averageBond();
-
-  requestAnimationFrame(()=>{
-    $("reachBar").style.width = state.reach+"%";
-    $("bondBar").style.width = averageBond()+"%";
-  });
-
-  $("energyRow").innerHTML =
-    Object.keys(MEMBERS).map(id=>{
-
-      const m = MEMBERS[id];
-      const energy = state.members[id].energy;
-
-      return `
-        <div class="energy">
-
-          <div class="energyTop">
-
-            <span>
-              <span
-                class="dot"
-                style="background:${m.color}"
-              ></span>
-              ${m.name}
-            </span>
-
-            <span>${energy}</span>
-
-          </div>
-
-          <div class="bar">
-            <div
-              class="fill"
-              style="width:${energy}%"
-            ></div>
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
-}
-
-
-/* =========================
-   BACKGROUND
-========================= */
-
-function setBackground(bg){
-
-  visual.className = "visual";
-
-  visual.classList.remove("hasCharacter");
-
-  photo.classList.remove("show");
-  managerMark.classList.remove("show");
-  character.classList.remove("show");
-
-  if(bg==="photo"){
-    visual.classList.add("scene-photo");
-    photo.classList.add("show");
-  }
-
-  else if(bg==="studio"){
-    visual.classList.add("scene-studio");
-  }
-
-  else if(bg==="lounge"){
-    visual.classList.add("scene-lounge");
-  }
-
-  else if(bg==="city"){
-    visual.classList.add("scene-city");
-  }
-
-  else if(bg==="sns"){
-    visual.classList.add("scene-sns");
-  }
-
-  else{
-    visual.classList.add("scene-manager");
-    managerMark.classList.add("show");
-  }
-
-}
-
-
-/* =========================
-   CHARACTER
-========================= */
-
-function showCharacter(memberId,expression){
-
-  if(!memberId){
-    character.classList.remove("show");
-    return;
-  }
-
-  const m = MEMBERS[memberId];
-
-  visual.classList.add("hasCharacter");
-
-  visual.style.setProperty("--char-rgb",m.rgb);
-
-  character.src =
-    CHAR_IMAGES[memberId][expression || "normal"];
-
-  character.alt = m.name;
-
-  character.classList.remove("show");
-
-  requestAnimationFrame(()=>{
-    character.classList.add("show");
-  });
-
-}
-
-
-/* =========================
-   REACTION
-========================= */
-
-function showReaction(symbol){
-
-  reaction.classList.remove("show");
-  reaction.textContent="";
-
-  if(!symbol) return;
-
-  reaction.textContent=symbol;
-
-  requestAnimationFrame(()=>{
-    reaction.classList.add("show");
-  });
-}
-
-
-/* =========================
-   STORY RENDER
-========================= */
-
-function renderNode(){
-
-  if(state.node==="showWeekResult"){
-    renderWeekResult();
-    return;
-  }
-
-  const node = STORY[state.node];
-
-  if(!node) return;
-
-  choices.classList.remove("show");
-  choices.innerHTML="";
-
-  resultOverlay.classList.remove("show");
-
-  sceneTitle.textContent=node.scene || "WEEK 1";
-  sceneCounter.textContent="";
-
-  setBackground(node.bg);
-
-  if(node.photo){
-    photoTag.textContent=node.photo.tag;
-    photoTitle.textContent=node.photo.title;
-    photoSub.textContent=node.photo.sub;
-  }
-
-  if(node.bg==="manager"){
-    managerMark.classList.add("show");
-  }
-
-  showCharacter(node.member,node.expression);
-  showReaction(node.reaction);
-
-  speakerName.textContent=node.speaker || "MANAGER";
-  dialogue.textContent=node.text || "";
-
-  if(node.choices){
-    tapHint.style.display="none";
-
-    choices.innerHTML=node.choices.map((c,index)=>`
-      <button
-        class="choice"
-        data-choice="${index}"
-      >
-        <b>${c.text}</b>
-        <span>${c.sub}</span>
-      </button>
-    `).join("");
-
-    choices.classList.add("show");
-
-  }else{
-    tapHint.style.display="block";
-  }
-
-}
-
-
-/* =========================
-   RESULT OVERLAY
-========================= */
-
-function showResult(result,nextNode){
-
-  resultPanel.innerHTML=`
-
-    <div class="resultTitle">
-      ${result.title}
-    </div>
-
-    <div class="resultHeadline">
-      ${result.headline}
-    </div>
-
-    <div class="changeList">
-
-      ${result.changes.map(change=>`
-
-        <div class="change">
-
-          <div class="who">
-            ${change.who}<br>
-            <span style="color:#918e9a;font-weight:500">
-              ${metricLabel(change.metric)}
-            </span>
-          </div>
-
-          <div class="beforeAfter">
-            ${change.before}
-            →
-            ${change.after}
-          </div>
-
-          <div
-            class="delta
-            ${change.delta>=0 ? "plus":"minus"}"
-          >
-            ${change.delta>=0 ? "+":""}${change.delta}
-          </div>
-
-        </div>
-
-      `).join("")}
-
-    </div>
-
-    <div class="resultTap">
-      タップして続ける
-    </div>
-
-  `;
-
-  resultOverlay.classList.add("show");
-
-  resultOverlay.onclick=()=>{
-
-    resultOverlay.classList.remove("show");
-
-    state.node=nextNode;
-
-    save();
-
-    renderNode();
-
-  };
-
-}
-
-
-/* =========================
-   ADVANCE STORY
-========================= */
-
-function advanceStory(){
-
-  if(resultOverlay.classList.contains("show")) return;
-  if(weekResult.classList.contains("show")) return;
-
-  const node=STORY[state.node];
-
-  if(!node) return;
-  if(node.choices) return;
-
-  if(node.result){
-
-    const result =
-      RESULT_HANDLERS[node.result]();
-
-    showResult(result,node.next);
-
-    return;
-  }
-
-  if(node.next){
-
-    state.node=node.next;
-    save();
-    renderNode();
-
-  }
-
-}
-
-
-/* =========================
-   CHOICE
-========================= */
-
-choices.addEventListener("click",event=>{
-
-  const button =
-    event.target.closest("[data-choice]");
-
-  if(!button) return;
-
-  const node=STORY[state.node];
-
-  const choice=
-    node.choices[
-      Number(button.dataset.choice)
-    ];
-
-  runChoiceAction(choice.action);
-
-  state.node=choice.next;
-
-  save();
-
-  renderNode();
-
-});
-
-
-/* =========================
-   TAP ADVANCE
-========================= */
-
-$("talk").addEventListener(
-  "click",
-  advanceStory
-);
-
-visual.addEventListener(
-  "click",
-  advanceStory
-);
-
-
-/* =========================
-   WEEK RESULT
-========================= */
-
-function buildSummaryRows(){
-
-  const rows=[];
-
-  if(state.reach !== state.weekStart.reach){
-
-    const delta=
-      state.reach-state.weekStart.reach;
-
-    rows.push(`
-      <div class="summaryRow">
-        <span>GROUP｜認知</span>
-        <b>
-          ${state.weekStart.reach}
-          →
-          ${state.reach}
-          <span style="color:${delta>=0?"#cfff63":"#ff8d96"}">
-            ${delta>=0?"+":""}${delta}
-          </span>
-        </b>
-      </div>
-    `);
-  }
-
-  Object.keys(MEMBERS).forEach(id=>{
-
-    ["vocal","dance","bond","energy"].forEach(metric=>{
-
-      const before=state.weekStart.members[id][metric];
-      const after=state.members[id][metric];
-
-      if(before===after) return;
-
-      const delta=after-before;
-
-      rows.push(`
-        <div class="summaryRow">
-          <span>
-            ${MEMBERS[id].name}｜
-            ${metricLabel(metric)}
-          </span>
-
-          <b>
-            ${before}
-            →
-            ${after}
-
-            <span
-              style="
-                color:${delta>=0?"#cfff63":"#ff8d96"}
-              "
-            >
-              ${delta>=0?"+":""}${delta}
-            </span>
-          </b>
-        </div>
-      `);
-
-    });
-
-  });
-
-  return rows.join("");
-}
-
-
-function renderWeekResult(){
-
-  state.weekFinished=true;
-  save();
-
-  weekResult.innerHTML=`
-
-    <div class="weekResultTag">
-      WEEK 1 COMPLETE
-    </div>
-
-    <h2>
-      4人でやるって、<br>
-      難しい。
-    </h2>
-
-    <div class="weekResultSub">
-      それでも少しずつ、
-      O-VER-KiLLになっていく。
-    </div>
-
-    <div class="summaryBox">
-
-      <div class="summaryTitle">
-        THIS WEEK
-      </div>
-
-      ${buildSummaryRows()}
-
-    </div>
-
-    <div class="daysBig">
-      デビューまで
-      <strong>あと21日</strong>
-    </div>
-
-    <div class="weekEndHint">
-      WEEK2へ続く
-    </div>
-
-  `;
-
-  weekResult.classList.add("show");
-
-}
-
-
-/* =========================
-   STATUS
-========================= */
-
-function openStatus(){
-
-  $("modalBox").innerHTML=`
-
-    <h2>
-      O-VER-KiLL STATUS
-    </h2>
-
-    <p
-      style="
-        color:#aaa7b5;
-        font-size:11px;
-      "
-    >
-      認知 ${state.reach}
-      ／
-      平均連携 ${averageBond()}
-    </p>
-
-    ${Object.keys(MEMBERS).map(id=>{
-
-      const m=MEMBERS[id];
-      const s=state.members[id];
-
-      return `
-        <div class="memberStatus">
-
-          <h3 style="color:${m.color}">
-            ${m.name}
-          </h3>
-
-          <div class="memberStats">
-            <div>歌唱：${s.vocal}</div>
-            <div>ダンス：${s.dance}</div>
-            <div>連携：${s.bond}</div>
-            <div>体力：${s.energy}</div>
-          </div>
-
-        </div>
-      `;
-
-    }).join("")}
-
-    <button
-      class="closeButton"
-      data-close-modal
-    >
-      閉じる
-    </button>
-  `;
-
-  $("modal").classList.add("show");
-
-}
-
-$("statusButton").onclick=openStatus;
-
-$("modal").addEventListener("click",event=>{
-
-  if(
-    event.target.id==="modal" ||
-    event.target.matches("[data-close-modal]")
-  ){
-    $("modal").classList.remove("show");
-  }
-
-});
-
-
-/* =========================
-   RESET
-========================= */
-
-$("resetButton").onclick=()=>{
-
-  if(confirm("最初からやり直しますか？")){
-
-    localStorage.removeItem(STORAGE_KEY);
-
-    state=freshState();
-
-    weekResult.classList.remove("show");
-
-    renderHud();
-    renderNode();
-
-  }
-
-};
-
-
-/* =========================
-   START
-========================= */
-
-renderHud();
-
-if(state.weekFinished){
-  renderWeekResult();
-}else{
-  renderNode();
-}
-
-</script>
-
-</body>
-</html>
+  letter-spacing:3
