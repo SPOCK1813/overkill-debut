@@ -1,856 +1,629 @@
-const PROLOGUE_LINES = [
-`豊洲公園。
+window.GAME_CONFIG = {
+  members: {
+    sarina: { name: "SARiNA", color: "#69e09a", rgb: "105,224,154" },
+    miyu:   { name: "MiYU",   color: "#72bdff", rgb: "114,189,255" },
+    kilua:  { name: "KiLUA",  color: "#ff7b88", rgb: "255,123,136" },
+    raisa:  { name: "RAiSA",  color: "#ffdc69", rgb: "255,220,105" }
+  },
 
-まだ何者でもない4人が、
-初めて同じステージに立った。`,
+  charImages: {
+    sarina: {
+      normal: "./sarina_normal.png",
+      smile: "./sarina_smile.png",
+      angry: "./sarina_angry.png",
+      troubled: "./sarina_troubled.png",
+      cry: "./sarina_cry.png"
+    },
+    miyu: {
+      normal: "./miyu_normal.png",
+      smile: "./miyu_smile.png",
+      angry: "./miyu_angry.png",
+      troubled: "./miyu_troubled.png",
+      cry: "./miyu_cry.png"
+    },
+    kilua: {
+      normal: "./kilua_normal.png",
+      smile: "./kilua_smile.png",
+      angry: "./kilua_angry.png",
+      troubled: "./kilua_troubled.png",
+      cry: "./kilua_cry.png"
+    },
+    raisa: {
+      normal: "./raisa_normal.png",
+      smile: "./raisa_smile.png",
+      angry: "./raisa_angry.png",
+      troubled: "./raisa_troubled.png",
+      cry: "./raisa_cry.png"
+    }
+  },
 
-`その4週間前――
+  prologue: [
+    "あなたは今日から、\n4人組アイドルグループ\n『O-VER-KiLL』のマネージャー。",
+    "デビューまで残り4週間。\nまだ4人は、ひとつのグループとは言いきれない。",
+    "歌、ダンス、連携、体力。\n限られた時間の中で、何を優先するか。",
+    "その選択が、\n4人の未来を少しずつ変えていく。"
+  ],
 
-あなたは、
-新しく結成された4人組
-「O-VER-KiLL」の
-マネージャーを任される。`,
+  story: {
+    m1: {
+      chapter: "WEEK 1｜マネージャー就任",
+      bg: "office",
+      speaker: "MANAGER",
+      text:
+`今日からあなたは、
+O-VER-KiLLのマネージャー。
 
-`歌も、ダンスも、
-性格も、バラバラ。
+まずは4人の顔合わせと、
+初めての全体レッスンへ向かう。`,
+      next: "m2"
+    },
 
-だけど、
-この4人には
-何かがある気がした。`,
+    m2: {
+      chapter: "WEEK 1｜初顔合わせ",
+      bg: "office",
+      speaker: "MANAGER",
+      text:
+`デビューライブは4週間後。
+場所は豊洲公園。
 
-`デビューライブまで、あと28日。
+最初の目標は、
+4人をひとつのチームにすることだ。`,
+      next: "s1"
+    },
 
-ここから、
-4人とあなたの物語が始まる。`
-];
-
-
-const STORY = {
-
-intro0:{
-  chapter:"WEEK 1｜初顔合わせ",
-  bg:"manager",
-  speaker:"MANAGER",
-  text:
-`今日から、
-4人組アイドル
-「O-VER-KiLL」の
-マネージャーを任された。
-
-まずは初レッスン。
-ここから全部が始まる。`,
-  next:"s1"
-},
-
-
-s1:{
-  chapter:"WEEK 1｜初レッスン",
-  bg:"studio",
-  member:"sarina",
-  expression:"normal",
-  speaker:"SARiNA",
-  text:
+    s1: {
+      chapter: "WEEK 1｜初レッスン",
+      bg: "studio",
+      member: "sarina",
+      expression: "normal",
+      speaker: "SARiNA",
+      text:
 `今日からちゃんと
 4人で合わせるんだよね。`,
-  next:"s2"
-},
+      next: "s2"
+    },
 
-
-s2:{
-  chapter:"WEEK 1｜初レッスン",
-  bg:"studio",
-  member:"miyu",
-  expression:"smile",
-  speaker:"MiYU",
-  text:
+    s2: {
+      chapter: "WEEK 1｜初レッスン",
+      bg: "studio",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
+      text:
 `なんか急に
-グループっぽくなってきた笑`,
-  reaction:"✨",
-  next:"s3"
-},
+グループっぽくなってきたね。`,
+      reaction: "✨",
+      next: "s3"
+    },
 
-
-s3:{
-  chapter:"WEEK 1｜初レッスン",
-  bg:"studio",
-  member:"raisa",
-  expression:"troubled",
-  speaker:"RAiSA",
-  text:
+    s3: {
+      chapter: "WEEK 1｜初レッスン",
+      bg: "studio",
+      member: "raisa",
+      expression: "troubled",
+      speaker: "RAiSA",
+      text:
 `私、
-ついていけるかな……`,
-  reaction:"💧",
-  next:"s4"
-},
+ちゃんとついていけるかな……`,
+      reaction: "💧",
+      next: "s4"
+    },
 
+    s4: {
+      chapter: "WEEK 1｜初レッスン",
+      bg: "studio",
+      member: "kilua",
+      expression: "normal",
+      speaker: "KiLUA",
+      text:
+`じゃあ、最初から通そう。
+5、6、7、8！`,
+      next: "s5"
+    },
 
-s4:{
-  chapter:"WEEK 1｜初レッスン",
-  bg:"studio",
-  member:"kilua",
-  expression:"normal",
-  speaker:"KiLUA",
-  text:
-`大丈夫。
+    s5: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "sarina",
+      expression: "troubled",
+      speaker: "SARiNA",
+      text:
+`待って、待って！
+今どこ入った！？`,
+      reaction: "💦",
+      next: "s6"
+    },
 
-じゃあ最初から通そう。`,
-  next:"s5"
-},
+    s6: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "miyu",
+      expression: "troubled",
+      speaker: "MiYU",
+      text:
+`KiLUA、速いって！
+そこ、まだ教わってない。`,
+      reaction: "💦",
+      next: "s7"
+    },
 
+    s7: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "kilua",
+      expression: "angry",
+      speaker: "KiLUA",
+      text:
+`でも、この速さで入れないと
+本番に間に合わないよ？`,
+      next: "s8"
+    },
 
-s5:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"smile",
-  speaker:"KiLUA",
-  text:
-`5、6、7、8！`,
-  next:"s6"
-},
+    s8: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "sarina",
+      expression: "angry",
+      speaker: "SARiNA",
+      text:
+`できる人の感覚で
+進められても困る。`,
+      reaction: "💢",
+      next: "s9"
+    },
 
+    s9: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "miyu",
+      expression: "angry",
+      speaker: "MiYU",
+      text:
+`KiLUAは踊れる。
+でも教えるのはまた別じゃん。`,
+      next: "decision1"
+    },
 
-s6:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"sarina",
-  expression:"troubled",
-  speaker:"SARiNA",
-  text:
-`……待って待って！`,
-  reaction:"💦",
-  next:"s7"
-},
-
-
-s7:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"miyu",
-  expression:"troubled",
-  speaker:"MiYU",
-  text:
-`そこ、もう一回！
-
-KiLUA速いって笑`,
-  next:"s8"
-},
-
-
-s8:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"normal",
-  speaker:"KiLUA",
-  text:
-`でもこれくらいで入らないと、
-次間に合わないよ？`,
-  next:"s9"
-},
-
-
-s9:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"sarina",
-  expression:"angry",
-  speaker:"SARiNA",
-  text:
-`いや待って。
-
-まだ分かってないから。`,
-  reaction:"💢",
-  next:"s10"
-},
-
-
-s10:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"angry",
-  speaker:"KiLUA",
-  text:
-`でも何回も止めてたら
-終わらなくない？`,
-  next:"s11"
-},
-
-
-s11:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"miyu",
-  expression:"angry",
-  speaker:"MiYU",
-  text:
-`KiLUAはできるけど、
-私たちはまだ
-教わってないじゃん。`,
-  next:"s12"
-},
-
-
-s12:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"troubled",
-  speaker:"KiLUA",
-  text:
-`……見たら分かると思った。`,
-  next:"decision1"
-},
-
-
-decision1:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  speaker:"MANAGER",
-  text:
+    decision1: {
+      chapter: "WEEK 1｜最初の判断",
+      bg: "studio",
+      speaker: "MANAGER",
+      text:
 `スタジオの空気が
 少し張りつめてきた。
 
 マネージャーとして、
-どう動く？`,
-  choices:[
-    {
-      text:"教え方を変えてもらう",
-      action:"teach",
-      next:"teach1"
+ここで何を優先する？`,
+      choices: [
+        { text: "KiLUAに教え方を変えてもらう", next: "teach1", result: "teach" },
+        { text: "8カウントずつ分けて確認する", next: "split1", result: "split" },
+        { text: "KiLUAのペースで続ける", next: "push1", result: "push" },
+        { text: "一度休憩して空気を戻す", next: "rest1", result: "restDance" }
+      ]
     },
-    {
-      text:"8カウントずつ確認",
-      action:"split",
-      next:"split1"
+
+    teach1: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "kilua",
+      expression: "troubled",
+      speaker: "KiLUA",
+      text:
+`……教え方？
+見れば分かると思ってた。`,
+      next: "teach2"
     },
-    {
-      text:"そのまま続ける",
-      action:"push",
-      next:"push1"
-    },
-    {
-      text:"一度休憩する",
-      action:"restDance",
-      next:"rest1"
-    }
-  ]
-},
 
-
-teach1:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"troubled",
-  speaker:"KiLUA",
-  text:
-`……教え方？`,
-  next:"teach2"
-},
-
-
-teach2:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  speaker:"MANAGER",
-  text:
+    teach2: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      speaker: "MANAGER",
+      text:
 `KiLUAには自然でも、
 3人にはまだ自然じゃない。
 
-一回ゆっくり説明しよう。`,
-  next:"teach3"
-},
+ゆっくり言葉にして伝えよう。`,
+      next: "teach3"
+    },
 
-
-teach3:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"normal",
-  speaker:"KiLUA",
-  text:
+    teach3: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "kilua",
+      expression: "normal",
+      speaker: "KiLUA",
+      text:
 `……分かった。
+ここは足じゃなくて、先に肩。`,
+      next: "teach4"
+    },
 
-ここ。
-足からじゃなくて、
-先に肩。`,
-  next:"teach4"
-},
+    teach4: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
+      text:
+`あ、それなら分かる！
+最初からそう言ってほしかった。`,
+      reaction: "✨",
+      resultId: "teachResult",
+      next: "after1"
+    },
 
+    split1: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      speaker: "MANAGER",
+      text:
+`一気に通すんじゃなくて、
+8カウントずつ揃えよう。
 
-teach4:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"miyu",
-  expression:"smile",
-  speaker:"MiYU",
-  text:
-`あっ！
+4人で一回ずつ確認していく。`,
+      next: "split2"
+    },
 
-今ので分かった！`,
-  reaction:"✨",
-  next:"teach5"
-},
+    split2: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "raisa",
+      expression: "smile",
+      speaker: "RAiSA",
+      text:
+`これなら、置いていかれない……！`,
+      reaction: "✨",
+      next: "split3"
+    },
 
+    split3: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
+      text:
+`うん。
+少しずつでも揃う方がいい。`,
+      resultId: "splitResult",
+      next: "after1"
+    },
 
-teach5:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"sarina",
-  expression:"smile",
-  speaker:"SARiNA",
-  text:
-`最初からそれ言ってよ笑`,
-  next:"teach6"
-},
+    push1: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      speaker: "MANAGER",
+      text:
+`今日は止めずに行こう。
+まず本番速度を身体で覚える。`,
+      next: "push2"
+    },
 
-
-teach6:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"troubled",
-  speaker:"KiLUA",
-  text:
-`教えるの……
-
-むず。`,
-  result:"teach",
-  next:"after1"
-},
-
-
-split1:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  speaker:"MANAGER",
-  text:
-`誰が悪いかじゃなくて、
-8カウントずつ確認しよう。`,
-  next:"split2"
-},
-
-
-split2:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"miyu",
-  expression:"smile",
-  speaker:"MiYU",
-  text:
-`あ、これなら分かる！`,
-  next:"split3"
-},
-
-
-split3:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"raisa",
-  expression:"smile",
-  speaker:"RAiSA",
-  text:
-`助かる……！`,
-  reaction:"✨",
-  next:"split4"
-},
-
-
-split4:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"normal",
-  speaker:"KiLUA",
-  text:
-`じゃあここまで。
-
-まず8カウント。`,
-  result:"split",
-  next:"after1"
-},
-
-
-push1:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  speaker:"MANAGER",
-  text:
-`今日はKiLUAのペースでいこう。
-
-まず本番速度を知る。`,
-  next:"push2"
-},
-
-
-push2:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"smile",
-  speaker:"KiLUA",
-  text:
+    push2: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "kilua",
+      expression: "smile",
+      speaker: "KiLUA",
+      text:
 `OK。
+じゃあ今度は止めない。`,
+      next: "push3"
+    },
 
-じゃあ止めないよ。`,
-  next:"push3"
-},
+    push3: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "raisa",
+      expression: "cry",
+      speaker: "RAiSA",
+      text:
+`速っ……！
+待って、全然追いつかない……！`,
+      reaction: "💦",
+      next: "push4"
+    },
 
+    push4: {
+      chapter: "WEEK 1｜ダンス合わせ",
+      bg: "studio",
+      member: "sarina",
+      expression: "angry",
+      speaker: "SARiNA",
+      text:
+`揃ってないのに通しても、
+ただ崩れるだけじゃん。`,
+      reaction: "💢",
+      resultId: "pushResult",
+      next: "after1"
+    },
 
-push3:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"sarina",
-  expression:"troubled",
-  speaker:"SARiNA",
-  text:
-`キッツ……！`,
-  reaction:"💦",
-  next:"push4"
-},
+    rest1: {
+      chapter: "WEEK 1｜休憩",
+      bg: "lounge",
+      speaker: "MANAGER",
+      text:
+`一旦5分休憩。
+空気を立て直してから戻ろう。`,
+      next: "rest2"
+    },
 
+    rest2: {
+      chapter: "WEEK 1｜休憩",
+      bg: "lounge",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
+      text:
+`KiLUA、教えるの初めてでしょ？`,
+      next: "rest3"
+    },
 
-push4:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"raisa",
-  expression:"troubled",
-  speaker:"RAiSA",
-  text:
-`無理無理無理！`,
-  reaction:"💦",
-  next:"push5"
-},
+    rest3: {
+      chapter: "WEEK 1｜休憩",
+      bg: "lounge",
+      member: "kilua",
+      expression: "troubled",
+      speaker: "KiLUA",
+      text:
+`……うん。`,
+      next: "rest4"
+    },
 
+    rest4: {
+      chapter: "WEEK 1｜休憩",
+      bg: "lounge",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
+      text:
+`じゃあ、そこからだね。
+できるのと教えるのは違うし。`,
+      resultId: "restResult",
+      next: "after1"
+    },
 
-push5:{
-  chapter:"DANCE LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"normal",
-  speaker:"KiLUA",
-  text:
-`……でも、
-さっきより揃ってる。`,
-  result:"push",
-  next:"after1"
-},
+    after1: {
+      chapter: "WEEK 1｜練習後",
+      bg: "lounge",
+      member: "miyu",
+      expression: "troubled",
+      speaker: "MiYU",
+      text:
+`……疲れた。
+でもちょっとだけ形見えてきたかも。`,
+      next: "after2"
+    },
 
+    after2: {
+      chapter: "WEEK 1｜練習後",
+      bg: "lounge",
+      member: "sarina",
+      expression: "normal",
+      speaker: "SARiNA",
+      text:
+`ただ、レッスンだけじゃ
+誰にも知られないんだよね。`,
+      next: "after3"
+    },
 
-rest1:{
-  chapter:"BREAK",
-  bg:"lounge",
-  speaker:"MANAGER",
-  text:
-`5分休憩。`,
-  next:"rest2"
-},
+    after3: {
+      chapter: "WEEK 1｜練習後",
+      bg: "lounge",
+      member: "raisa",
+      expression: "troubled",
+      speaker: "RAiSA",
+      text:
+`今のままだと、
+認知も全然ないし……`,
+      next: "decision2"
+    },
 
-
-rest2:{
-  chapter:"BREAK",
-  bg:"lounge",
-  member:"kilua",
-  speaker:"KiLUA",
-  text:
-`まだできるけど。`,
-  next:"rest3"
-},
-
-
-rest3:{
-  chapter:"BREAK",
-  bg:"lounge",
-  member:"sarina",
-  expression:"angry",
-  speaker:"SARiNA",
-  text:
-`できるできないじゃなくて、
-今ちょっと空気悪い。`,
-  next:"rest4"
-},
-
-
-rest4:{
-  chapter:"BREAK",
-  bg:"lounge",
-  member:"miyu",
-  expression:"smile",
-  speaker:"MiYU",
-  text:
-`KiLUAさ。
-
-教えるの初めて？`,
-  next:"rest5"
-},
-
-
-rest5:{
-  chapter:"BREAK",
-  bg:"lounge",
-  member:"kilua",
-  speaker:"KiLUA",
-  text:
-`うん。`,
-  next:"rest6"
-},
-
-
-rest6:{
-  chapter:"BREAK",
-  bg:"lounge",
-  member:"miyu",
-  expression:"smile",
-  speaker:"MiYU",
-  text:
-`だったら
-最初から言ってよ笑`,
-  reaction:"😂",
-  result:"rest",
-  next:"after1"
-},
-
-
-after1:{
-  chapter:"練習後",
-  bg:"lounge",
-  member:"miyu",
-  expression:"troubled",
-  speaker:"MiYU",
-  text:
-`……疲れた。`,
-  next:"after2"
-},
-
-
-after2:{
-  chapter:"練習後",
-  bg:"lounge",
-  member:"raisa",
-  expression:"troubled",
-  speaker:"RAiSA",
-  text:
-`足ない。`,
-  next:"after3"
-},
-
-
-after3:{
-  chapter:"練習後",
-  bg:"lounge",
-  member:"kilua",
-  speaker:"KiLUA",
-  text:
-`まだできる。`,
-  next:"after4"
-},
-
-
-after4:{
-  chapter:"練習後",
-  bg:"lounge",
-  member:"sarina",
-  expression:"smile",
-  speaker:"SARiNA",
-  text:
-`KiLUAだけ
-体力おかしいでしょ笑`,
-  reaction:"😂",
-  next:"after5"
-},
-
-
-after5:{
-  chapter:"練習後",
-  bg:"lounge",
-  member:"sarina",
-  speaker:"SARiNA",
-  text:
-`でもさ。
-
-ダンスだけやってても、
-誰にも知られてないよね。`,
-  next:"decision2"
-},
-
-
-decision2:{
-  chapter:"練習後",
-  bg:"lounge",
-  speaker:"MANAGER",
-  text:
+    decision2: {
+      chapter: "WEEK 1｜次の一手",
+      bg: "lounge",
+      speaker: "MANAGER",
+      text:
 `まだ少し時間はある。
 
 マネージャーとして、
 次に何を優先する？`,
-  choices:[
-    {
-      text:"SNS用の動画を撮る",
-      action:"sns",
-      next:"sns1"
+      choices: [
+        { text: "SNS用の動画を撮る", next: "sns1", result: "sns" },
+        { text: "チラシを配りに行く", next: "flyer1", result: "flyer" },
+        { text: "ボーカルを合わせる", next: "vocal1", result: "vocal" },
+        { text: "今日は回復を優先する", next: "recover1", result: "recover" }
+      ]
     },
-    {
-      text:"チラシを配りに行く",
-      action:"flyer",
-      next:"flyer1"
+
+    sns1: {
+      chapter: "WEEK 1｜SNS撮影",
+      bg: "sns",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
+      text:
+`じゃあ動画撮ろう！
+レッスン終わりの勢いで行ける。`,
+      reaction: "📱",
+      next: "sns2"
     },
-    {
-      text:"ボーカルも合わせる",
-      action:"vocal",
-      next:"vocal1"
+
+    sns2: {
+      chapter: "WEEK 1｜SNS撮影",
+      bg: "sns",
+      member: "raisa",
+      expression: "troubled",
+      speaker: "RAiSA",
+      text:
+`前髪やばいんだけど……`,
+      reaction: "💦",
+      next: "sns3"
     },
-    {
-      text:"今日はここで終わる",
-      action:"recovery",
-      next:"recovery1"
-    }
-  ]
-},
 
+    sns3: {
+      chapter: "WEEK 1｜SNS撮影",
+      bg: "sns",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
+      text:
+`そういう生っぽさも武器でしょ。
+よし、撮るよ！`,
+      reaction: "📸",
+      resultId: "snsResult",
+      next: "end1"
+    },
 
-sns1:{
-  chapter:"SNS作戦",
-  bg:"sns",
-  member:"miyu",
-  expression:"smile",
-  speaker:"MiYU",
-  text:
-`じゃあ動画撮ろうよ！`,
-  reaction:"📱",
-  next:"sns2"
-},
-
-
-sns2:{
-  chapter:"SNS作戦",
-  bg:"sns",
-  member:"raisa",
-  expression:"troubled",
-  speaker:"RAiSA",
-  text:
-`私、
-前髪死んでる……`,
-  reaction:"💦",
-  next:"sns3"
-},
-
-
-sns3:{
-  chapter:"SNS作戦",
-  bg:"sns",
-  member:"sarina",
-  expression:"smile",
-  speaker:"SARiNA",
-  text:
-`撮るよー！`,
-  reaction:"📸",
-  next:"sns4"
-},
-
-
-sns4:{
-  chapter:"SNS作戦",
-  bg:"sns",
-  member:"raisa",
-  expression:"smile",
-  speaker:"RAiSA",
-  text:
-`……増えてる！
-
-ほんとに見てる人いる！`,
-  reaction:"✨",
-  result:"sns",
-  next:"end1"
-},
-
-
-flyer1:{
-  chapter:"FLYER MISSION",
-  bg:"city",
-  member:"miyu",
-  expression:"smile",
-  speaker:"MiYU",
-  text:
+    flyer1: {
+      chapter: "WEEK 1｜チラシ配布",
+      bg: "city",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
+      text:
 `お願いしまーす！
+今度ライブあります！`,
+      reaction: "📣",
+      next: "flyer2"
+    },
 
-今度ライブやります！`,
-  reaction:"📣",
-  next:"flyer2"
-},
+    flyer2: {
+      chapter: "WEEK 1｜チラシ配布",
+      bg: "city",
+      member: "raisa",
+      expression: "troubled",
+      speaker: "RAiSA",
+      text:
+`こんなに無視されるんだ……`,
+      reaction: "💧",
+      next: "flyer3"
+    },
 
+    flyer3: {
+      chapter: "WEEK 1｜チラシ配布",
+      bg: "city",
+      member: "sarina",
+      expression: "normal",
+      speaker: "SARiNA",
+      text:
+`知られてないなら、
+知ってもらうまでやるだけ。`,
+      resultId: "flyerResult",
+      next: "end1"
+    },
 
-flyer2:{
-  chapter:"FLYER MISSION",
-  bg:"city",
-  member:"raisa",
-  expression:"troubled",
-  speaker:"RAiSA",
-  text:
-`……え。
+    vocal1: {
+      chapter: "WEEK 1｜ボーカル合わせ",
+      bg: "studio",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
+      text:
+`じゃあ歌を合わせよう。
+ここは私とMiYUが引っ張る。`,
+      reaction: "🎤",
+      next: "vocal2"
+    },
 
-こんなに
-無視される？`,
-  reaction:"💧",
-  next:"flyer3"
-},
+    vocal2: {
+      chapter: "WEEK 1｜ボーカル合わせ",
+      bg: "studio",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
+      text:
+`やっと私の見せ場って感じ。`,
+      next: "vocal3"
+    },
 
+    vocal3: {
+      chapter: "WEEK 1｜ボーカル合わせ",
+      bg: "studio",
+      member: "kilua",
+      expression: "troubled",
+      speaker: "KiLUA",
+      text:
+`ダンスより、
+歌の方がむずいかも。`,
+      reaction: "💦",
+      resultId: "vocalResult",
+      next: "end1"
+    },
 
-flyer3:{
-  chapter:"FLYER MISSION",
-  bg:"city",
-  member:"sarina",
-  speaker:"SARiNA",
-  text:
-`もっと声出そ。
+    recover1: {
+      chapter: "WEEK 1｜回復優先",
+      bg: "lounge",
+      member: "sarina",
+      expression: "normal",
+      speaker: "SARiNA",
+      text:
+`無理して潰れるのが一番困る。
+今日は戻ろう。`,
+      next: "recover2"
+    },
 
-知られてないなら、
-知ってもらうしかない。`,
-  next:"flyer4"
-},
+    recover2: {
+      chapter: "WEEK 1｜回復優先",
+      bg: "lounge",
+      member: "raisa",
+      expression: "smile",
+      speaker: "RAiSA",
+      text:
+`助かる……。
+明日また頑張る。`,
+      resultId: "recoverResult",
+      next: "end1"
+    },
 
+    end1: {
+      chapter: "WEEK 1｜夜",
+      bg: "livehouse",
+      speaker: "MANAGER",
+      text:
+`こうして、
+最初の1週間が終わった。
 
-flyer4:{
-  chapter:"FLYER MISSION",
-  bg:"city",
-  member:"raisa",
-  expression:"smile",
-  speaker:"RAiSA",
-  text:
-`今の一枚、
-めっちゃ嬉しいんだけど。`,
-  result:"flyer",
-  next:"end1"
-},
+まだバラバラだ。
+でも、少しだけ前に進んだ。`,
+      next: "end2"
+    },
 
+    end2: {
+      chapter: "WEEK 1｜夜",
+      bg: "livehouse",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
+      text:
+`4人で見たい景色、
+ちゃんとある気がしてきた。`,
+      reaction: "✨",
+      next: "end3"
+    },
 
-vocal1:{
-  chapter:"VOCAL LESSON",
-  bg:"studio",
-  member:"sarina",
-  expression:"smile",
-  speaker:"SARiNA",
-  text:
+    end3: {
+      chapter: "WEEK 1｜夜",
+      bg: "livehouse",
+      member: "kilua",
+      expression: "normal",
+      speaker: "KiLUA",
+      text:
+`……次はもっと
+揃えられると思う。`,
+      next: "end4"
+    },
+
+    end4: {
+      chapter: "WEEK 1｜夜",
+      bg: "livehouse",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
+      text:
 `じゃあ、
-歌も合わせよう。`,
-  reaction:"🎤",
-  next:"vocal2"
-},
-
-
-vocal2:{
-  chapter:"VOCAL LESSON",
-  bg:"studio",
-  member:"kilua",
-  expression:"troubled",
-  speaker:"KiLUA",
-  text:
-`ダンスより
-歌の方がキツいんだけど。`,
-  reaction:"💦",
-  next:"vocal3"
-},
-
-
-vocal3:{
-  chapter:"VOCAL LESSON",
-  bg:"studio",
-  member:"sarina",
-  expression:"smile",
-  speaker:"SARiNA",
-  text:
-`じゃあ、
-ここから！`,
-  result:"vocal",
-  next:"end1"
-},
-
-
-recovery1:{
-  chapter:"TODAY'S END",
-  bg:"lounge",
-  member:"miyu",
-  speaker:"MiYU",
-  text:
-`今日はもう帰ろ。`,
-  next:"recovery2"
-},
-
-
-recovery2:{
-  chapter:"TODAY'S END",
-  bg:"lounge",
-  member:"sarina",
-  speaker:"SARiNA",
-  text:
-`明日動けなくなったら
-意味ないよ。`,
-  next:"recovery3"
-},
-
-
-recovery3:{
-  chapter:"TODAY'S END",
-  bg:"lounge",
-  member:"kilua",
-  speaker:"KiLUA",
-  text:
-`……分かった。`,
-  result:"recovery",
-  next:"end1"
-},
-
-
-end1:{
-  chapter:"WEEK 1｜夜",
-  bg:"lounge",
-  member:"raisa",
-  expression:"troubled",
-  speaker:"RAiSA",
-  text:
-`1週間長かった……`,
-  next:"end2"
-},
-
-
-end2:{
-  chapter:"WEEK 1｜夜",
-  bg:"lounge",
-  member:"miyu",
-  expression:"smile",
-  speaker:"MiYU",
-  text:
-`まだ1週目なんだけど笑`,
-  reaction:"😂",
-  next:"end3"
-},
-
-
-end3:{
-  chapter:"WEEK 1｜夜",
-  bg:"lounge",
-  member:"sarina",
-  expression:"smile",
-  speaker:"SARiNA",
-  text:
-`まだ4人とも
-全然違うけど。
-
-それを合わせてくのが、
-グループなのかもね。`,
-  next:"end4"
-},
-
-
-end4:{
-  chapter:"WEEK 1｜夜",
-  bg:"lounge",
-  member:"kilua",
-  speaker:"KiLUA",
-  text:
-`……たぶん。`,
-  next:"weekComplete"
-}
-
+ここから大きくなってみせよう。`,
+      next: "weekComplete"
+    }
+  }
 };
