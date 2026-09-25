@@ -1,1940 +1,712 @@
-const $ =
-  id =>
-    document.getElementById(id);
+const CFG = window.GAME_CONFIG;
+const MEMBERS = CFG.members;
+const CHAR_IMAGES = CFG.charImages;
+const PROLOGUE_LINES = CFG.prologue;
+const STORY = CFG.story;
 
+const STORAGE_KEY = "overkill_manager_story_v5";
 
-const STORAGE_KEY =
-  "overkill_manager_story_v6";
+const $ = (id) => document.getElementById(id);
 
-
-const CHAR_IMAGES = {
-
-  sarina:{
-    normal:"./sarina_normal.png",
-    smile:"./sarina_smile.png",
-    angry:"./sarina_angry.png",
-    troubled:"./sarina_troubled.png"
-  },
-
-  miyu:{
-    normal:"./miyu_normal.png",
-    smile:"./miyu_smile.png",
-    angry:"./miyu_angry.png",
-    troubled:"./miyu_troubled.png"
-  },
-
-  kilua:{
-    normal:"./kilua_normal.png",
-    smile:"./kilua_smile.png",
-    angry:"./kilua_angry.png",
-    troubled:"./kilua_troubled.png"
-  },
-
-  raisa:{
-    normal:"./raisa_normal.png",
-    smile:"./raisa_smile.png",
-    angry:"./raisa_angry.png",
-    troubled:"./raisa_troubled.png"
-  }
-
+const screens = {
+  loading: $("loading"),
+  title: $("title"),
+  prologue: $("prologue"),
+  game: $("game")
 };
 
+const loadChar = $("loadChar");
+const loadMsg = $("loadMsg");
+const loadBar = $("loadBar");
+const loadPct = $("loadPct");
 
-const MEMBERS = {
+const proText = $("proText");
 
-  sarina:{
-    name:"SARiNA",
-    color:"#69e09a",
-    rgb:"105,224,154"
-  },
+const chapter = $("chapter");
+const env = $("env");
+const aura = $("aura");
+const managerMark = $("managerMark");
+const char = $("char");
+const reaction = $("reaction");
 
-  miyu:{
-    name:"MiYU",
-    color:"#72bdff",
-    rgb:"114,189,255"
-  },
+const dialogue = $("dialogue");
+const speaker = $("speaker");
+const text = $("text");
+const nextMark = $("nextMark");
+const tapGuide = $("tapGuide");
 
-  kilua:{
-    name:"KiLUA",
-    color:"#ff7b88",
-    rgb:"255,123,136"
-  },
+const result = $("result");
+const resultBox = $("resultBox");
+const weekEnd = $("weekEnd");
 
-  raisa:{
-    name:"RAiSA",
-    color:"#ffdc69",
-    rgb:"255,220,105"
-  }
+const modal = $("modal");
+const modalBox = $("modalBox");
 
-};
-
+const songAudio = $("songAudio");
 
 function initialMembers(){
-
   return {
-
-    sarina:{
-      vocal:78,
-      dance:48,
-      bond:74,
-      energy:72
-    },
-
-    miyu:{
-      vocal:74,
-      dance:54,
-      bond:68,
-      energy:76
-    },
-
-    kilua:{
-      vocal:52,
-      dance:84,
-      bond:40,
-      energy:80
-    },
-
-    raisa:{
-      vocal:42,
-      dance:44,
-      bond:58,
-      energy:70
-    }
-
+    sarina: { vocal:78, dance:48, bond:74, energy:72 },
+    miyu:   { vocal:74, dance:54, bond:68, energy:76 },
+    kilua:  { vocal:52, dance:84, bond:40, energy:80 },
+    raisa:  { vocal:42, dance:44, bond:58, energy:70 }
   };
-
 }
 
+function clone(obj){
+  return JSON.parse(JSON.stringify(obj));
+}
 
 function freshState(){
-
+  const members = initialMembers();
   return {
-
-    node:"intro0",
-
-    reach:10,
-
-    cash:220000,
-
-    members:
-      initialMembers(),
-
-    startSnapshot:{
-      reach:10,
-      members:
-        initialMembers()
-    },
-
-    flags:{},
-
-    hasStarted:false,
-
-    tutorialSeen:false,
-
-    prologueSeen:false,
-
-    weekFinished:false
-
+    started: false,
+    prologueSeen: false,
+    tutorialSeen: false,
+    node: "m1",
+    week: 1,
+    reach: 10,
+    cash: 220000,
+    members,
+    snapshot: {
+      reach: 10,
+      cash: 220000,
+      members: clone(members)
+    }
   };
-
 }
-
 
 function loadState(){
-
   try{
-
-    return (
-      JSON.parse(
-        localStorage.getItem(
-          STORAGE_KEY
-        )
-      )
-      ||
-      freshState()
-    );
-
-  }
-
-  catch{
-
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || freshState();
+  }catch{
     return freshState();
-
   }
-
 }
 
+let state = loadState();
 
-let state =
-  loadState();
-
-
-function save(){
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(state)
-  );
-
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-
-function clamp(value){
-
-  return Math.max(
-    0,
-    Math.min(
-      100,
-      value
-    )
-  );
-
+function clamp(n){
+  return Math.max(0, Math.min(999999, n));
 }
 
+function avgBond(){
+  const keys = Object.keys(state.members);
+  return Math.round(keys.reduce((sum, key) => sum + state.members[key].bond, 0) / keys.length);
+}
 
 function metricLabel(metric){
-
   return {
-
-    vocal:"歌唱",
-    dance:"ダンス",
-    bond:"連携",
-    energy:"体力",
-    reach:"認知"
-
-  }[metric];
-
+    vocal: "歌唱",
+    dance: "ダンス",
+    bond: "連携",
+    energy: "体力",
+    reach: "認知",
+    cash: "活動資金"
+  }[metric] || metric;
 }
-
-
-/* =========================
-   SCREEN
-========================= */
 
 function showScreen(name){
-
-  [
-    "loading",
-    "title",
-    "prologue",
-    "game"
-  ]
-  .forEach(
-    id =>
-      $(id)
-      .classList
-      .remove("active")
-  );
-
-
-  $(name)
-    .classList
-    .add("active");
-
+  Object.values(screens).forEach(el => el.classList.remove("active"));
+  screens[name].classList.add("active");
 }
 
+function tryPlaySong(){
+  songAudio.volume = 0.4;
+  songAudio.play().catch(() => {});
+}
+
+function resetGame(){
+  state = freshState();
+  state.started = true;
+  saveState();
+}
 
 /* =========================
    LOADING
 ========================= */
-
-const loadingMembers = [
-
-  [
-    "./sarina_smile.png",
-    "4人の予定を確認中…"
-  ],
-
-  [
-    "./miyu_smile.png",
-    "SNSのネタを考え中…"
-  ],
-
-  [
-    "./kilua_smile.png",
-    "ダンススタジオ準備中…"
-  ],
-
-  [
-    "./raisa_smile.png",
-    "チラシを印刷中…"
-  ]
-
+const loadingSet = [
+  { img: "./sarina_smile.png", msg: "4人の予定を確認中…" },
+  { img: "./miyu_smile.png",   msg: "SNSのネタを整理中…" },
+  { img: "./kilua_smile.png",  msg: "レッスン場を準備中…" },
+  { img: "./raisa_smile.png",  msg: "ステージを確認中…" }
 ];
 
-
-let loadingValue = 0;
-let loadingMember = 0;
-
-
 function startLoading(){
+  let p = 0;
+  let idx = 0;
 
-  const timer =
-    setInterval(
-      ()=>{
+  const timer = setInterval(() => {
+    p += Math.floor(Math.random() * 7) + 3;
+    if(p > 100) p = 100;
 
-        loadingValue =
-          Math.min(
-            100,
-            loadingValue + 6
-          );
+    const nextIdx = Math.min(loadingSet.length - 1, Math.floor(p / 25));
+    if(nextIdx !== idx){
+      idx = nextIdx;
+      loadChar.src = loadingSet[idx].img;
+      loadMsg.textContent = loadingSet[idx].msg;
+    }
 
+    loadBar.style.width = p + "%";
+    loadPct.textContent = p + "%";
 
-        $("loadBar")
-          .style.width =
-          loadingValue + "%";
-
-
-        $("loadPct")
-          .textContent =
-          loadingValue + "%";
-
-
-        const nextMember =
-          Math.min(
-            3,
-            Math.floor(
-              loadingValue / 25
-            )
-          );
-
-
-        if(
-          nextMember
-          !==
-          loadingMember
-        ){
-
-          loadingMember =
-            nextMember;
-
-
-          $("loadChar").src =
-            loadingMembers[
-              loadingMember
-            ][0];
-
-
-          $("loadMsg")
-            .textContent =
-            loadingMembers[
-              loadingMember
-            ][1];
-
-        }
-
-
-        if(
-          loadingValue >= 100
-        ){
-
-          clearInterval(timer);
-
-
-          setTimeout(
-            ()=>{
-              showScreen(
-                "title"
-              );
-            },
-            350
-          );
-
-        }
-
-      },
-      100
-    );
-
+    if(p >= 100){
+      clearInterval(timer);
+      setTimeout(() => showScreen("title"), 350);
+    }
+  }, 110);
 }
 
-
 /* =========================
-   TITLE
+   TITLE / PROLOGUE
 ========================= */
-
-$("startBtn").onclick =
-()=>{
-
-  state =
-    freshState();
-
-
-  state.hasStarted =
-    true;
-
-
-  save();
-
-  startPrologue();
-
-};
-
-
-$("contBtn").onclick =
-()=>{
-
-  if(
-    state.prologueSeen
-  ){
-
-    showScreen(
-      "game"
-    );
-
-    renderStory();
-
-  }
-
-  else{
-
-    startPrologue();
-
-  }
-
-};
-
-
-/* =========================
-   PROLOGUE
-========================= */
-
 let prologueIndex = 0;
-
-let prologueTyping =
-  false;
-
-let prologueFullText =
-  "";
-
-let prologueTimer =
-  null;
-
+let prologueTyping = false;
+let prologueFullText = "";
+let prologueTimer = null;
 
 function startPrologue(){
-
+  showScreen("prologue");
   prologueIndex = 0;
-
-  showScreen(
-    "prologue"
-  );
-
-  typePrologue(
-    PROLOGUE_LINES[0]
-  );
-
+  typePrologue(PROLOGUE_LINES[0]);
 }
 
+function typePrologue(line){
+  clearInterval(prologueTimer);
+  prologueFullText = line;
+  proText.textContent = "";
+  prologueTyping = true;
 
-function typePrologue(text){
-
-  clearInterval(
-    prologueTimer
-  );
-
-
-  prologueTyping =
-    true;
-
-
-  prologueFullText =
-    text;
-
-
-  $("proText")
-    .textContent =
-    "";
-
-
-  let index = 0;
-
-
-  prologueTimer =
-    setInterval(
-      ()=>{
-
-        index++;
-
-
-        $("proText")
-          .textContent =
-          text.slice(
-            0,
-            index
-          );
-
-
-        if(
-          index >=
-          text.length
-        ){
-
-          clearInterval(
-            prologueTimer
-          );
-
-
-          prologueTyping =
-            false;
-
-        }
-
-      },
-      36
-    );
-
+  let i = 0;
+  prologueTimer = setInterval(() => {
+    i++;
+    proText.textContent = line.slice(0, i);
+    if(i >= line.length){
+      clearInterval(prologueTimer);
+      prologueTyping = false;
+    }
+  }, 42);
 }
 
+$("startBtn").addEventListener("click", () => {
+  resetGame();
+  tryPlaySong();
+  startPrologue();
+});
 
-$("prologue").onclick =
-()=>{
-
-  if(
-    prologueTyping
-  ){
-
-    clearInterval(
-      prologueTimer
-    );
-
-
-    $("proText")
-      .textContent =
-      prologueFullText;
-
-
-    prologueTyping =
-      false;
-
-
+$("contBtn").addEventListener("click", () => {
+  if(!state.started){
+    state.started = true;
+    saveState();
+    tryPlaySong();
+    startPrologue();
     return;
-
   }
 
+  tryPlaySong();
+
+  if(state.prologueSeen){
+    showScreen("game");
+    renderNode();
+  }else{
+    startPrologue();
+  }
+});
+
+screens.prologue.addEventListener("click", () => {
+  if(prologueTyping){
+    clearInterval(prologueTimer);
+    proText.textContent = prologueFullText;
+    prologueTyping = false;
+    return;
+  }
 
   prologueIndex++;
-
-
-  if(
-    prologueIndex
-    >=
-    PROLOGUE_LINES.length
-  ){
-
-    state.prologueSeen =
-      true;
-
-
-    save();
-
-
-    showScreen(
-      "game"
-    );
-
-
-    renderStory();
-
-
+  if(prologueIndex >= PROLOGUE_LINES.length){
+    state.prologueSeen = true;
+    saveState();
+    showScreen("game");
+    renderNode();
     return;
-
   }
 
-
-  typePrologue(
-    PROLOGUE_LINES[
-      prologueIndex
-    ]
-  );
-
-};
-
+  typePrologue(PROLOGUE_LINES[prologueIndex]);
+});
 
 /* =========================
-   STORY RENDER
+   CHARACTER / BG
 ========================= */
-
-const env =
-  $("env");
-
-const character =
-  $("char");
-
-const aura =
-  $("aura");
-
-const managerMark =
-  $("managerMark");
-
-const reaction =
-  $("reaction");
-
-const speaker =
-  $("speaker");
-
-const text =
-  $("text");
-
-const dialogue =
-  $("dialogue");
-
-const nextMark =
-  $("nextMark");
-
-const tapGuide =
-  $("tapGuide");
-
-
-function setScene(node){
-
-  $("chapter")
-    .textContent =
-    node.chapter
-    ||
-    "WEEK 1";
-
-
-  env.className =
-    "environment "
-    +
-    (
-      node.bg
-      ||
-      "manager"
-    );
-
-
-  character
-    .classList
-    .remove("show");
-
-
-  aura
-    .classList
-    .remove("show");
-
-
-  managerMark
-    .classList
-    .remove("show");
-
-
-  reaction
-    .classList
-    .remove("show");
-
-
-  reaction.textContent =
-    "";
-
-
-  if(
-    node.member
-  ){
-
-    const member =
-      MEMBERS[
-        node.member
-      ];
-
-
-    const expression =
-      node.expression
-      ||
-      "normal";
-
-
-    character.src =
-      CHAR_IMAGES[
-        node.member
-      ][expression];
-
-
-    aura.style
-      .setProperty(
-        "--char-rgb",
-        member.rgb
-      );
-
-
-    requestAnimationFrame(
-      ()=>{
-
-        character
-          .classList
-          .add("show");
-
-
-        aura
-          .classList
-          .add("show");
-
-      }
-    );
-
-  }
-
-  else{
-
-    managerMark
-      .classList
-      .add("show");
-
-  }
-
-
-  if(
-    node.reaction
-  ){
-
-    reaction.textContent =
-      node.reaction;
-
-
-    requestAnimationFrame(
-      ()=>{
-
-        reaction
-          .classList
-          .add("show");
-
-      }
-    );
-
-  }
-
-
-  speaker.textContent =
-    node.speaker
-    ||
-    "MANAGER";
-
+function setBackground(bg){
+  env.className = "environment " + (bg || "office");
 }
 
+function setCharacter(memberId, expression = "normal"){
+  char.classList.remove("show");
+  aura.classList.remove("show");
+  managerMark.classList.remove("show");
+
+  if(!memberId){
+    char.style.opacity = "0";
+    managerMark.classList.add("show");
+    return;
+  }
+
+  const member = MEMBERS[memberId];
+  const src = (CHAR_IMAGES[memberId] && CHAR_IMAGES[memberId][expression]) || CHAR_IMAGES[memberId].normal;
+
+  char.src = src;
+  char.alt = member.name;
+  char.style.opacity = "1";
+  aura.style.setProperty("--char-rgb", member.rgb);
+
+  requestAnimationFrame(() => {
+    char.classList.add("show");
+    aura.classList.add("show");
+  });
+}
+
+function setReaction(symbol){
+  reaction.classList.remove("show");
+  reaction.textContent = "";
+  if(!symbol) return;
+
+  reaction.textContent = symbol;
+  requestAnimationFrame(() => reaction.classList.add("show"));
+}
 
 /* =========================
    TYPEWRITER
 ========================= */
-
-let typing =
-  false;
-
-let fullText =
-  "";
-
-let typingTimer =
-  null;
-
-
-function typeLine(line){
-
-  clearInterval(
-    typingTimer
-  );
-
-
-  typing =
-    true;
-
-
-  fullText =
-    line;
-
-
-  text.innerHTML =
-    "";
-
-
-  nextMark
-    .style.display =
-    "none";
-
-
-  let index = 0;
-
-
-  typingTimer =
-    setInterval(
-      ()=>{
-
-        index++;
-
-
-        text.textContent =
-          line.slice(
-            0,
-            index
-          );
-
-
-        if(
-          index >=
-          line.length
-        ){
-
-          clearInterval(
-            typingTimer
-          );
-
-
-          typing =
-            false;
-
-
-          nextMark
-            .style.display =
-            "block";
-
-        }
-
-      },
-      24
-    );
-
-}
-
-
-/* =========================
-   MAIN RENDER
-========================= */
-
-function renderStory(){
-
-  if(
-    state.node
-    ===
-    "weekComplete"
-  ){
-
-    renderWeekEnd();
-
-    return;
-
-  }
-
-
-  const node =
-    STORY[
-      state.node
-    ];
-
-
-  if(
-    !node
-  ){
-
-    console.error(
-      "Story node not found:",
-      state.node
-    );
-
-    return;
-
-  }
-
-
-  setScene(
-    node
-  );
-
-
-  dialogue.onclick =
-    null;
-
-
-  if(
-    node.choices
-  ){
-
-    typing =
-      false;
-
-
-    nextMark
-      .style.display =
-      "none";
-
-
-    const choiceHtml =
-      node.choices
-      .map(
-        (choice,index)=>
-          `
-          <button
-            class="choice"
-            data-choice="${index}"
-          >
-            ${choice.text}
-          </button>
-          `
-      )
-      .join("");
-
-
-    text.innerHTML =
-      `
-      <div class="choiceIntro">
-        ${node.text.replace(/\n/g,"<br>")}
-      </div>
-
-      <div class="choices">
-        ${choiceHtml}
-      </div>
-      `;
-
-
-    return;
-
-  }
-
-
-  typeLine(
-    node.text
-  );
-
-
-  if(
-    !state.tutorialSeen
-  ){
-
-    tapGuide
-      .classList
-      .add("show");
-
-  }
-
-
-  dialogue.onclick =
-    advanceStory;
-
-}
-
-
-/* =========================
-   ADVANCE
-========================= */
-
-function advanceStory(){
-
-  if(
-    !state.tutorialSeen
-  ){
-
-    state.tutorialSeen =
-      true;
-
-
-    tapGuide
-      .classList
-      .remove("show");
-
-
-    save();
-
-  }
-
-
-  if(
-    typing
-  ){
-
-    clearInterval(
-      typingTimer
-    );
-
-
-    text.textContent =
-      fullText;
-
-
-    typing =
-      false;
-
-
-    nextMark
-      .style.display =
-      "block";
-
-
-    return;
-
-  }
-
-
-  const node =
-    STORY[
-      state.node
-    ];
-
-
-  if(
-    node.result
-  ){
-
-    const result =
-      runResult(
-        node.result
-      );
-
-
-    showResult(
-      result,
-      node.next
-    );
-
-
-    return;
-
-  }
-
-
-  if(
-    node.next
-  ){
-
-    state.node =
-      node.next;
-
-
-    save();
-
-
-    renderStory();
-
-  }
-
-}
-
-
-/* =========================
-   CHOICES
-========================= */
-
-text.addEventListener(
-  "click",
-  event=>{
-
-    const button =
-      event.target.closest(
-        "[data-choice]"
-      );
-
-
-    if(
-      !button
-    ){
-
-      return;
-
+let typing = false;
+let fullText = "";
+let typingTimer = null;
+
+function typeDialogue(line){
+  clearInterval(typingTimer);
+  typing = true;
+  fullText = line;
+  text.textContent = "";
+  nextMark.style.display = "none";
+
+  let i = 0;
+  typingTimer = setInterval(() => {
+    i++;
+    text.textContent = line.slice(0, i);
+    if(i >= line.length){
+      clearInterval(typingTimer);
+      typing = false;
+      nextMark.style.display = "block";
     }
-
-
-    event.stopPropagation();
-
-
-    const node =
-      STORY[
-        state.node
-      ];
-
-
-    const choice =
-      node.choices[
-        Number(
-          button.dataset.choice
-        )
-      ];
-
-
-    state.flags[
-      choice.action
-    ] =
-      true;
-
-
-    state.node =
-      choice.next;
-
-
-    save();
-
-
-    renderStory();
-
-  }
-);
-
+  }, 22);
+}
 
 /* =========================
-   STATUS UPDATE
+   RENDER
 ========================= */
+function renderChoices(node){
+  nextMark.style.display = "none";
+  text.innerHTML = `
+    <div class="choiceLead">${node.text.replace(/\n/g, "<br>")}</div>
+    <div class="choices">
+      ${node.choices.map((c, i) => `
+        <button class="choiceBtn" data-choice="${i}">${c.text}</button>
+      `).join("")}
+    </div>
+  `;
+  dialogue.dataset.mode = "choice";
+}
 
-function updateMember(
-  member,
-  metric,
-  delta
-){
+function renderNode(){
+  if(state.node === "weekComplete"){
+    renderWeekEnd();
+    return;
+  }
 
-  const before =
-    state.members[
-      member
-    ][metric];
+  const node = STORY[state.node];
+  if(!node) return;
 
+  chapter.textContent = node.chapter || `WEEK ${state.week}`;
+  speaker.textContent = node.speaker || "MANAGER";
+  setBackground(node.bg);
+  setCharacter(node.member, node.expression);
+  setReaction(node.reaction);
 
-  state.members[
-    member
-  ][metric] =
-    clamp(
-      before
-      +
-      delta
-    );
+  if(node.choices){
+    renderChoices(node);
+  }else{
+    dialogue.dataset.mode = "advance";
+    typeDialogue(node.text);
+  }
 
+  if(!state.tutorialSeen){
+    tapGuide.classList.add("show");
+  }else{
+    tapGuide.classList.remove("show");
+  }
+}
 
+/* =========================
+   DIALOGUE CLICK
+========================= */
+dialogue.addEventListener("click", (e) => {
+  if(!state.tutorialSeen){
+    state.tutorialSeen = true;
+    saveState();
+    tapGuide.classList.remove("show");
+  }
+
+  const node = STORY[state.node];
+  if(!node) return;
+
+  if(dialogue.dataset.mode === "choice"){
+    const btn = e.target.closest("[data-choice]");
+    if(!btn) return;
+
+    const choice = node.choices[Number(btn.dataset.choice)];
+    state.node = choice.next;
+    saveState();
+    renderNode();
+    return;
+  }
+
+  advanceDialogue();
+});
+
+function advanceDialogue(){
+  const node = STORY[state.node];
+  if(!node) return;
+
+  if(typing){
+    clearInterval(typingTimer);
+    text.textContent = fullText;
+    typing = false;
+    nextMark.style.display = "block";
+    return;
+  }
+
+  if(node.resultId){
+    const res = applyResult(node.resultId);
+    showResult(res, node.next);
+    return;
+  }
+
+  if(node.next){
+    state.node = node.next;
+    saveState();
+    renderNode();
+  }
+}
+
+/* =========================
+   RESULT LOGIC
+========================= */
+function changeMember(memberId, metric, delta){
+  const before = state.members[memberId][metric];
+  const after = clamp(before + delta);
+  state.members[memberId][metric] = after;
   return {
-
-    name:
-      MEMBERS[
-        member
-      ].name,
-
+    name: MEMBERS[memberId].name,
     metric,
-
     before,
-
-    after:
-      state.members[
-        member
-      ][metric],
-
+    after,
     delta
-
   };
-
 }
 
-
-function updateReach(
-  delta
-){
-
-  const before =
-    state.reach;
-
-
-  state.reach =
-    clamp(
-      before
-      +
-      delta
-    );
-
-
-  return {
-
-    name:"GROUP",
-
-    metric:"reach",
-
-    before,
-
-    after:
-      state.reach,
-
-    delta
-
-  };
-
+function changeReach(delta){
+  const before = state.reach;
+  const after = clamp(before + delta);
+  state.reach = after;
+  return { name: "GROUP", metric: "reach", before, after, delta };
 }
 
-
-/* =========================
-   RESULT CALCULATION
-========================= */
-
-function runResult(
-  type
-){
-
-  let changes = [];
-
-  let title =
-    "RESULT";
-
-  let headline =
-    "";
-
-
-  if(
-    type === "teach"
-  ){
-
-    title =
-      "LESSON RESULT";
-
-
-    headline =
-      "教えることも、練習。";
-
-
-    changes = [
-
-      updateMember(
-        "kilua",
-        "dance",
-        3
-      ),
-
-      updateMember(
-        "kilua",
-        "bond",
-        6
-      ),
-
-      updateMember(
-        "sarina",
-        "dance",
-        5
-      ),
-
-      updateMember(
-        "miyu",
-        "dance",
-        5
-      ),
-
-      updateMember(
-        "raisa",
-        "dance",
-        4
-      ),
-
-      updateMember(
-        "sarina",
-        "energy",
-        -7
-      ),
-
-      updateMember(
-        "miyu",
-        "energy",
-        -7
-      ),
-
-      updateMember(
-        "kilua",
-        "energy",
-        -7
-      ),
-
-      updateMember(
-        "raisa",
-        "energy",
-        -7
-      )
-
-    ];
-
-  }
-
-
-  if(
-    type === "split"
-  ){
-
-    title =
-      "LESSON RESULT";
-
-
-    headline =
-      "少しずつなら、4人で揃えられる。";
-
-
-    [
-      "sarina",
-      "miyu",
-      "kilua",
-      "raisa"
-    ]
-    .forEach(
-      id=>{
-
-        changes.push(
-          updateMember(
-            id,
-            "dance",
-            4
-          )
-        );
-
-
-        changes.push(
-          updateMember(
-            id,
-            "bond",
-            3
-          )
-        );
-
-
-        changes.push(
-          updateMember(
-            id,
-            "energy",
-            -7
-          )
-        );
-
-      }
-    );
-
-  }
-
-
-  if(
-    type === "push"
-  ){
-
-    title =
-      "LESSON RESULT";
-
-
-    headline =
-      "伸びた。でも少し無理をした。";
-
-
-    changes = [
-
-      updateMember(
-        "sarina",
-        "dance",
-        7
-      ),
-
-      updateMember(
-        "miyu",
-        "dance",
-        7
-      ),
-
-      updateMember(
-        "kilua",
-        "dance",
-        4
-      ),
-
-      updateMember(
-        "raisa",
-        "dance",
-        5
-      ),
-
-      updateMember(
-        "sarina",
-        "energy",
-        -12
-      ),
-
-      updateMember(
-        "miyu",
-        "energy",
-        -12
-      ),
-
-      updateMember(
-        "kilua",
-        "energy",
-        -8
-      ),
-
-      updateMember(
-        "raisa",
-        "energy",
-        -13
-      )
-
-    ];
-
-  }
-
-
-  if(
-    type === "rest"
-  ){
-
-    title =
-      "LESSON RESULT";
-
-
-    headline =
-      "止まったから見えたこともある。";
-
-
-    [
-      "sarina",
-      "miyu",
-      "kilua",
-      "raisa"
-    ]
-    .forEach(
-      id=>{
-
-        changes.push(
-          updateMember(
-            id,
-            "bond",
-            4
-          )
-        );
-
-
-        changes.push(
-          updateMember(
-            id,
-            "energy",
-            -3
-          )
-        );
-
-      }
-    );
-
-  }
-
-
-  if(
-    type === "sns"
-  ){
-
-    title =
-      "SNS RESULT";
-
-
-    headline =
-      "知らない誰かに届いた。";
-
-
-    changes = [
-
-      updateReach(
-        8
-      ),
-
-      updateMember(
-        "miyu",
-        "bond",
-        2
-      ),
-
-      updateMember(
-        "sarina",
-        "energy",
-        -3
-      ),
-
-      updateMember(
-        "miyu",
-        "energy",
-        -3
-      ),
-
-      updateMember(
-        "kilua",
-        "energy",
-        -3
-      ),
-
-      updateMember(
-        "raisa",
-        "energy",
-        -3
-      )
-
-    ];
-
-  }
-
-
-  if(
-    type === "flyer"
-  ){
-
-    title =
-      "FLYER RESULT";
-
-
-    headline =
-      "一枚ずつ、知ってもらう。";
-
-
-    changes = [
-
-      updateReach(
-        12
-      ),
-
-      updateMember(
-        "sarina",
-        "energy",
-        -7
-      ),
-
-      updateMember(
-        "miyu",
-        "energy",
-        -7
-      ),
-
-      updateMember(
-        "kilua",
-        "energy",
-        -7
-      ),
-
-      updateMember(
-        "raisa",
-        "energy",
-        -7
-      )
-
-    ];
-
-  }
-
-
-  if(
-    type === "vocal"
-  ){
-
-    title =
-      "VOCAL RESULT";
-
-
-    headline =
-      "認知は増えない。でも歌は良くなる。";
-
-
-    changes = [
-
-      updateMember(
-        "sarina",
-        "vocal",
-        5
-      ),
-
-      updateMember(
-        "miyu",
-        "vocal",
-        5
-      ),
-
-      updateMember(
-        "kilua",
-        "vocal",
-        4
-      ),
-
-      updateMember(
-        "raisa",
-        "vocal",
-        4
-      ),
-
-      updateMember(
-        "sarina",
-        "energy",
-        -6
-      ),
-
-      updateMember(
-        "miyu",
-        "energy",
-        -6
-      ),
-
-      updateMember(
-        "kilua",
-        "energy",
-        -6
-      ),
-
-      updateMember(
-        "raisa",
-        "energy",
-        -6
-      )
-
-    ];
-
-  }
-
-
-  if(
-    type === "recovery"
-  ){
-
-    title =
-      "RECOVERY";
-
-
-    headline =
-      "休むことも、仕事。";
-
-
-    changes =
-      [
-        "sarina",
-        "miyu",
-        "kilua",
-        "raisa"
-      ]
-      .map(
-        id =>
-          updateMember(
-            id,
-            "energy",
-            8
-          )
+function changeCash(delta){
+  const before = state.cash;
+  const after = clamp(before + delta);
+  state.cash = after;
+  return { name: "GROUP", metric: "cash", before, after, delta };
+}
+
+function applyResult(id){
+  const changes = [];
+  let mini = "RESULT";
+  let title = "";
+
+  switch(id){
+    case "teachResult":
+      mini = "LESSON RESULT";
+      title = "教えることも、練習。";
+      changes.push(
+        changeMember("sarina","dance",5),
+        changeMember("miyu","dance",5),
+        changeMember("raisa","dance",4),
+        changeMember("kilua","dance",3),
+        changeMember("kilua","bond",6),
+        changeMember("sarina","energy",-7),
+        changeMember("miyu","energy",-7),
+        changeMember("kilua","energy",-7),
+        changeMember("raisa","energy",-7)
       );
+      break;
 
+    case "splitResult":
+      mini = "LESSON RESULT";
+      title = "少しずつなら、4人で揃えられる。";
+      ["sarina","miyu","kilua","raisa"].forEach(id => {
+        changes.push(changeMember(id,"dance",4));
+        changes.push(changeMember(id,"bond",3));
+        changes.push(changeMember(id,"energy",-6));
+      });
+      break;
+
+    case "pushResult":
+      mini = "LESSON RESULT";
+      title = "伸びた。でも、少し無理をした。";
+      changes.push(
+        changeMember("sarina","dance",6),
+        changeMember("miyu","dance",6),
+        changeMember("kilua","dance",4),
+        changeMember("raisa","dance",5),
+        changeMember("sarina","bond",-2),
+        changeMember("miyu","bond",-2),
+        changeMember("raisa","bond",-3),
+        changeMember("sarina","energy",-12),
+        changeMember("miyu","energy",-12),
+        changeMember("kilua","energy",-8),
+        changeMember("raisa","energy",-13)
+      );
+      break;
+
+    case "restResult":
+      mini = "LESSON RESULT";
+      title = "空気を戻したから、前へ進めた。";
+      ["sarina","miyu","kilua","raisa"].forEach(id => {
+        changes.push(changeMember(id,"bond",4));
+        changes.push(changeMember(id,"dance",2));
+        changes.push(changeMember(id,"energy",-3));
+      });
+      break;
+
+    case "snsResult":
+      mini = "SNS RESULT";
+      title = "はじめて、画面の向こうに届いた。";
+      changes.push(
+        changeReach(8),
+        changeCash(-2000),
+        changeMember("miyu","bond",2),
+        changeMember("sarina","energy",-3),
+        changeMember("miyu","energy",-3),
+        changeMember("kilua","energy",-3),
+        changeMember("raisa","energy",-3)
+      );
+      break;
+
+    case "flyerResult":
+      mini = "PROMOTION RESULT";
+      title = "一枚ずつ、名前を知ってもらう。";
+      changes.push(
+        changeReach(12),
+        changeCash(-5000),
+        changeMember("sarina","energy",-7),
+        changeMember("miyu","energy",-7),
+        changeMember("kilua","energy",-7),
+        changeMember("raisa","energy",-7)
+      );
+      break;
+
+    case "vocalResult":
+      mini = "VOCAL RESULT";
+      title = "認知は増えない。でも歌は前に進む。";
+      changes.push(
+        changeMember("sarina","vocal",5),
+        changeMember("miyu","vocal",5),
+        changeMember("kilua","vocal",4),
+        changeMember("raisa","vocal",4),
+        changeCash(-3000),
+        changeMember("sarina","energy",-6),
+        changeMember("miyu","energy",-6),
+        changeMember("kilua","energy",-6),
+        changeMember("raisa","energy",-6)
+      );
+      break;
+
+    case "recoverResult":
+      mini = "RECOVERY";
+      title = "休むことも、デビューまでの仕事。";
+      changes.push(
+        changeMember("sarina","energy",8),
+        changeMember("miyu","energy",8),
+        changeMember("kilua","energy",8),
+        changeMember("raisa","energy",8)
+      );
+      break;
   }
 
-
-  save();
-
-
-  return {
-
-    title,
-    headline,
-    changes
-
-  };
-
+  saveState();
+  return { mini, title, changes };
 }
-
 
 /* =========================
    RESULT UI
 ========================= */
-
-function showResult(
-  result,
-  nextNode
-){
-
-  $("resultBox")
-    .innerHTML =
-    `
-    <div class="resultTag">
-      ${result.title}
-    </div>
-
-    <div class="resultTitle">
-      ${result.headline}
-    </div>
-
+function showResult(data, nextNode){
+  resultBox.innerHTML = `
+    <div class="resultMini">${data.mini}</div>
+    <div class="resultTitle">${data.title}</div>
     <div class="resultRows">
-
-      ${result.changes
-        .map(
-          change =>
-            `
-            <div class="resultRow">
-
-              <span>
-                ${change.name}
-                ・
-                ${metricLabel(
-                  change.metric
-                )}
-              </span>
-
-              <span>
-                ${change.before}
-                →
-                ${change.after}
-              </span>
-
-              <span
-                class="
-                  delta
-                  ${
-                    change.delta < 0
-                    ? "minus"
-                    : ""
-                  }
-                "
-              >
-
-                ${
-                  change.delta > 0
-                  ? "+"
-                  : ""
-                }
-
-                ${change.delta}
-
-              </span>
-
-            </div>
-            `
-        )
-        .join("")
-      }
-
+      ${data.changes.map(ch => `
+        <div class="resultRow">
+          <span>${ch.name}・${metricLabel(ch.metric)}</span>
+          <span>${formatValue(ch.metric, ch.before)} → ${formatValue(ch.metric, ch.after)}</span>
+          <span class="resultDelta ${ch.delta < 0 ? 'minus' : ''}">
+            ${ch.delta > 0 ? '+' : ''}${formatDelta(ch.metric, ch.delta)}
+          </span>
+        </div>
+      `).join("")}
     </div>
+    <div class="resultHint">タップして続ける</div>
+  `;
 
-    <div class="resultHint">
-      タップして続ける
-    </div>
-    `;
-
-
-  $("result")
-    .classList
-    .add("show");
-
-
-  $("result").onclick =
-  ()=>{
-
-    $("result")
-      .classList
-      .remove("show");
-
-
-    state.node =
-      nextNode;
-
-
-    save();
-
-
-    renderStory();
-
+  result.classList.add("show");
+  result.onclick = () => {
+    result.classList.remove("show");
+    state.node = nextNode;
+    saveState();
+    renderNode();
   };
-
 }
 
+function formatValue(metric, value){
+  return metric === "cash" ? `¥${value.toLocaleString("ja-JP")}` : value;
+}
+
+function formatDelta(metric, value){
+  return metric === "cash" ? `¥${Math.abs(value).toLocaleString("ja-JP")}` : value;
+}
 
 /* =========================
    WEEK END
 ========================= */
+function buildWeekSummaryRows(){
+  const rows = [];
 
-function renderWeekEnd(){
-
-  state.weekFinished =
-    true;
-
-
-  save();
-
-
-  $("weekEnd")
-    .innerHTML =
-    `
-    <div class="weekTag">
-      WEEK 1 COMPLETE
-    </div>
-
-    <h2>
-      4人でやるって、<br>
-      難しい。
-    </h2>
-
-    <div class="weekText">
-      まだバラバラ。<br>
-      でも少しずつ、
-      4人の形が見えてきた。
-    </div>
-
-    <div class="summary">
-
-      <div class="sumRow">
-
-        <span>
-          認知
-        </span>
-
-        <strong>
-          ${state.startSnapshot.reach}
-          →
-          ${state.reach}
-        </strong>
-
+  if(state.snapshot.reach !== state.reach){
+    const d = state.reach - state.snapshot.reach;
+    rows.push(`
+      <div class="weekRow">
+        <span>GROUP｜認知</span>
+        <strong>${state.snapshot.reach} → ${state.reach} <span style="color:${d >= 0 ? '#ddff63' : '#ff9da7'};">${d >= 0 ? '+' : ''}${d}</span></strong>
       </div>
+    `);
+  }
 
-    </div>
+  if(state.snapshot.cash !== state.cash){
+    const d = state.cash - state.snapshot.cash;
+    rows.push(`
+      <div class="weekRow">
+        <span>GROUP｜活動資金</span>
+        <strong>¥${state.snapshot.cash.toLocaleString("ja-JP")} → ¥${state.cash.toLocaleString("ja-JP")} <span style="color:${d >= 0 ? '#ddff63' : '#ff9da7'};">${d >= 0 ? '+' : ''}¥${Math.abs(d).toLocaleString("ja-JP")}</span></strong>
+      </div>
+    `);
+  }
 
-    <div class="days">
+  Object.keys(MEMBERS).forEach(id => {
+    ["vocal","dance","bond","energy"].forEach(metric => {
+      const before = state.snapshot.members[id][metric];
+      const after = state.members[id][metric];
+      if(before === after) return;
+      const d = after - before;
+      rows.push(`
+        <div class="weekRow">
+          <span>${MEMBERS[id].name}｜${metricLabel(metric)}</span>
+          <strong>${before} → ${after} <span style="color:${d >= 0 ? '#ddff63' : '#ff9da7'};">${d >= 0 ? '+' : ''}${d}</span></strong>
+        </div>
+      `);
+    });
+  });
 
-      デビューまで
-
-      <strong>
-        あと21日
-      </strong>
-
-    </div>
-
-    <button class="weekBtn">
-      WEEK 2へ →
-    </button>
-    `;
-
-
-  $("weekEnd")
-    .classList
-    .add("show");
-
+  return rows.join("") || `<div class="weekRow"><span>変化なし</span><strong>--</strong></div>`;
 }
 
+function renderWeekEnd(){
+  weekEnd.innerHTML = `
+    <div class="weekTag">WEEK 1 COMPLETE</div>
+    <div class="weekTitle">最初の1週間、<br>ここから始まった。</div>
+    <div class="weekText">
+      まだ4人は完成していない。<br>
+      でも、選んだ判断のぶんだけ前に進んでいる。
+    </div>
+
+    <div class="weekSummary">
+      ${buildWeekSummaryRows()}
+    </div>
+
+    <div class="weekDays">
+      デビューまで
+      <strong>あと21日</strong>
+    </div>
+
+    <div class="weekBtns">
+      <button class="weekBtn primary" id="restartWeekBtn">もう一度WEEK 1をやる</button>
+      <button class="weekBtn sub" id="backTitleBtn">タイトルへ戻る</button>
+    </div>
+  `;
+
+  weekEnd.classList.add("show");
+
+  $("restartWeekBtn").onclick = () => {
+    resetGame();
+    showScreen("game");
+    weekEnd.classList.remove("show");
+    renderNode();
+  };
+
+  $("backTitleBtn").onclick = () => {
+    weekEnd.classList.remove("show");
+    showScreen("title");
+  };
+}
 
 /* =========================
    STATUS
 ========================= */
-
-$("statusBtn").onclick =
-()=>{
-
-  const averageBond =
-    Math.round(
-      Object.keys(
-        state.members
-      )
-      .reduce(
-        (sum,id)=>
-          sum
-          +
-          state.members[id].bond,
-        0
-      )
-      /
-      4
-    );
-
-
-  $("modalBox")
-    .innerHTML =
-    `
-    <h2>
-      O-VER-KiLL STATUS
-    </h2>
-
-    <div class="statusTop">
-
-      認知：
-      ${state.reach}
-
-      <br>
-
-      連携平均：
-      ${averageBond}
-
-      <br>
-
-      活動資金：
-      ¥${state.cash.toLocaleString(
-        "ja-JP"
-      )}
-
+$("statusBtn").addEventListener("click", () => {
+  modalBox.innerHTML = `
+    <h2>O-VER-KiLL STATUS</h2>
+    <div class="statusHead">
+      認知：${state.reach}<br>
+      活動資金：¥${state.cash.toLocaleString("ja-JP")}<br>
+      連携平均：${avgBond()}
     </div>
 
-    ${Object.keys(
-      MEMBERS
-    )
-    .map(
-      id => {
-
-        const member =
-          MEMBERS[id];
-
-
-        const stats =
-          state.members[id];
-
-
-        return `
-        <div class="member">
-
-          <h3
-            style="
-              color:${member.color}
-            "
-          >
-            ${member.name}
-          </h3>
-
-          <div class="vals">
-
-            <div>
-              🎤 歌唱
-              ${stats.vocal}
-            </div>
-
-            <div>
-              💃 ダンス
-              ${stats.dance}
-            </div>
-
-            <div>
-              🤝 連携
-              ${stats.bond}
-            </div>
-
-            <div>
-              ❤️ 体力
-              ${stats.energy}
-            </div>
-
-          </div>
-
+    ${Object.keys(MEMBERS).map(id => `
+      <div class="memberCard">
+        <h3 style="color:${MEMBERS[id].color};">${MEMBERS[id].name}</h3>
+        <div class="memberGrid">
+          <div>🎤 歌唱 ${state.members[id].vocal}</div>
+          <div>💃 ダンス ${state.members[id].dance}</div>
+          <div>🤝 連携 ${state.members[id].bond}</div>
+          <div>❤️ 体力 ${state.members[id].energy}</div>
         </div>
-        `;
+      </div>
+    `).join("")}
 
-      }
-    )
-    .join("")
-    }
+    <button class="modalClose" data-close>閉じる</button>
+  `;
+  modal.classList.add("show");
+});
 
-    <button
-      class="close"
-      data-close
-    >
-      閉じる
-    </button>
-    `;
-
-
-  $("modal")
-    .classList
-    .add("show");
-
-};
-
-
-$("modal").onclick =
-event=>{
-
-  if(
-    event.target.id === "modal"
-    ||
-    event.target.matches(
-      "[data-close]"
-    )
-  ){
-
-    $("modal")
-      .classList
-      .remove("show");
-
+modal.addEventListener("click", (e) => {
+  if(e.target.id === "modal" || e.target.matches("[data-close]")){
+    modal.classList.remove("show");
   }
-
-};
-
+});
 
 /* =========================
-   START
+   INIT
 ========================= */
-
 startLoading();
