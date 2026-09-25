@@ -206,7 +206,7 @@ button{
       rgba(17,17,24,.75) 80%,
       #111118 100%
     ),
-    url("../debut-live.webp")
+    url("./debut-live.webp")
     center top/contain no-repeat;
 
   background-color:#111118;
@@ -315,7 +315,7 @@ button{
   inset:0;
 
   background:
-    url("../debut-live.webp")
+    url("./debut-live.webp")
     center/cover no-repeat;
 
   opacity:.58;
