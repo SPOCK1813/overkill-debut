@@ -4,16 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111118">
-
   <title>O-VER-KiLL｜MANAGER'S STORY</title>
-
   <link rel="stylesheet" href="./style.css">
 </head>
-
 <body>
 
   <!-- LOADING -->
   <section id="loading" class="screen active">
+    <div class="loadStars">
+      <span>★</span><span>☆</span><span>★</span><span>☆</span>
+    </div>
+
     <div class="loadLogo">
       O-VER-KiLL
       <small>MANAGER'S STORY</small>
@@ -21,143 +22,79 @@
 
     <img id="loadChar" src="./sarina_smile.png" alt="">
 
-    <div id="loadMsg">
-      4人の予定を確認中…
-    </div>
+    <div id="loadMsg">4人の予定を確認中…</div>
 
     <div class="loadTrack">
       <div id="loadBar"></div>
     </div>
 
-    <div id="loadPct">
-      0%
-    </div>
+    <div id="loadPct">0%</div>
   </section>
 
 
   <!-- TITLE -->
   <section id="title" class="screen">
-
     <div class="titleBg"></div>
 
     <div class="titleContent">
+      <div class="titleMini">IDOL MANAGEMENT STORY</div>
+      <div class="titleMain">O-VER-KiLL</div>
+      <div class="titleSub">MANAGER'S STORY</div>
 
-      <div class="titleMini">
-        IDOL MANAGEMENT STORY
-      </div>
-
-      <div class="titleMain">
-        O-VER-KiLL
-      </div>
-
-      <div class="titleSub">
-        MANAGER'S STORY
-      </div>
-
-      <button id="startBtn">
-        ▶ GAME START
-      </button>
-
-      <button id="contBtn">
-        続きから
-      </button>
-
+      <button id="startBtn">▶ GAME START</button>
+      <button id="contBtn">続きから</button>
     </div>
-
   </section>
 
 
   <!-- PROLOGUE -->
   <section id="prologue" class="screen">
-
     <div class="proBg"></div>
     <div class="proShade"></div>
 
     <div id="proText"></div>
-
-    <div class="proHint">
-      タップで進む ▼
-    </div>
-
+    <div class="proHint">タップで進む ▼</div>
   </section>
 
 
   <!-- GAME -->
   <section id="game" class="screen">
-
     <header class="gameTop">
-
-      <div id="chapter">
-        WEEK 1
-      </div>
-
-      <button id="statusBtn">
-        STATUS
-      </button>
-
+      <div id="chapter">WEEK 1</div>
+      <button id="statusBtn">STATUS</button>
     </header>
 
-
     <main class="stage">
-
       <div class="visual">
-
-        <div
-          id="env"
-          class="environment studio"
-        ></div>
+        <div id="env" class="environment studio"></div>
 
         <div id="aura"></div>
 
         <div id="managerMark">
-          <strong>
-            O-VER-KiLL
-            <small>THE BEGINNING</small>
-          </strong>
+          <strong>O-VER-KiLL</strong>
+          <small>THE BEGINNING</small>
         </div>
 
-        <img
-          id="char"
-          alt=""
-        >
-
+        <img id="char" alt="">
         <div id="reaction"></div>
-
       </div>
-
 
       <div class="dialogueWrap">
-
-        <div id="tapGuide">
-          👆 吹き出しをタップ！
-        </div>
+        <div id="tapGuide">👆 吹き出しをタップ！</div>
 
         <div id="dialogue">
-
-          <div id="speaker">
-            MANAGER
-          </div>
-
+          <div id="speaker">MANAGER</div>
           <div id="text"></div>
-
-          <div id="nextMark">
-            ▼
-          </div>
-
+          <div id="nextMark">▼</div>
         </div>
-
       </div>
-
 
       <div id="result">
         <div id="resultBox"></div>
       </div>
 
-
       <div id="weekEnd"></div>
-
     </main>
-
   </section>
 
 
@@ -167,15 +104,9 @@
   </div>
 
 
-  <audio
-    id="songAudio"
-    src="./akunaki-kodou.mp3"
-    preload="metadata"
-  ></audio>
-
+  <audio id="songAudio" src="./akunaki-kodou.mp3" preload="metadata"></audio>
 
   <script src="./story.js"></script>
   <script src="./game.js"></script>
-
 </body>
 </html>
