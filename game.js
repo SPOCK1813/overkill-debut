@@ -346,12 +346,24 @@ function renderNode(){
   setCharacter(node.member, node.expression);
   setReaction(node.reaction);
 
-  if(node.choices){
-    renderChoices(node);
-  }else{
-    dialogue.dataset.mode = "advance";
-    typeDialogue(node.text);
-  }
+  dialogue.scrollTop = 0;
+
+if(node.choices){
+  nextMark.style.display = "none";
+
+  text.innerHTML = `
+    <div class="choiceLead">${node.text.replace(/\n/g,"<br>")}</div>
+    <div class="choiceGrid">
+      ${node.choices.map((choice,index)=>`
+        <button class="choiceBtn" data-choice="${index}">
+          ${choice.text}
+        </button>
+      `).join("")}
+    </div>
+  `;
+
+  return;
+}
 
   if(!state.tutorialSeen){
     tapGuide.classList.add("show");
