@@ -241,7 +241,18 @@ screens.prologue.addEventListener("click", () => {
    CHARACTER / BG
 ========================= */
 function setBackground(bg){
-  env.className = "environment " + (bg || "office");
+  const allow = [
+    "manager",
+    "studio",
+    "lounge",
+    "sns",
+    "city",
+    "live",
+    "outdoor"
+  ];
+
+  const key = allow.includes(bg) ? bg : "manager";
+  env.className = "environment " + key;
 }
 
 function setCharacter(memberId, expression = "normal"){
