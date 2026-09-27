@@ -289,54 +289,70 @@ function setBackground(bg){
 
 /* CHARACTER */
 
-function setCharacter(memberId, expression="normal"){
-  char.classList.remove("show");
-  reaction.textContent = "";
+function setCharacter(memberId, expression = "normal"){
+  return new Promise((resolve) => {
 
-  if(!memberId){
-    char.style.display = "none";
-    aura.style.display = "none";
-    managerMark.style.display = "flex";
-    return;
-  }
+    char.classList.remove("show");
+    reaction.textContent = "";
 
-  const member = MEMBERS[memberId];
-  const images = CHAR_IMAGES[memberId];
+    if(!memberId){
+      char.style.display = "none";
+      aura.style.display = "none";
+      managerMark.style.display = "flex";
+      resolve();
+      return;
+    }
 
-  if(!member || !images){
-    char.style.display = "none";
-    aura.style.display = "none";
-    managerMark.style.display = "flex";
-    return;
-  }
+    const member = MEMBERS[memberId];
+    const images = CHAR_IMAGES[memberId];
 
-  managerMark.style.display = "none";
-  aura.style.display = "block";
+    if(!member || !images){
+      char.style.display = "none";
+      aura.style.display = "none";
+      managerMark.style.display = "flex";
+      resolve();
+      return;
+    }
 
-  char.src =
-    images[expression] ||
-    images.normal;
+    managerMark.style.display = "none";
+    aura.style.display = "block";
 
-  char.alt = member.name;
-  char.style.display = "block";
+    const src =
+      images[expression] ||
+      images.normal;
 
-  aura.style.setProperty(
-    "--char-rgb",
-    member.rgb
-  );
+    char.onload = () => {
+      char.style.display = "block";
 
-  requestAnimationFrame(() => {
-    char.classList.add("show");
+      requestAnimationFrame(() => {
+        char.classList.add("show");
+        resolve();
+      });
+    };
+
+    char.onerror = () => {
+      char.style.display = "block";
+      resolve();
+    };
+
+    char.src = src;
+    char.alt = member.name;
+
+    aura.style.setProperty(
+      "--char-rgb",
+      member.rgb
+    );
+
+    if(char.complete){
+      char.style.display = "block";
+
+      requestAnimationFrame(() => {
+        char.classList.add("show");
+        resolve();
+      });
+    }
   });
 }
-
-function setReaction(symbol){
-  reaction.textContent = symbol || "";
-  reaction.style.display = symbol
-    ? "block"
-    : "none";
-}
-
 
 /* TYPEWRITER */
 
