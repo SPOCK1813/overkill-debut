@@ -1,12 +1,13 @@
 window.GAME_DATA = {
 
+  version: "0.20",
+
   memberOrder: [
     "sarina",
     "miyu",
     "kilua",
     "raisa"
   ],
-
 
   members: {
 
@@ -65,9 +66,7 @@ window.GAME_DATA = {
         energy: 70
       }
     }
-
   },
-
 
   images: {
 
@@ -102,9 +101,7 @@ window.GAME_DATA = {
       troubled: "./raisa_troubled.png",
       cry: "./raisa_cry.png"
     }
-
   },
-
 
   backgrounds: {
     manager: "./bg-manager.png",
@@ -117,50 +114,53 @@ window.GAME_DATA = {
     outdoor: "./bg-outdoor.png"
   },
 
+  statLabels: {
+    vocal: "歌唱",
+    dance: "ダンス",
+    mc: "MC",
+    bond: "連携",
+    energy: "体力"
+  },
 
   ranks: [
-    {
-      min: 90,
-      rank: "S"
-    },
-    {
-      min: 75,
-      rank: "A"
-    },
-    {
-      min: 60,
-      rank: "B"
-    },
-    {
-      min: 45,
-      rank: "C"
-    },
-    {
-      min: 30,
-      rank: "D"
-    },
-    {
-      min: 0,
-      rank: "E"
-    }
+    { min: 90, rank: "S" },
+    { min: 75, rank: "A" },
+    { min: 60, rank: "B" },
+    { min: 45, rank: "C" },
+    { min: 30, rank: "D" },
+    { min: 0, rank: "E" }
   ],
 
-
-  expTable: {
+  exp: {
     base: 100,
     growth: 35,
     pointPerLevel: 3
   },
 
+  seasons: {
+    total: 4,
+    weeksPerSeason: 8,
 
-  commands: [
+    names: {
+      1: "THE BEGINNING",
+      2: "UNDERGROUND",
+      3: "BREAK THROUGH",
+      4: "LAST FOUR"
+    }
+  },
+
+  weekActions: 3,
+
+  trainingCommands: [
 
     {
       id: "dance",
       icon: "💃",
-      name: "ダンス",
-      desc: "ダンス↑ / 体力↓",
-      bg: "studio",
+      title: "ダンス",
+      description: "振付・フォーメーションを磨く",
+      primary: "dance",
+      primaryGain: 4,
+      energy: -7,
       cash: -3000,
       exp: 35
     },
@@ -168,9 +168,11 @@ window.GAME_DATA = {
     {
       id: "vocal",
       icon: "🎤",
-      name: "ボーカル",
-      desc: "歌唱↑ / 体力↓",
-      bg: "studio",
+      title: "ボーカル",
+      description: "歌唱力と表現を鍛える",
+      primary: "vocal",
+      primaryGain: 4,
+      energy: -6,
       cash: -3000,
       exp: 35
     },
@@ -178,9 +180,12 @@ window.GAME_DATA = {
     {
       id: "mc",
       icon: "🎙️",
-      name: "MC練習",
-      desc: "MC↑ / 連携↑",
-      bg: "studio",
+      title: "MC練習",
+      description: "話す力と4人の連携を磨く",
+      primary: "mc",
+      primaryGain: 4,
+      bondGain: 2,
+      energy: -4,
       cash: -1000,
       exp: 30
     },
@@ -188,9 +193,12 @@ window.GAME_DATA = {
     {
       id: "sns",
       icon: "📱",
-      name: "SNS配信",
-      desc: "認知↑ / MC↑",
-      bg: "sns",
+      title: "SNS配信",
+      description: "自宅から配信して認知を広げる",
+      primary: "mc",
+      primaryGain: 2,
+      reach: 7,
+      energy: -3,
       cash: -1000,
       exp: 25
     },
@@ -198,9 +206,10 @@ window.GAME_DATA = {
     {
       id: "flyer",
       icon: "📄",
-      name: "チラシ配り",
-      desc: "認知↑↑ / 体力↓",
-      bg: "city",
+      title: "チラシ配り",
+      description: "街で直接名前を知ってもらう",
+      reach: 11,
+      energy: -6,
       cash: -3000,
       exp: 25
     },
@@ -208,28 +217,37 @@ window.GAME_DATA = {
     {
       id: "rest",
       icon: "💤",
-      name: "休養",
-      desc: "体力↑↑",
-      bg: "lounge",
+      title: "休養",
+      description: "体力を戻して次に備える",
+      energy: 13,
       cash: 0,
       exp: 10
     }
-
   ],
 
+  week1Mission: [
+    {
+      id: "dance",
+      label: "ダンス平均 C以上",
+      type: "average",
+      stat: "dance",
+      target: 45
+    },
 
-  seasons: {
+    {
+      id: "bond",
+      label: "連携平均 C以上",
+      type: "average",
+      stat: "bond",
+      target: 45
+    },
 
-    total: 4,
-    weeksPerSeason: 8,
-
-    titles: {
-      1: "THE BEGINNING",
-      2: "UNDERGROUND",
-      3: "BREAK THROUGH",
-      4: "LAST FOUR"
+    {
+      id: "energy",
+      label: "全員の体力40以上",
+      type: "minimum",
+      stat: "energy",
+      target: 40
     }
-
-  }
-
+  ]
 };
