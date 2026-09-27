@@ -1,111 +1,159 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+
   <meta
     name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
-  <meta name="theme-color" content="#111118">
 
-  <title>O-VER-KiLL｜MANAGER'S STORY</title>
+  <meta
+    name="theme-color"
+    content="#080a10"
+  >
 
-  <link rel="stylesheet" href="./style.css">
+  <title>
+    O-VER-KiLL｜MANAGER'S STORY
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="./style.css"
+  >
 </head>
 
 <body>
 
-  <!-- LOADING -->
-  <section id="loading" class="screen active">
+  <!-- ==========================================
+       LOADING
+  =========================================== -->
 
-    <div class="loadLogo">
+  <section
+    id="loading"
+    class="screen active"
+  >
+
+    <div class="loadingLogo">
       O-VER-KiLL
-      <small>MANAGER'S STORY</small>
     </div>
 
-    <img
-      id="loadChar"
-      src="./sarina_smile.png"
-      alt=""
+    <div class="loadingSub">
+      MANAGER'S STORY
+    </div>
+
+    <div class="loadingBar">
+      <div
+        id="loadingProgress"
+        class="loadingProgress"
+      ></div>
+    </div>
+
+    <div
+      id="loadingPercent"
+      class="loadingPercent"
     >
-
-    <div id="loadMsg">
-      4人の予定を確認中…
+      0%
     </div>
-
-    <div class="loadTrack">
-      <div id="loadBar"></div>
-    </div>
-
-    <div id="loadPct">0%</div>
 
   </section>
 
 
-  <!-- TITLE -->
-  <section id="title" class="screen">
+  <!-- ==========================================
+       TITLE
+  =========================================== -->
 
-    <div class="titleBlur"></div>
+  <section
+    id="title"
+    class="screen"
+  >
 
-    <div class="titlePhoto"></div>
+    <div class="titleBgBlur"></div>
+
+    <img
+      class="titlePhoto"
+      src="./debut-live.webp"
+      alt=""
+    >
 
     <div class="titleShade"></div>
 
     <div class="titleContent">
 
-      <div class="titleMini">
-        IDOL MANAGEMENT STORY
+      <div class="titleSmall">
+        IDOL MANAGEMENT GAME
       </div>
 
-      <div class="titleMain">
+      <h1 class="titleLogo">
         O-VER-KiLL
-      </div>
+      </h1>
 
-      <div class="titleSub">
+      <div class="titleGameName">
         MANAGER'S STORY
       </div>
 
-      <button id="startBtn">
-        ▶ GAME START
-      </button>
+      <div class="titleButtons">
 
-      <button id="contBtn">
-        続きから
-      </button>
+        <button id="startBtn">
+          NEW GAME
+        </button>
+
+        <button id="continueBtn">
+          CONTINUE
+        </button>
+
+      </div>
 
     </div>
 
   </section>
 
 
-  <!-- PROLOGUE -->
-  <section id="prologue" class="screen">
+  <!-- ==========================================
+       PROLOGUE
+  =========================================== -->
 
-    <div class="proBg"></div>
-    <div class="proShade"></div>
+  <section
+    id="prologue"
+    class="screen"
+  >
 
-    <div id="proText"></div>
-
-    <div class="proHint">
-      タップで進む ▼
+    <div class="prologueBrand">
+      O-VER-KiLL
     </div>
+
+    <div id="prologueText"></div>
+
+    <button id="prologueNext">
+      NEXT
+    </button>
 
   </section>
 
 
-  <!-- STORY -->
-  <section id="game" class="screen">
+  <!-- ==========================================
+       STORY / ADV
+  =========================================== -->
 
-    <header class="gameTop">
+  <section
+    id="game"
+    class="screen"
+  >
 
-      <div>
-        <div id="seasonLabel">
+    <div id="env"></div>
+
+    <header class="storyHeader">
+
+      <div class="storyHeaderInfo">
+
+        <span id="seasonLabel">
           SEASON 1
-        </div>
+        </span>
 
         <div id="chapter">
           WEEK 1
         </div>
+
       </div>
 
       <button id="statusBtn">
@@ -115,71 +163,56 @@
     </header>
 
 
-    <main class="stage">
-
-      <div class="visual">
-
-        <div
-          id="env"
-          class="environment manager"
-        ></div>
-
-        <div id="aura"></div>
-
-        <div id="managerMark">
-          <div>
-            <strong>O-VER-KiLL</strong>
-            <small>THE BEGINNING</small>
-          </div>
-        </div>
-
-        <img id="char" alt="">
-
-        <div id="reaction"></div>
-
-      </div>
+    <div id="managerMark"></div>
 
 
-      <div class="dialogueWrap">
+    <img
+      id="char"
+      src=""
+      alt=""
+    >
 
-        <div id="tapGuide">
-          👆 吹き出しをタップ！
-        </div>
 
-        <div id="dialogue">
+    <div id="reaction"></div>
 
-          <div id="speaker">
-            MANAGER
-          </div>
 
-          <div id="text"></div>
+    <div
+      id="dialogue"
+      data-mode="normal"
+    >
 
-          <div id="nextMark">
-            ▼
-          </div>
+      <div id="speaker"></div>
 
-        </div>
+      <div id="text"></div>
 
-      </div>
+      <div id="choices"></div>
 
-    </main>
+    </div>
 
   </section>
 
 
-  <!-- TRAINING -->
-  <section id="training" class="screen">
+  <!-- ==========================================
+       MANAGEMENT / TRAINING
+  =========================================== -->
 
-    <header class="gameTop">
+  <section
+    id="training"
+    class="screen"
+  >
 
-      <div>
-        <div id="trainingSeason">
+    <header class="trainingHeader">
+
+      <div class="trainingHeaderInfo">
+
+        <span id="trainingSeason">
           SEASON 1
-        </div>
+        </span>
 
         <div id="trainingWeek">
-          WEEK 2
+          WEEK 1
         </div>
+
       </div>
 
       <button id="trainingStatusBtn">
@@ -189,70 +222,142 @@
     </header>
 
 
-    <div class="trainingBody">
+    <main class="trainingBody">
 
-      <div class="trainingTop">
+      <div class="trainingTitleBlock">
 
-        <div class="trainingTitle">
-          今日の行動を選択
+        <small>
+          MANAGEMENT
+        </small>
+
+        <h1>
+          今日、何をする？
+        </h1>
+
+        <p>
+          メンバーと活動を選んで、
+          O-VER-KiLLを育てよう。
+        </p>
+
+      </div>
+
+
+      <div class="trainingInfo">
+
+        <div>
+          <span>
+            認知度
+          </span>
+
+          <strong id="trainingReach">
+            0
+          </strong>
         </div>
 
-        <div id="trainingDays">
-          デビューまであと21日
+
+        <div>
+          <span>
+            ファン
+          </span>
+
+          <strong id="trainingFans">
+            0
+          </strong>
+        </div>
+
+
+        <div>
+          <span>
+            活動資金
+          </span>
+
+          <strong id="trainingCash">
+            ¥0
+          </strong>
         </div>
 
       </div>
 
 
-      <div
-        id="trainingMembers"
-        class="trainingMembers"
-      ></div>
+      <div id="trainingDays">
+        デビューまであと28日
+      </div>
 
 
-      <div
-        id="commandGrid"
-        class="commandGrid"
-      ></div>
+      <div class="trainingSectionLabel">
+        育成するメンバー
+      </div>
 
-    </div>
-
-  </section>
+      <div id="trainingMembers"></div>
 
 
-  <!-- ACTION RESULT -->
-  <div id="result">
+      <div class="trainingSectionLabel">
+        ACTIVITY
+      </div>
 
-    <div id="resultBox"></div>
+      <div id="commandGrid"></div>
 
-  </div>
-
-
-  <!-- WEEK RESULT -->
-  <section id="weekEnd">
-
-    <div id="weekEndInner"></div>
+    </main>
 
   </section>
 
 
-  <!-- STATUS -->
-  <div id="modal">
+  <!-- ==========================================
+       ACTION RESULT
+       JavaScriptで中身を生成
+  =========================================== -->
 
-    <div id="modalBox"></div>
+  <section
+    id="actionResult"
+    class="screen"
+  ></section>
 
-  </div>
 
+  <!-- ==========================================
+       WEEK RESULT
+       JavaScriptで中身を生成
+  =========================================== -->
+
+  <section
+    id="weekEnd"
+    class="screen"
+  ></section>
+
+
+  <!-- ==========================================
+       STATUS MODAL
+       JavaScriptで中身を生成
+  =========================================== -->
+
+  <div id="statusModal"></div>
+
+
+  <!-- ==========================================
+       AUDIO
+  =========================================== -->
 
   <audio
-    id="songAudio"
-    src="./akunaki-kodou.mp3"
+    id="song"
     preload="metadata"
-  ></audio>
+  >
 
+    <source
+      src="./akunaki-kodou.mp3"
+      type="audio/mpeg"
+    >
+
+  </audio>
+
+
+  <!-- ==========================================
+       GAME DATA
+       順番重要
+  =========================================== -->
 
   <script src="./data.js"></script>
+
   <script src="./story.js"></script>
+
   <script src="./game.js"></script>
 
 </body>
