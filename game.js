@@ -1,23 +1,11 @@
 const CFG = window.GAME_CONFIG;
-
 const MEMBERS = CFG.members;
 const CHAR_IMAGES = CFG.charImages;
 const PROLOGUE_LINES = CFG.prologue;
 const STORY = CFG.story;
 
-/*
-  v6
-  背景画像方式へ統一したので、
-  古い途中データとの事故を避けるため保存キーを更新。
-*/
 const STORAGE_KEY = "overkill_manager_story_v6";
-
-const $ = (id) => document.getElementById(id);
-
-
-/* =========================
-   ELEMENTS
-========================= */
+const $ = id => document.getElementById(id);
 
 const screens = {
   loading: $("loading"),
@@ -32,10 +20,8 @@ const loadBar = $("loadBar");
 const loadPct = $("loadPct");
 
 const proText = $("proText");
-
 const chapter = $("chapter");
 const env = $("env");
-
 const aura = $("aura");
 const managerMark = $("managerMark");
 const char = $("char");
@@ -49,455 +35,241 @@ const tapGuide = $("tapGuide");
 
 const result = $("result");
 const resultBox = $("resultBox");
-
 const weekEnd = $("weekEnd");
 
 const modal = $("modal");
 const modalBox = $("modalBox");
-
 const songAudio = $("songAudio");
 
 
-/* =========================
-   INITIAL DATA
-========================= */
-
 function initialMembers(){
   return {
-    sarina: {
-      vocal: 78,
-      dance: 48,
-      bond: 74,
-      energy: 72
-    },
-
-    miyu: {
-      vocal: 74,
-      dance: 54,
-      bond: 68,
-      energy: 76
-    },
-
-    kilua: {
-      vocal: 52,
-      dance: 84,
-      bond: 40,
-      energy: 80
-    },
-
-    raisa: {
-      vocal: 42,
-      dance: 44,
-      bond: 58,
-      energy: 70
-    }
+    sarina:{ vocal:78, dance:48, bond:74, energy:72 },
+    miyu:{ vocal:74, dance:54, bond:68, energy:76 },
+    kilua:{ vocal:52, dance:84, bond:40, energy:80 },
+    raisa:{ vocal:42, dance:44, bond:58, energy:70 }
   };
 }
-
 
 function clone(obj){
   return JSON.parse(JSON.stringify(obj));
 }
 
-
 function freshState(){
-
   const members = initialMembers();
 
   return {
-    started: false,
-
-    prologueSeen: false,
-    tutorialSeen: false,
-
-    node: "m1",
-
-    week: 1,
-
-    reach: 10,
-
-    cash: 220000,
-
-    members: members,
-
-    snapshot: {
-      reach: 10,
-      cash: 220000,
-      members: clone(members)
+    started:false,
+    prologueSeen:false,
+    tutorialSeen:false,
+    node:"m1",
+    week:1,
+    reach:10,
+    cash:220000,
+    members,
+    snapshot:{
+      reach:10,
+      cash:220000,
+      members:clone(members)
     }
   };
 }
 
-
 function loadState(){
-
   try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
 
-    const saved = localStorage.getItem(STORAGE_KEY);
-
-    if(!saved){
+    if(!saved || !saved.node || !STORY[saved.node]){
       return freshState();
     }
 
-    const parsed = JSON.parse(saved);
-
-    if(!parsed.node || !STORY[parsed.node]){
-      return freshState();
-    }
-
-    return parsed;
-
-  }catch(error){
-
-    console.warn("SAVE LOAD ERROR", error);
-
+    return saved;
+  }catch{
     return freshState();
   }
 }
 
-
 let state = loadState();
 
-
 function saveState(){
-
-  try{
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(state)
-    );
-
-  }catch(error){
-
-    console.warn("SAVE ERROR", error);
-  }
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(state)
+  );
 }
 
-
 function resetGame(){
-
   state = freshState();
-
   state.started = true;
-
   saveState();
 }
 
-
-/* =========================
-   HELPERS
-========================= */
-
 function clamp(n){
-
-  return Math.max(
-    0,
-    Math.min(999999, n)
-  );
+  return Math.max(0, Math.min(999999, n));
 }
 
+function metricLabel(metric){
+  return {
+    vocal:"歌唱",
+    dance:"ダンス",
+    bond:"連携",
+    energy:"体力",
+    reach:"認知",
+    cash:"活動資金"
+  }[metric] || metric;
+}
 
 function avgBond(){
-
-  const keys = Object.keys(state.members);
-
-  const total = keys.reduce(
-    (sum, key) => sum + state.members[key].bond,
+  const ids = Object.keys(state.members);
+  const total = ids.reduce(
+    (sum,id) => sum + state.members[id].bond,
     0
   );
 
-  return Math.round(total / keys.length);
+  return Math.round(total / ids.length);
 }
-
-
-function metricLabel(metric){
-
-  const labels = {
-    vocal: "歌唱",
-    dance: "ダンス",
-    bond: "連携",
-    energy: "体力",
-    reach: "認知",
-    cash: "活動資金"
-  };
-
-  return labels[metric] || metric;
-}
-
 
 function showScreen(name){
+  Object.values(screens).forEach(
+    el => el.classList.remove("active")
+  );
 
-  Object.values(screens).forEach((screen) => {
-    screen.classList.remove("active");
-  });
-
-  if(screens[name]){
-    screens[name].classList.add("active");
-  }
+  screens[name].classList.add("active");
 }
-
-
-/* =========================
-   MUSIC
-========================= */
 
 function tryPlaySong(){
-
-  if(!songAudio){
-    return;
-  }
+  if(!songAudio) return;
 
   songAudio.volume = 0.35;
-
-  songAudio.play().catch(() => {
-    /*
-      iPhoneではユーザー操作以外から
-      再生できない場合があるので無視。
-    */
-  });
+  songAudio.play().catch(() => {});
 }
 
 
-/* =========================
-   LOADING
-========================= */
+/* LOADING */
 
 const loadingSet = [
-
-  {
-    img: "./sarina_smile.png",
-    msg: "4人の予定を確認中…"
-  },
-
-  {
-    img: "./miyu_smile.png",
-    msg: "SNSのネタを整理中…"
-  },
-
-  {
-    img: "./kilua_smile.png",
-    msg: "レッスン場を準備中…"
-  },
-
-  {
-    img: "./raisa_smile.png",
-    msg: "ステージを確認中…"
-  }
+  { img:"./sarina_smile.png", msg:"4人の予定を確認中…" },
+  { img:"./miyu_smile.png", msg:"SNSのネタを整理中…" },
+  { img:"./kilua_smile.png", msg:"レッスン場を準備中…" },
+  { img:"./raisa_smile.png", msg:"ステージを確認中…" }
 ];
 
-
 function startLoading(){
-
-  let progress = 0;
-  let currentCharacter = 0;
+  let p = 0;
+  let current = 0;
 
   const timer = setInterval(() => {
+    p += Math.floor(Math.random() * 7) + 3;
+    p = Math.min(100,p);
 
-    progress += Math.floor(Math.random() * 7) + 3;
-
-    if(progress > 100){
-      progress = 100;
-    }
-
-    const nextCharacter = Math.min(
+    const index = Math.min(
       loadingSet.length - 1,
-      Math.floor(progress / 25)
+      Math.floor(p / 25)
     );
 
-    if(nextCharacter !== currentCharacter){
-
-      currentCharacter = nextCharacter;
-
-      loadChar.src =
-        loadingSet[currentCharacter].img;
-
-      loadMsg.textContent =
-        loadingSet[currentCharacter].msg;
+    if(index !== current){
+      current = index;
+      loadChar.src = loadingSet[index].img;
+      loadMsg.textContent = loadingSet[index].msg;
     }
 
-    loadBar.style.width =
-      progress + "%";
+    loadBar.style.width = p + "%";
+    loadPct.textContent = p + "%";
 
-    loadPct.textContent =
-      progress + "%";
-
-
-    if(progress >= 100){
-
+    if(p >= 100){
       clearInterval(timer);
 
       setTimeout(() => {
-
         showScreen("title");
-
-      }, 350);
+      },350);
     }
-
-  }, 110);
+  },110);
 }
 
 
-/* =========================
-   PROLOGUE
-========================= */
+/* PROLOGUE */
 
 let prologueIndex = 0;
-
 let prologueTyping = false;
-
 let prologueFullText = "";
-
 let prologueTimer = null;
 
-
 function startPrologue(){
-
   showScreen("prologue");
-
   prologueIndex = 0;
-
-  typePrologue(
-    PROLOGUE_LINES[0]
-  );
+  typePrologue(PROLOGUE_LINES[0]);
 }
 
-
 function typePrologue(line){
-
   clearInterval(prologueTimer);
 
   prologueFullText = line;
-
   proText.textContent = "";
-
   prologueTyping = true;
 
-  let index = 0;
+  let i = 0;
 
   prologueTimer = setInterval(() => {
+    i++;
+    proText.textContent = line.slice(0,i);
 
-    index++;
-
-    proText.textContent =
-      line.slice(0, index);
-
-    if(index >= line.length){
-
+    if(i >= line.length){
       clearInterval(prologueTimer);
-
       prologueTyping = false;
     }
-
-  }, 42);
+  },42);
 }
 
+$("startBtn").onclick = () => {
+  resetGame();
+  tryPlaySong();
+  startPrologue();
+};
 
-/* =========================
-   TITLE BUTTONS
-========================= */
+$("contBtn").onclick = () => {
+  if(!state.started){
+    state.started = true;
+    saveState();
+    startPrologue();
+    return;
+  }
 
-$("startBtn").addEventListener(
-  "click",
-  () => {
+  tryPlaySong();
 
-    resetGame();
-
-    tryPlaySong();
-
+  if(state.prologueSeen){
+    showScreen("game");
+    renderNode();
+  }else{
     startPrologue();
   }
-);
+};
 
-
-$("contBtn").addEventListener(
-  "click",
-  () => {
-
-    if(!state.started){
-
-      state.started = true;
-
-      saveState();
-
-      tryPlaySong();
-
-      startPrologue();
-
-      return;
-    }
-
-    tryPlaySong();
-
-    if(state.prologueSeen){
-
-      showScreen("game");
-
-      renderNode();
-
-    }else{
-
-      startPrologue();
-    }
+screens.prologue.onclick = () => {
+  if(prologueTyping){
+    clearInterval(prologueTimer);
+    proText.textContent = prologueFullText;
+    prologueTyping = false;
+    return;
   }
-);
 
+  prologueIndex++;
 
-/* =========================
-   PROLOGUE CLICK
-========================= */
-
-screens.prologue.addEventListener(
-  "click",
-  () => {
-
-    if(prologueTyping){
-
-      clearInterval(prologueTimer);
-
-      proText.textContent =
-        prologueFullText;
-
-      prologueTyping = false;
-
-      return;
-    }
-
-
-    prologueIndex++;
-
-
-    if(
-      prologueIndex >=
-      PROLOGUE_LINES.length
-    ){
-
-      state.prologueSeen = true;
-
-      saveState();
-
-      showScreen("game");
-
-      renderNode();
-
-      return;
-    }
-
-
-    typePrologue(
-      PROLOGUE_LINES[prologueIndex]
-    );
+  if(prologueIndex >= PROLOGUE_LINES.length){
+    state.prologueSeen = true;
+    saveState();
+    showScreen("game");
+    renderNode();
+    return;
   }
-);
+
+  typePrologue(PROLOGUE_LINES[prologueIndex]);
+};
 
 
-/* =========================
-   BACKGROUND
-========================= */
+/* BACKGROUND */
 
 function setBackground(bg){
-
-  const backgrounds = [
+  const allowed = [
     "manager",
     "studio",
     "lounge",
@@ -507,218 +279,129 @@ function setBackground(bg){
     "outdoor"
   ];
 
+  const key = allowed.includes(bg)
+    ? bg
+    : "manager";
 
-  const selected =
-    backgrounds.includes(bg)
-      ? bg
-      : "manager";
-
-
-  env.className =
-    "environment " + selected;
+  env.className = "environment " + key;
 }
 
 
-/* =========================
-   CHARACTER
-========================= */
+/* CHARACTER */
 
-function hideCharacter(){
-
+function setCharacter(memberId, expression="normal"){
   char.classList.remove("show");
-
-  char.style.display = "none";
-
-  aura.style.display = "none";
-}
-
-
-function showManager(){
-
-  hideCharacter();
-
-  managerMark.style.display = "flex";
-}
-
-
-function setCharacter(
-  memberId,
-  expression = "normal"
-){
-
   reaction.textContent = "";
 
-
   if(!memberId){
-
-    showManager();
-
+    char.style.display = "none";
+    aura.style.display = "none";
+    managerMark.style.display = "flex";
     return;
   }
 
+  const member = MEMBERS[memberId];
+  const images = CHAR_IMAGES[memberId];
 
-  const member =
-    MEMBERS[memberId];
-
-
-  if(!member){
-
-    showManager();
-
+  if(!member || !images){
+    char.style.display = "none";
+    aura.style.display = "none";
+    managerMark.style.display = "flex";
     return;
   }
-
 
   managerMark.style.display = "none";
+  aura.style.display = "block";
 
-
-  const memberImages =
-    CHAR_IMAGES[memberId];
-
-
-  const source =
-    memberImages[expression] ||
-    memberImages.normal;
-
-
-  char.src = source;
+  char.src =
+    images[expression] ||
+    images.normal;
 
   char.alt = member.name;
-
   char.style.display = "block";
-
-  aura.style.display = "block";
 
   aura.style.setProperty(
     "--char-rgb",
     member.rgb
   );
 
-
   requestAnimationFrame(() => {
-
     char.classList.add("show");
   });
 }
 
-
-/* =========================
-   REACTION
-========================= */
-
 function setReaction(symbol){
-
-  reaction.textContent =
-    symbol || "";
-
-  reaction.style.display =
-    symbol ? "block" : "none";
+  reaction.textContent = symbol || "";
+  reaction.style.display = symbol
+    ? "block"
+    : "none";
 }
 
 
-/* =========================
-   TYPEWRITER
-========================= */
+/* TYPEWRITER */
 
 let typing = false;
-
 let fullText = "";
-
 let typingTimer = null;
 
-
 function stopTyping(){
-
   if(typingTimer){
-
     clearInterval(typingTimer);
   }
 
   typingTimer = null;
 }
 
-
 function typeDialogue(line){
-
   stopTyping();
 
   typing = true;
-
   fullText = line;
 
   text.textContent = "";
+  nextMark.style.display = "none";
+  dialogue.dataset.mode = "dialogue";
 
-  nextMark.style.display =
-    "none";
-
-  dialogue.dataset.mode =
-    "dialogue";
-
-
-  let index = 0;
-
+  let i = 0;
 
   typingTimer = setInterval(() => {
-
-    index++;
+    i++;
 
     text.textContent =
-      line.slice(0, index);
+      line.slice(0,i);
 
-
-    if(index >= line.length){
-
+    if(i >= line.length){
       stopTyping();
-
       typing = false;
-
-      nextMark.style.display =
-        "block";
+      nextMark.style.display = "block";
     }
-
-  }, 22);
+  },22);
 }
 
 
-/* =========================
-   CHOICES
-========================= */
+/* CHOICES */
 
 function renderChoices(node){
-
   stopTyping();
 
   typing = false;
-
-  nextMark.style.display =
-    "none";
-
-  dialogue.dataset.mode =
-    "choice";
-
+  nextMark.style.display = "none";
+  dialogue.dataset.mode = "choice";
 
   const lead =
     String(node.text || "")
       .split("\n")
       .join("<br>");
 
-
   const buttons =
-    node.choices
-      .map((choice, index) => {
-
-        return `
-          <button
-            class="choiceBtn"
-            data-choice="${index}"
-          >
-            ${choice.text}
-          </button>
-        `;
-
-      })
-      .join("");
-
+    node.choices.map((choice,index) => `
+      <button
+        class="choiceBtn"
+        data-choice="${index}"
+      >
+        ${choice.text}
+      </button>
+    `).join("");
 
   text.innerHTML = `
     <div class="choiceLead">
@@ -732,253 +415,136 @@ function renderChoices(node){
 }
 
 
-/* =========================
-   RENDER STORY
-========================= */
+/* STORY */
 
 function renderNode(){
-
   if(state.node === "weekComplete"){
-
     renderWeekEnd();
-
     return;
   }
 
-
-  const node =
-    STORY[state.node];
-
+  const node = STORY[state.node];
 
   if(!node){
-
-    console.warn(
-      "STORY NODE NOT FOUND:",
-      state.node
-    );
-
     state.node = "m1";
-
     saveState();
-
     renderNode();
-
     return;
   }
 
-
   dialogue.scrollTop = 0;
-
 
   chapter.textContent =
     node.chapter ||
     `WEEK ${state.week}`;
 
-
   speaker.textContent =
     node.speaker ||
     "MANAGER";
 
-
-  setBackground(
-    node.bg
-  );
-
+  setBackground(node.bg);
 
   setCharacter(
     node.member,
     node.expression
   );
 
-
-  setReaction(
-    node.reaction
-  );
-
+  setReaction(node.reaction);
 
   if(node.choices){
-
     renderChoices(node);
-
   }else{
-
-    typeDialogue(
-      node.text || ""
-    );
+    typeDialogue(node.text || "");
   }
 
-
-  if(!state.tutorialSeen){
-
-    tapGuide.classList.add("show");
-
-  }else{
-
-    tapGuide.classList.remove("show");
-  }
+  tapGuide.classList.toggle(
+    "show",
+    !state.tutorialSeen
+  );
 }
 
-
-/* =========================
-   DIALOGUE CLICK
-========================= */
-
-dialogue.addEventListener(
-  "click",
-  (event) => {
-
-    if(!state.tutorialSeen){
-
-      state.tutorialSeen = true;
-
-      saveState();
-
-      tapGuide.classList.remove("show");
-    }
-
-
-    const node =
-      STORY[state.node];
-
-
-    if(!node){
-      return;
-    }
-
-
-    if(
-      dialogue.dataset.mode ===
-      "choice"
-    ){
-
-      const button =
-        event.target.closest(
-          "[data-choice]"
-        );
-
-
-      if(!button){
-        return;
-      }
-
-
-      const index =
-        Number(
-          button.dataset.choice
-        );
-
-
-      const choice =
-        node.choices[index];
-
-
-      if(!choice){
-        return;
-      }
-
-
-      state.node =
-        choice.next;
-
-
-      saveState();
-
-      renderNode();
-
-      return;
-    }
-
-
-    advanceDialogue();
+dialogue.onclick = event => {
+  if(!state.tutorialSeen){
+    state.tutorialSeen = true;
+    saveState();
+    tapGuide.classList.remove("show");
   }
-);
 
+  const node = STORY[state.node];
 
-/* =========================
-   ADVANCE
-========================= */
+  if(!node) return;
+
+  if(dialogue.dataset.mode === "choice"){
+    const button =
+      event.target.closest("[data-choice]");
+
+    if(!button) return;
+
+    const choice =
+      node.choices[
+        Number(button.dataset.choice)
+      ];
+
+    if(!choice) return;
+
+    state.node = choice.next;
+    saveState();
+    renderNode();
+
+    return;
+  }
+
+  advanceDialogue();
+};
 
 function advanceDialogue(){
+  const node = STORY[state.node];
 
-  const node =
-    STORY[state.node];
-
-
-  if(!node){
-    return;
-  }
-
+  if(!node) return;
 
   if(typing){
-
     stopTyping();
 
-    text.textContent =
-      fullText;
-
+    text.textContent = fullText;
     typing = false;
-
-    nextMark.style.display =
-      "block";
+    nextMark.style.display = "block";
 
     return;
   }
 
-
   if(node.resultId){
-
-    const resultData =
-      applyResult(
-        node.resultId
-      );
+    const data =
+      applyResult(node.resultId);
 
     showResult(
-      resultData,
+      data,
       node.next
     );
 
     return;
   }
 
-
   if(node.next){
-
-    state.node =
-      node.next;
-
+    state.node = node.next;
     saveState();
-
     renderNode();
   }
 }
 
 
-/* =========================
-   STAT CHANGES
-========================= */
+/* STATS */
 
-function changeMember(
-  memberId,
-  metric,
-  delta
-){
-
+function changeMember(id, metric, delta){
   const before =
-    state.members[memberId][metric];
-
+    state.members[id][metric];
 
   const after =
-    clamp(
-      before + delta
-    );
+    clamp(before + delta);
 
-
-  state.members[memberId][metric] =
-    after;
-
+  state.members[id][metric] = after;
 
   return {
-    name: MEMBERS[memberId].name,
+    name:MEMBERS[id].name,
     metric,
     before,
     after,
@@ -986,52 +552,30 @@ function changeMember(
   };
 }
 
-
 function changeReach(delta){
+  const before = state.reach;
+  const after = clamp(before + delta);
 
-  const before =
-    state.reach;
-
-
-  const after =
-    clamp(
-      before + delta
-    );
-
-
-  state.reach =
-    after;
-
+  state.reach = after;
 
   return {
-    name: "GROUP",
-    metric: "reach",
+    name:"GROUP",
+    metric:"reach",
     before,
     after,
     delta
   };
 }
-
 
 function changeCash(delta){
+  const before = state.cash;
+  const after = clamp(before + delta);
 
-  const before =
-    state.cash;
-
-
-  const after =
-    clamp(
-      before + delta
-    );
-
-
-  state.cash =
-    after;
-
+  state.cash = after;
 
   return {
-    name: "GROUP",
-    metric: "cash",
+    name:"GROUP",
+    metric:"cash",
     before,
     after,
     delta
@@ -1039,430 +583,148 @@ function changeCash(delta){
 }
 
 
-/* =========================
-   RESULTS
-========================= */
+/* RESULTS */
 
 function applyResult(id){
-
   const changes = [];
+  let mini = "RESULT";
+  let title = "";
 
-  let mini =
-    "RESULT";
+  const all = [
+    "sarina",
+    "miyu",
+    "kilua",
+    "raisa"
+  ];
 
-  let title =
-    "";
+  if(id === "teachResult"){
+    mini = "LESSON RESULT";
+    title = "教えることも、練習。";
 
+    changes.push(
+      changeMember("sarina","dance",5),
+      changeMember("miyu","dance",5),
+      changeMember("raisa","dance",4),
+      changeMember("kilua","dance",3),
+      changeMember("kilua","bond",6)
+    );
 
-  switch(id){
-
-
-    case "teachResult":
-
-      mini =
-        "LESSON RESULT";
-
-      title =
-        "教えることも、練習。";
-
-
+    all.forEach(member => {
       changes.push(
-        changeMember(
-          "sarina",
-          "dance",
-          5
-        ),
-
-        changeMember(
-          "miyu",
-          "dance",
-          5
-        ),
-
-        changeMember(
-          "raisa",
-          "dance",
-          4
-        ),
-
-        changeMember(
-          "kilua",
-          "dance",
-          3
-        ),
-
-        changeMember(
-          "kilua",
-          "bond",
-          6
-        )
+        changeMember(member,"energy",-7)
       );
-
-
-      [
-        "sarina",
-        "miyu",
-        "kilua",
-        "raisa"
-      ].forEach((id) => {
-
-        changes.push(
-          changeMember(
-            id,
-            "energy",
-            -7
-          )
-        );
-      });
-
-      break;
-
-
-    case "splitResult":
-
-      mini =
-        "LESSON RESULT";
-
-      title =
-        "少しずつなら、4人で揃えられる。";
-
-
-      [
-        "sarina",
-        "miyu",
-        "kilua",
-        "raisa"
-      ].forEach((id) => {
-
-        changes.push(
-          changeMember(
-            id,
-            "dance",
-            4
-          )
-        );
-
-        changes.push(
-          changeMember(
-            id,
-            "bond",
-            3
-          )
-        );
-
-        changes.push(
-          changeMember(
-            id,
-            "energy",
-            -6
-          )
-        );
-      });
-
-      break;
-
-
-    case "pushResult":
-
-      mini =
-        "LESSON RESULT";
-
-      title =
-        "伸びた。でも、少し無理をした。";
-
-
-      changes.push(
-
-        changeMember(
-          "sarina",
-          "dance",
-          6
-        ),
-
-        changeMember(
-          "miyu",
-          "dance",
-          6
-        ),
-
-        changeMember(
-          "kilua",
-          "dance",
-          4
-        ),
-
-        changeMember(
-          "raisa",
-          "dance",
-          5
-        ),
-
-        changeMember(
-          "sarina",
-          "bond",
-          -2
-        ),
-
-        changeMember(
-          "miyu",
-          "bond",
-          -2
-        ),
-
-        changeMember(
-          "raisa",
-          "bond",
-          -3
-        ),
-
-        changeMember(
-          "sarina",
-          "energy",
-          -12
-        ),
-
-        changeMember(
-          "miyu",
-          "energy",
-          -12
-        ),
-
-        changeMember(
-          "kilua",
-          "energy",
-          -8
-        ),
-
-        changeMember(
-          "raisa",
-          "energy",
-          -13
-        )
-      );
-
-      break;
-
-
-    case "restResult":
-
-      mini =
-        "LESSON RESULT";
-
-      title =
-        "空気を戻したから、前へ進めた。";
-
-
-      [
-        "sarina",
-        "miyu",
-        "kilua",
-        "raisa"
-      ].forEach((id) => {
-
-        changes.push(
-          changeMember(
-            id,
-            "bond",
-            4
-          )
-        );
-
-        changes.push(
-          changeMember(
-            id,
-            "dance",
-            2
-          )
-        );
-
-        changes.push(
-          changeMember(
-            id,
-            "energy",
-            -3
-          )
-        );
-      });
-
-      break;
-
-
-    case "snsResult":
-
-      mini =
-        "SNS RESULT";
-
-      title =
-        "はじめて、画面の向こうに届いた。";
-
-
-      changes.push(
-        changeReach(8),
-
-        changeCash(-2000),
-
-        changeMember(
-          "miyu",
-          "bond",
-          2
-        )
-      );
-
-
-      [
-        "sarina",
-        "miyu",
-        "kilua",
-        "raisa"
-      ].forEach((id) => {
-
-        changes.push(
-          changeMember(
-            id,
-            "energy",
-            -3
-          )
-        );
-      });
-
-      break;
-
-
-    case "flyerResult":
-
-      mini =
-        "PROMOTION RESULT";
-
-      title =
-        "一枚ずつ、名前を知ってもらう。";
-
-
-      changes.push(
-        changeReach(12),
-
-        changeCash(-5000)
-      );
-
-
-      [
-        "sarina",
-        "miyu",
-        "kilua",
-        "raisa"
-      ].forEach((id) => {
-
-        changes.push(
-          changeMember(
-            id,
-            "energy",
-            -7
-          )
-        );
-      });
-
-      break;
-
-
-    case "vocalResult":
-
-      mini =
-        "VOCAL RESULT";
-
-      title =
-        "認知は増えない。でも歌は前に進む。";
-
-
-      changes.push(
-
-        changeMember(
-          "sarina",
-          "vocal",
-          5
-        ),
-
-        changeMember(
-          "miyu",
-          "vocal",
-          5
-        ),
-
-        changeMember(
-          "kilua",
-          "vocal",
-          4
-        ),
-
-        changeMember(
-          "raisa",
-          "vocal",
-          4
-        ),
-
-        changeCash(-3000)
-      );
-
-
-      [
-        "sarina",
-        "miyu",
-        "kilua",
-        "raisa"
-      ].forEach((id) => {
-
-        changes.push(
-          changeMember(
-            id,
-            "energy",
-            -6
-          )
-        );
-      });
-
-      break;
-
-
-    case "recoverResult":
-
-      mini =
-        "RECOVERY";
-
-      title =
-        "休むことも、デビューまでの仕事。";
-
-
-      [
-        "sarina",
-        "miyu",
-        "kilua",
-        "raisa"
-      ].forEach((id) => {
-
-        changes.push(
-          changeMember(
-            id,
-            "energy",
-            8
-          )
-        );
-      });
-
-      break;
-
-
-    default:
-
-      mini =
-        "RESULT";
-
-      title =
-        "変化はなかった。";
-
-      break;
+    });
   }
 
+  else if(id === "splitResult"){
+    mini = "LESSON RESULT";
+    title = "少しずつなら、4人で揃えられる。";
+
+    all.forEach(member => {
+      changes.push(
+        changeMember(member,"dance",4),
+        changeMember(member,"bond",3),
+        changeMember(member,"energy",-6)
+      );
+    });
+  }
+
+  else if(id === "pushResult"){
+    mini = "LESSON RESULT";
+    title = "伸びた。でも、少し無理をした。";
+
+    changes.push(
+      changeMember("sarina","dance",6),
+      changeMember("miyu","dance",6),
+      changeMember("kilua","dance",4),
+      changeMember("raisa","dance",5),
+      changeMember("sarina","bond",-2),
+      changeMember("miyu","bond",-2),
+      changeMember("raisa","bond",-3),
+      changeMember("sarina","energy",-12),
+      changeMember("miyu","energy",-12),
+      changeMember("kilua","energy",-8),
+      changeMember("raisa","energy",-13)
+    );
+  }
+
+  else if(id === "restResult"){
+    mini = "LESSON RESULT";
+    title = "空気を戻したから、前へ進めた。";
+
+    all.forEach(member => {
+      changes.push(
+        changeMember(member,"bond",4),
+        changeMember(member,"dance",2),
+        changeMember(member,"energy",-3)
+      );
+    });
+  }
+
+  else if(id === "snsResult"){
+    mini = "SNS RESULT";
+    title = "はじめて、画面の向こうに届いた。";
+
+    changes.push(
+      changeReach(8),
+      changeCash(-2000),
+      changeMember("miyu","bond",2)
+    );
+
+    all.forEach(member => {
+      changes.push(
+        changeMember(member,"energy",-3)
+      );
+    });
+  }
+
+  else if(id === "flyerResult"){
+    mini = "PROMOTION RESULT";
+    title = "一枚ずつ、名前を知ってもらう。";
+
+    changes.push(
+      changeReach(12),
+      changeCash(-5000)
+    );
+
+    all.forEach(member => {
+      changes.push(
+        changeMember(member,"energy",-7)
+      );
+    });
+  }
+
+  else if(id === "vocalResult"){
+    mini = "VOCAL RESULT";
+    title = "認知は増えない。でも歌は前に進む。";
+
+    changes.push(
+      changeMember("sarina","vocal",5),
+      changeMember("miyu","vocal",5),
+      changeMember("kilua","vocal",4),
+      changeMember("raisa","vocal",4),
+      changeCash(-3000)
+    );
+
+    all.forEach(member => {
+      changes.push(
+        changeMember(member,"energy",-6)
+      );
+    });
+  }
+
+  else if(id === "recoverResult"){
+    mini = "RECOVERY";
+    title = "休むことも、デビューまでの仕事。";
+
+    all.forEach(member => {
+      changes.push(
+        changeMember(member,"energy",8)
+      );
+    });
+  }
 
   saveState();
-
 
   return {
     mini,
@@ -1472,96 +734,62 @@ function applyResult(id){
 }
 
 
-/* =========================
-   RESULT UI
-========================= */
+/* RESULT UI */
 
-function formatValue(
-  metric,
-  value
-){
-
+function formatValue(metric,value){
   if(metric === "cash"){
-
-    return (
-      "¥" +
-      value.toLocaleString("ja-JP")
-    );
+    return "¥" +
+      value.toLocaleString("ja-JP");
   }
 
   return value;
 }
 
-
-function formatDelta(
-  metric,
-  value
-){
+function formatDelta(metric,value){
+  const abs = Math.abs(value);
 
   if(metric === "cash"){
-
-    const abs =
-      Math.abs(value);
-
-    return (
-      "¥" +
-      abs.toLocaleString("ja-JP")
-    );
+    return "¥" +
+      abs.toLocaleString("ja-JP");
   }
 
-  return Math.abs(value);
+  return abs;
 }
 
+function showResult(data,nextNode){
+  const rows = data.changes.map(change => {
+    const sign =
+      change.delta > 0
+        ? "+"
+        : change.delta < 0
+          ? "-"
+          : "";
 
-function showResult(
-  data,
-  nextNode
-){
+    const cls =
+      change.delta < 0
+        ? "minus"
+        : "";
 
-  const rows =
-    data.changes
-      .map((change) => {
+    return `
+      <div class="resultRow">
+        <span>
+          ${change.name}・${metricLabel(change.metric)}
+        </span>
 
-        const sign =
-          change.delta > 0
-            ? "+"
-            : change.delta < 0
-              ? "-"
-              : "";
+        <span>
+          ${formatValue(change.metric,change.before)}
+          →
+          ${formatValue(change.metric,change.after)}
+        </span>
 
-
-        const className =
-          change.delta < 0
-            ? "minus"
-            : "";
-
-
-        return `
-          <div class="resultRow">
-
-            <span>
-              ${change.name}・${metricLabel(change.metric)}
-            </span>
-
-            <span>
-              ${formatValue(change.metric, change.before)}
-              →
-              ${formatValue(change.metric, change.after)}
-            </span>
-
-            <span class="resultDelta ${className}">
-              ${sign}${formatDelta(change.metric, change.delta)}
-            </span>
-
-          </div>
-        `;
-
-      })
-      .join("");
-
+        <span class="resultDelta ${cls}">
+          ${sign}${formatDelta(change.metric,change.delta)}
+        </span>
+      </div>
+    `;
+  }).join("");
 
   resultBox.innerHTML = `
-
     <div class="resultMini">
       ${data.mini}
     </div>
@@ -1579,74 +807,219 @@ function showResult(
     </div>
   `;
 
-
-  result.classList.add(
-    "show"
-  );
-
+  result.classList.add("show");
 
   result.onclick = () => {
-
-    result.classList.remove(
-      "show"
-    );
-
+    result.classList.remove("show");
 
     if(nextNode){
-
-      state.node =
-        nextNode;
-
+      state.node = nextNode;
       saveState();
-
       renderNode();
     }
   };
 }
 
 
-/* =========================
-   WEEK SUMMARY
-========================= */
+/* WEEK END */
 
 function buildWeekSummaryRows(){
-
   const rows = [];
 
-
-  if(
-    state.snapshot.reach !==
-    state.reach
-  ){
-
-    const delta =
+  if(state.snapshot.reach !== state.reach){
+    const d =
       state.reach -
       state.snapshot.reach;
 
-
     rows.push(`
-
       <div class="weekRow">
-
-        <span>
-          GROUP｜認知
-        </span>
-
+        <span>GROUP｜認知</span>
         <strong>
           ${state.snapshot.reach}
           →
           ${state.reach}
-
-          <span>
-            ${delta >= 0 ? "+" : ""}
-            ${delta}
-          </span>
+          (${d >= 0 ? "+" : ""}${d})
         </strong>
-
       </div>
     `);
   }
 
+  if(state.snapshot.cash !== state.cash){
+    const d =
+      state.cash -
+      state.snapshot.cash;
 
+    rows.push(`
+      <div class="weekRow">
+        <span>GROUP｜活動資金</span>
+        <strong>
+          ¥${state.snapshot.cash.toLocaleString("ja-JP")}
+          →
+          ¥${state.cash.toLocaleString("ja-JP")}
+        </strong>
+      </div>
+    `);
+  }
+
+  Object.keys(MEMBERS).forEach(id => {
+    [
+      "vocal",
+      "dance",
+      "bond",
+      "energy"
+    ].forEach(metric => {
+      const before =
+        state.snapshot.members[id][metric];
+
+      const after =
+        state.members[id][metric];
+
+      if(before === after) return;
+
+      const d =
+        after - before;
+
+      rows.push(`
+        <div class="weekRow">
+          <span>
+            ${MEMBERS[id].name}｜
+            ${metricLabel(metric)}
+          </span>
+
+          <strong>
+            ${before}
+            →
+            ${after}
+            (${d >= 0 ? "+" : ""}${d})
+          </strong>
+        </div>
+      `);
+    });
+  });
+
+  return rows.join("") || `
+    <div class="weekRow">
+      <span>変化なし</span>
+      <strong>--</strong>
+    </div>
+  `;
+}
+
+function renderWeekEnd(){
+  weekEnd.innerHTML = `
+    <div class="weekTag">
+      WEEK 1 COMPLETE
+    </div>
+
+    <div class="weekTitle">
+      最初の1週間、<br>
+      ここから始まった。
+    </div>
+
+    <div class="weekText">
+      まだ4人は完成していない。<br>
+      でも、選んだ判断のぶんだけ
+      前に進んでいる。
+    </div>
+
+    <div class="weekSummary">
+      ${buildWeekSummaryRows()}
+    </div>
+
+    <div class="weekDays">
+      デビューまで
+      <strong>あと21日</strong>
+    </div>
+
+    <div class="weekBtns">
+      <button
+        class="weekBtn primary"
+        id="restartWeekBtn"
+      >
+        もう一度WEEK 1をやる
+      </button>
+
+      <button
+        class="weekBtn sub"
+        id="backTitleBtn"
+      >
+        タイトルへ戻る
+      </button>
+    </div>
+  `;
+
+  weekEnd.classList.add("show");
+
+  $("restartWeekBtn").onclick = () => {
+    resetGame();
+    weekEnd.classList.remove("show");
+    showScreen("game");
+    renderNode();
+  };
+
+  $("backTitleBtn").onclick = () => {
+    weekEnd.classList.remove("show");
+    showScreen("title");
+  };
+}
+
+
+/* STATUS */
+
+$("statusBtn").onclick = () => {
+  const cards =
+    Object.keys(MEMBERS).map(id => {
+      const member = MEMBERS[id];
+      const stats = state.members[id];
+
+      return `
+        <div class="memberCard">
+          <h3 style="color:${member.color}">
+            ${member.name}
+          </h3>
+
+          <div class="memberGrid">
+            <div>🎤 歌唱 ${stats.vocal}</div>
+            <div>💃 ダンス ${stats.dance}</div>
+            <div>🤝 連携 ${stats.bond}</div>
+            <div>❤️ 体力 ${stats.energy}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+  modalBox.innerHTML = `
+    <h2>O-VER-KiLL STATUS</h2>
+
+    <div class="statusHead">
+      認知：${state.reach}<br>
+      活動資金：¥${state.cash.toLocaleString("ja-JP")}<br>
+      連携平均：${avgBond()}
+    </div>
+
+    ${cards}
+
+    <button
+      class="modalClose"
+      data-close
+    >
+      閉じる
+    </button>
+  `;
+
+  modal.classList.add("show");
+};
+
+modal.onclick = event => {
   if(
-   
+    event.target.id === "modal" ||
+    event.target.matches("[data-close]")
+  ){
+    modal.classList.remove("show");
+  }
+};
+
+
+/* START */
+
+startLoading();
