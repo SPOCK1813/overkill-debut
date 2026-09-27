@@ -1038,4 +1038,497 @@ function applyResult(id){
       "PROMOTION RESULT";
 
     title =
-      "一枚ずつ、名前
+      "一枚ずつ、名前を知ってもらう。";
+
+    changes.push(
+      changeReach(12),
+      changeCash(-5000)
+    );
+
+    MEMBER_IDS.forEach(id =>
+      changes.push(
+        changeMember(
+          id,
+          "energy",
+          -7
+        )
+      )
+    );
+  }
+
+  else if(id === "vocalResult"){
+
+    mini =
+      "VOCAL RESULT";
+
+    title =
+      "認知は増えない。でも歌は前に進む。";
+
+    changes.push(
+      changeMember("sarina","vocal",5),
+      changeMember("miyu","vocal",5),
+      changeMember("kilua","vocal",4),
+      changeMember("raisa","vocal",4),
+      changeCash(-3000)
+    );
+
+    MEMBER_IDS.forEach(id =>
+      changes.push(
+        changeMember(
+          id,
+          "energy",
+          -6
+        )
+      )
+    );
+  }
+
+  else if(id === "recoverResult"){
+
+    mini = "RECOVERY";
+
+    title =
+      "休むことも、デビューまでの仕事。";
+
+    MEMBER_IDS.forEach(id =>
+      changes.push(
+        changeMember(
+          id,
+          "energy",
+          8
+        )
+      )
+    );
+  }
+
+  saveState();
+
+  return {
+    mini,
+    title,
+    changes
+  };
+}
+
+
+/* =========================
+   RESULT UI
+========================= */
+
+function formatValue(
+  metric,
+  value
+){
+
+  if(metric === "cash"){
+
+    return (
+      "¥" +
+      value.toLocaleString("ja-JP")
+    );
+  }
+
+  return value;
+}
+
+function formatDelta(
+  metric,
+  value
+){
+
+  const abs =
+    Math.abs(value);
+
+  if(metric === "cash"){
+
+    return (
+      "¥" +
+      abs.toLocaleString("ja-JP")
+    );
+  }
+
+  return abs;
+}
+
+function showResult(
+  data,
+  nextNode
+){
+
+  const rows =
+    data.changes.map(change => {
+
+      const sign =
+        change.delta > 0
+          ? "+"
+          : change.delta < 0
+            ? "-"
+            : "";
+
+      const cls =
+        change.delta < 0
+          ? "minus"
+          : "";
+
+      return `
+        <div class="resultRow">
+
+          <span>
+            ${change.name}・
+            ${metricLabel(change.metric)}
+          </span>
+
+          <span>
+            ${formatValue(
+              change.metric,
+              change.before
+            )}
+            →
+            ${formatValue(
+              change.metric,
+              change.after
+            )}
+          </span>
+
+          <span class="resultDelta ${cls}">
+            ${sign}${formatDelta(
+              change.metric,
+              change.delta
+            )}
+          </span>
+
+        </div>
+      `;
+    }).join("");
+
+  resultBox.innerHTML = `
+    <div class="resultMini">
+      ${data.mini}
+    </div>
+
+    <div class="resultTitle">
+      ${data.title}
+    </div>
+
+    <div class="resultRows">
+      ${rows}
+    </div>
+
+    <div class="resultHint">
+      タップして続ける
+    </div>
+  `;
+
+  result.classList.add(
+    "show"
+  );
+
+  result.onclick = () => {
+
+    result.classList.remove(
+      "show"
+    );
+
+    if(nextNode){
+
+      state.node =
+        nextNode;
+
+      saveState();
+
+      renderNode();
+    }
+  };
+}
+
+
+/* =========================
+   WEEK END
+========================= */
+
+function buildWeekSummaryRows(){
+
+  const rows = [];
+
+  if(
+    state.snapshot.reach !==
+    state.reach
+  ){
+
+    const d =
+      state.reach -
+      state.snapshot.reach;
+
+    rows.push(`
+      <div class="weekRow">
+
+        <span>
+          GROUP｜認知
+        </span>
+
+        <strong>
+          ${state.snapshot.reach}
+          →
+          ${state.reach}
+          (${d >= 0 ? "+" : ""}${d})
+        </strong>
+
+      </div>
+    `);
+  }
+
+  if(
+    state.snapshot.cash !==
+    state.cash
+  ){
+
+    rows.push(`
+      <div class="weekRow">
+
+        <span>
+          GROUP｜活動資金
+        </span>
+
+        <strong>
+          ¥${state.snapshot.cash.toLocaleString("ja-JP")}
+          →
+          ¥${state.cash.toLocaleString("ja-JP")}
+        </strong>
+
+      </div>
+    `);
+  }
+
+  MEMBER_IDS.forEach(id => {
+
+    [
+      "vocal",
+      "dance",
+      "bond",
+      "energy"
+    ].forEach(metric => {
+
+      const before =
+        state.snapshot.members[id][metric];
+
+      const after =
+        state.members[id][metric];
+
+      if(before === after){
+        return;
+      }
+
+      const d =
+        after - before;
+
+      rows.push(`
+        <div class="weekRow">
+
+          <span>
+            ${MEMBERS[id].name}｜
+            ${metricLabel(metric)}
+          </span>
+
+          <strong>
+            ${before}
+            →
+            ${after}
+            (${d >= 0 ? "+" : ""}${d})
+          </strong>
+
+        </div>
+      `);
+    });
+  });
+
+  return rows.join("") || `
+    <div class="weekRow">
+      <span>変化なし</span>
+      <strong>--</strong>
+    </div>
+  `;
+}
+
+function renderWeekEnd(){
+
+  stopTyping();
+
+  weekEnd.innerHTML = `
+    <div class="weekTag">
+      WEEK 1 COMPLETE
+    </div>
+
+    <div class="weekTitle">
+      最初の1週間、<br>
+      ここから始まった。
+    </div>
+
+    <div class="weekText">
+      まだ4人は完成していない。<br>
+      でも、選んだ判断のぶんだけ
+      前に進んでいる。
+    </div>
+
+    <div class="weekSummary">
+      ${buildWeekSummaryRows()}
+    </div>
+
+    <div class="weekDays">
+      デビューまで
+      <strong>
+        あと21日
+      </strong>
+    </div>
+
+    <div class="weekBtns">
+
+      <button
+        class="weekBtn primary"
+        id="restartWeekBtn"
+      >
+        もう一度WEEK 1をやる
+      </button>
+
+      <button
+        class="weekBtn sub"
+        id="backTitleBtn"
+      >
+        タイトルへ戻る
+      </button>
+
+    </div>
+  `;
+
+  weekEnd.classList.add(
+    "show"
+  );
+
+  $("restartWeekBtn").onclick =
+    () => {
+
+      resetGame();
+
+      weekEnd.classList.remove(
+        "show"
+      );
+
+      showScreen("game");
+
+      renderNode();
+    };
+
+  $("backTitleBtn").onclick =
+    () => {
+
+      weekEnd.classList.remove(
+        "show"
+      );
+
+      showScreen("title");
+    };
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+$("statusBtn").onclick = () => {
+
+  const cards =
+    MEMBER_IDS.map(id => {
+
+      const member =
+        MEMBERS[id];
+
+      const stats =
+        state.members[id];
+
+      return `
+        <div class="memberCard">
+
+          <h3 style="color:${member.color}">
+            ${member.name}
+          </h3>
+
+          <div class="memberGrid">
+
+            <div>
+              🎤 歌唱 ${stats.vocal}
+            </div>
+
+            <div>
+              💃 ダンス ${stats.dance}
+            </div>
+
+            <div>
+              🤝 連携 ${stats.bond}
+            </div>
+
+            <div>
+              ❤️ 体力 ${stats.energy}
+            </div>
+
+          </div>
+
+        </div>
+      `;
+    }).join("");
+
+  modalBox.innerHTML = `
+
+    <h2>
+      O-VER-KiLL STATUS
+    </h2>
+
+    <div class="statusHead">
+
+      認知：
+      ${state.reach}
+
+      <br>
+
+      活動資金：
+      ¥${state.cash.toLocaleString("ja-JP")}
+
+      <br>
+
+      連携平均：
+      ${avgBond()}
+
+    </div>
+
+    ${cards}
+
+    <button
+      class="modalClose"
+      data-close
+    >
+      閉じる
+    </button>
+  `;
+
+  modal.classList.add(
+    "show"
+  );
+};
+
+modal.onclick = event => {
+
+  if(
+    event.target.id === "modal" ||
+    event.target.matches("[data-close]")
+  ){
+
+    modal.classList.remove(
+      "show"
+    );
+  }
+};
+
+
+/* =========================
+   START
+========================= */
+
+startLoading();
