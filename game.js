@@ -1,233 +1,283 @@
-const CFG = window.GAME_CONFIG;
-const MEMBERS = CFG.members;
-const CHAR_IMAGES = CFG.charImages;
-const PROLOGUE_LINES = CFG.prologue;
-const STORY = CFG.story;
+const DATA = window.GAME_DATA;
+const STORY_DATA = window.GAME_STORY;
 
-const STORAGE_KEY = "overkill_manager_story_v7";
-const $ = id => document.getElementById(id);
+const MEMBERS = DATA.members;
+const MEMBER_IDS = DATA.memberOrder;
+const IMAGES = DATA.images;
+const STORY = STORY_DATA.nodes;
+
+const STORAGE_KEY = "overkill_manager_v10";
+
+const $ = id =>
+  document.getElementById(id);
+
 
 const screens = {
   loading: $("loading"),
   title: $("title"),
   prologue: $("prologue"),
-  game: $("game")
+  game: $("game"),
+  training: $("training")
 };
 
-const loadChar = $("loadChar");
-const loadMsg = $("loadMsg");
-const loadBar = $("loadBar");
-const loadPct = $("loadPct");
 
-const proText = $("proText");
-const chapter = $("chapter");
-const env = $("env");
-const aura = $("aura");
-const managerMark = $("managerMark");
-const char = $("char");
-const reaction = $("reaction");
+function createMemberState(id){
 
-const dialogue = $("dialogue");
-const speaker = $("speaker");
-const text = $("text");
-const nextMark = $("nextMark");
-const tapGuide = $("tapGuide");
-
-const result = $("result");
-const resultBox = $("resultBox");
-const weekEnd = $("weekEnd");
-
-const modal = $("modal");
-const modalBox = $("modalBox");
-const songAudio = $("songAudio");
-
-const MEMBER_IDS = [
-  "sarina",
-  "miyu",
-  "kilua",
-  "raisa"
-];
-
-
-/* =========================
-   STATE
-========================= */
-
-function initialMembers(){
-  return {
-    sarina:{ vocal:78, dance:48, bond:74, energy:72 },
-    miyu:{ vocal:74, dance:54, bond:68, energy:76 },
-    kilua:{ vocal:52, dance:84, bond:40, energy:80 },
-    raisa:{ vocal:42, dance:44, bond:58, energy:70 }
-  };
-}
-
-function clone(obj){
-  return JSON.parse(JSON.stringify(obj));
-}
-
-function freshState(){
-  const members = initialMembers();
+  const base = MEMBERS[id].initial;
 
   return {
-    started:false,
-    prologueSeen:false,
-    tutorialSeen:false,
-    node:"m1",
-    week:1,
-    reach:10,
-    cash:220000,
-    members,
-    snapshot:{
-      reach:10,
-      cash:220000,
-      members:clone(members)
+    vocal: base.vocal,
+    dance: base.dance,
+    mc: base.mc,
+    bond: base.bond,
+    energy: base.energy,
+
+    level: 1,
+    exp: 0,
+    points: 0,
+
+    skills: [],
+
+    equipment: {
+      costume: null,
+      accessory: null,
+      shoes: null
     }
   };
 }
+
+
+function createState(){
+
+  const members = {};
+
+  MEMBER_IDS.forEach(id => {
+    members[id] =
+      createMemberState(id);
+  });
+
+  return {
+
+    started: false,
+    prologueSeen: false,
+    tutorialSeen: false,
+
+    season: 1,
+    week: 1,
+    action: 0,
+
+    node: "m1",
+
+    reach: 10,
+    fans: 0,
+    cash: 220000,
+
+    ovkPoints: 0,
+
+    members,
+
+    collection: {},
+    achievements: [],
+    clearHistory: [],
+
+    weekSnapshot: null
+  };
+}
+
 
 function loadState(){
-  try{
-    const saved =
-      JSON.parse(localStorage.getItem(STORAGE_KEY));
 
-    if(
-      !saved ||
-      !saved.node ||
-      !STORY[saved.node]
-    ){
-      return freshState();
+  try{
+
+    const saved =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_KEY
+        )
+      );
+
+    if(saved){
+      return saved;
     }
 
-    return saved;
+  }catch(error){}
 
-  }catch{
-    return freshState();
-  }
+  return createState();
 }
+
 
 let state = loadState();
 
+
 function saveState(){
+
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify(state)
   );
 }
 
+
 function resetGame(){
-  state = freshState();
+
+  const permanentPoints =
+    state.ovkPoints || 0;
+
+  const collection =
+    state.collection || {};
+
+  const history =
+    state.clearHistory || [];
+
+  state = createState();
+
+  state.ovkPoints =
+    permanentPoints;
+
+  state.collection =
+    collection;
+
+  state.clearHistory =
+    history;
+
   state.started = true;
+
+  makeWeekSnapshot();
+
   saveState();
 }
 
 
-/* =========================
-   HELPERS
-========================= */
+function clamp(value,min=0,max=100){
 
-function clamp(n){
   return Math.max(
-    0,
-    Math.min(999999,n)
+    min,
+    Math.min(max,value)
   );
 }
 
-function wait(ms){
-  return new Promise(resolve =>
-    setTimeout(resolve,ms)
-  );
-}
-
-function metricLabel(metric){
-  return {
-    vocal:"歌唱",
-    dance:"ダンス",
-    bond:"連携",
-    energy:"体力",
-    reach:"認知",
-    cash:"活動資金"
-  }[metric] || metric;
-}
-
-function avgBond(){
-  const total = MEMBER_IDS.reduce(
-    (sum,id) =>
-      sum + state.members[id].bond,
-    0
-  );
-
-  return Math.round(
-    total / MEMBER_IDS.length
-  );
-}
 
 function showScreen(name){
-  Object.values(screens).forEach(el =>
-    el.classList.remove("active")
+
+  Object.values(screens)
+    .forEach(screen =>
+      screen.classList.remove(
+        "active"
+      )
+    );
+
+  screens[name]
+    .classList.add("active");
+}
+
+
+function rankOf(value){
+
+  const found =
+    DATA.ranks.find(
+      item =>
+        value >= item.min
+    );
+
+  return found
+    ? found.rank
+    : "E";
+}
+
+
+function metricName(key){
+
+  return {
+    vocal: "歌唱",
+    dance: "ダンス",
+    mc: "MC",
+    bond: "連携",
+    energy: "体力"
+  }[key] || key;
+}
+
+
+function expNeeded(level){
+
+  return (
+    DATA.expTable.base +
+    ((level - 1) *
+      DATA.expTable.growth)
   );
-
-  screens[name].classList.add("active");
-}
-
-function tryPlaySong(){
-  if(!songAudio) return;
-
-  songAudio.volume = 0.35;
-  songAudio.play().catch(() => {});
 }
 
 
-/* =========================
-   IMAGE PRELOAD
-========================= */
+function addExp(id,amount){
 
-const imageCache = new Map();
+  const member =
+    state.members[id];
 
-function preloadImage(src){
-  if(!src){
-    return Promise.resolve();
+  const levelUps = [];
+
+  member.exp += amount;
+
+  while(
+    member.exp >=
+    expNeeded(member.level)
+  ){
+
+    member.exp -=
+      expNeeded(member.level);
+
+    member.level++;
+
+    member.points +=
+      DATA.expTable.pointPerLevel;
+
+    levelUps.push(
+      member.level
+    );
   }
 
-  if(imageCache.has(src)){
-    return imageCache.get(src);
-  }
-
-  const promise =
-    new Promise(resolve => {
-
-      const img = new Image();
-
-      img.onload = () => resolve();
-      img.onerror = () => resolve();
-
-      img.src = src;
-
-      if(img.complete){
-        resolve();
-      }
-    });
-
-  imageCache.set(src,promise);
-
-  return promise;
+  return levelUps;
 }
 
-function preloadCharacters(){
-  const jobs = [];
 
-  Object.values(CHAR_IMAGES)
-    .forEach(expressions => {
+function changeStat(
+  id,
+  metric,
+  amount
+){
 
-      Object.values(expressions)
-        .forEach(src => {
-          jobs.push(
-            preloadImage(src)
-          );
-        });
-    });
+  const member =
+    state.members[id];
 
-  return Promise.all(jobs);
+  const before =
+    member[metric];
+
+  member[metric] =
+    clamp(
+      before + amount
+    );
+
+  return {
+    id,
+    metric,
+    before,
+    after: member[metric],
+    delta:
+      member[metric] - before
+  };
+}
+
+
+function makeWeekSnapshot(){
+
+  state.weekSnapshot = {
+    reach: state.reach,
+    cash: state.cash,
+    members:
+      JSON.parse(
+        JSON.stringify(
+          state.members
+        )
+      )
+  };
 }
 
 
@@ -235,191 +285,214 @@ function preloadCharacters(){
    LOADING
 ========================= */
 
-const loadingSet = [
-  {
-    img:"./sarina_smile.png",
-    msg:"4人の予定を確認中…"
-  },
-  {
-    img:"./miyu_smile.png",
-    msg:"SNSのネタを整理中…"
-  },
-  {
-    img:"./kilua_smile.png",
-    msg:"レッスン場を準備中…"
-  },
-  {
-    img:"./raisa_smile.png",
-    msg:"ステージを確認中…"
-  }
+const loadSet = [
+
+  [
+    "./sarina_smile.png",
+    "4人の予定を確認中…"
+  ],
+
+  [
+    "./miyu_smile.png",
+    "SNSのネタを整理中…"
+  ],
+
+  [
+    "./kilua_smile.png",
+    "レッスン場を準備中…"
+  ],
+
+  [
+    "./raisa_smile.png",
+    "ステージを確認中…"
+  ]
+
 ];
 
-async function startLoading(){
 
-  preloadCharacters();
+function startLoading(){
 
   let progress = 0;
-  let current = 0;
 
-  const timer = setInterval(() => {
+  const timer =
+    setInterval(() => {
 
-    progress +=
-      Math.floor(Math.random() * 7) + 3;
+      progress += 5;
 
-    progress =
-      Math.min(100,progress);
+      if(progress > 100){
+        progress = 100;
+      }
 
-    const index =
-      Math.min(
-        loadingSet.length - 1,
-        Math.floor(progress / 25)
-      );
+      const index =
+        Math.min(
+          3,
+          Math.floor(
+            progress / 26
+          )
+        );
 
-    if(index !== current){
-      current = index;
+      $("loadChar").src =
+        loadSet[index][0];
 
-      loadChar.src =
-        loadingSet[index].img;
+      $("loadMsg").textContent =
+        loadSet[index][1];
 
-      loadMsg.textContent =
-        loadingSet[index].msg;
-    }
+      $("loadBar").style.width =
+        progress + "%";
 
-    loadBar.style.width =
-      progress + "%";
+      $("loadPct").textContent =
+        progress + "%";
 
-    loadPct.textContent =
-      progress + "%";
+      if(progress >= 100){
 
-    if(progress >= 100){
+        clearInterval(timer);
 
-      clearInterval(timer);
+        setTimeout(() => {
+          showScreen("title");
+        },250);
+      }
 
-      setTimeout(() => {
-        showScreen("title");
-      },300);
-    }
-
-  },100);
+    },60);
 }
+
+
+/* =========================
+   TITLE
+========================= */
+
+$("startBtn").onclick = () => {
+
+  resetGame();
+
+  startPrologue();
+};
+
+
+$("contBtn").onclick = () => {
+
+  if(!state.started){
+
+    resetGame();
+
+    startPrologue();
+
+    return;
+  }
+
+  if(!state.prologueSeen){
+
+    startPrologue();
+
+    return;
+  }
+
+  if(
+    state.node ===
+    "openTraining"
+  ){
+
+    openTraining();
+
+  }else{
+
+    showScreen("game");
+
+    renderStory();
+  }
+};
 
 
 /* =========================
    PROLOGUE
 ========================= */
 
-let prologueIndex = 0;
-let prologueTyping = false;
-let prologueFullText = "";
-let prologueTimer = null;
+let proIndex = 0;
+let proTyping = false;
+let proFull = "";
+let proTimer = null;
+
 
 function startPrologue(){
+
   showScreen("prologue");
 
-  prologueIndex = 0;
+  proIndex = 0;
 
   typePrologue(
-    PROLOGUE_LINES[0]
+    STORY_DATA.prologue[0]
   );
 }
 
+
 function typePrologue(line){
 
-  clearInterval(prologueTimer);
+  clearInterval(proTimer);
 
-  prologueFullText = line;
-  proText.textContent = "";
-  prologueTyping = true;
+  proFull = line;
 
-  let i = 0;
+  $("proText").textContent = "";
 
-  prologueTimer = setInterval(() => {
+  proTyping = true;
 
-    i++;
+  let index = 0;
 
-    proText.textContent =
-      line.slice(0,i);
+  proTimer =
+    setInterval(() => {
 
-    if(i >= line.length){
+      index++;
 
-      clearInterval(prologueTimer);
+      $("proText").textContent =
+        line.slice(0,index);
 
-      prologueTyping = false;
-    }
+      if(index >= line.length){
 
-  },42);
+        clearInterval(proTimer);
+
+        proTyping = false;
+      }
+
+    },35);
 }
 
-$("startBtn").onclick = () => {
-
-  resetGame();
-
-  tryPlaySong();
-
-  startPrologue();
-};
-
-$("contBtn").onclick = () => {
-
-  tryPlaySong();
-
-  if(!state.started){
-
-    state.started = true;
-
-    saveState();
-
-    startPrologue();
-
-    return;
-  }
-
-  if(state.prologueSeen){
-
-    showScreen("game");
-
-    renderNode();
-
-  }else{
-
-    startPrologue();
-  }
-};
 
 screens.prologue.onclick = () => {
 
-  if(prologueTyping){
+  if(proTyping){
 
-    clearInterval(prologueTimer);
+    clearInterval(proTimer);
 
-    proText.textContent =
-      prologueFullText;
+    $("proText").textContent =
+      proFull;
 
-    prologueTyping = false;
+    proTyping = false;
 
     return;
   }
 
-  prologueIndex++;
+  proIndex++;
 
   if(
-    prologueIndex >=
-    PROLOGUE_LINES.length
+    proIndex >=
+    STORY_DATA.prologue.length
   ){
 
     state.prologueSeen = true;
 
+    makeWeekSnapshot();
+
     saveState();
 
     showScreen("game");
 
-    renderNode();
+    renderStory();
 
     return;
   }
 
   typePrologue(
-    PROLOGUE_LINES[prologueIndex]
+    STORY_DATA.prologue[
+      proIndex
+    ]
   );
 };
 
@@ -428,25 +501,14 @@ screens.prologue.onclick = () => {
    BACKGROUND
 ========================= */
 
-function setBackground(bg){
+function setBackground(key){
 
-  const allowed = [
-    "manager",
-    "studio",
-    "lounge",
-    "sns",
-    "city",
-    "live",
-    "outdoor"
-  ];
+  const src =
+    DATA.backgrounds[key] ||
+    DATA.backgrounds.manager;
 
-  const key =
-    allowed.includes(bg)
-      ? bg
-      : "manager";
-
-  env.className =
-    "environment " + key;
+  $("env").style.backgroundImage =
+    `url("${src}")`;
 }
 
 
@@ -454,186 +516,202 @@ function setBackground(bg){
    CHARACTER
 ========================= */
 
-let renderVersion = 0;
-
-async function setCharacter(
+function setCharacter(
   memberId,
-  expression="normal",
-  version
+  expression
 ){
 
-  char.classList.remove("show");
+  const char = $("char");
+  const mark = $("managerMark");
 
   if(!memberId){
 
-    char.style.display = "none";
-    aura.style.display = "none";
-    managerMark.style.display = "flex";
+    char.classList.remove(
+      "show"
+    );
+
+    char.style.display =
+      "none";
+
+    mark.style.display =
+      "flex";
 
     return;
   }
 
-  const member =
-    MEMBERS[memberId];
+  const image =
+    IMAGES[memberId][
+      expression || "normal"
+    ] ||
+    IMAGES[memberId].normal;
 
-  const images =
-    CHAR_IMAGES[memberId];
+  mark.style.display =
+    "none";
 
-  if(!member || !images){
+  char.src = image;
 
-    char.style.display = "none";
-    aura.style.display = "none";
-    managerMark.style.display = "flex";
-
-    return;
-  }
-
-  const src =
-    images[expression] ||
-    images.normal;
-
-  managerMark.style.display = "none";
-
-  char.style.display = "none";
-
-  await preloadImage(src);
-
-  if(version !== renderVersion){
-    return;
-  }
-
-  char.src = src;
-  char.alt = member.name;
-
-  aura.style.display = "block";
-
-  aura.style.setProperty(
-    "--char-rgb",
-    member.rgb
-  );
-
-  char.style.display = "block";
-
-  await wait(20);
-
-  if(version !== renderVersion){
-    return;
-  }
+  char.style.display =
+    "block";
 
   requestAnimationFrame(() => {
-    char.classList.add("show");
-  });
 
-  await wait(170);
+    char.classList.add(
+      "show"
+    );
+
+  });
 }
 
-
-/* =========================
-   REACTION
-========================= */
 
 function setReaction(symbol){
 
-  reaction.textContent =
+  const el =
+    $("reaction");
+
+  el.textContent =
     symbol || "";
 
-  reaction.style.display =
-    symbol
-      ? "block"
-      : "none";
+  el.classList.toggle(
+    "show",
+    Boolean(symbol)
+  );
 }
 
 
 /* =========================
-   TYPEWRITER
+   STORY
 ========================= */
 
 let typing = false;
 let fullText = "";
-let typingTimer = null;
+let typeTimer = null;
 
-function stopTyping(){
 
-  if(typingTimer){
-    clearInterval(typingTimer);
-  }
+function typeText(line){
 
-  typingTimer = null;
-}
+  clearInterval(typeTimer);
 
-function typeDialogue(line){
+  const text =
+    $("text");
 
-  stopTyping();
-
-  typing = true;
-
-  fullText = line;
+  fullText =
+    line || "";
 
   text.textContent = "";
 
-  nextMark.style.display = "none";
+  typing = true;
 
-  dialogue.dataset.mode =
-    "dialogue";
+  $("nextMark").style.display =
+    "none";
 
   let i = 0;
 
-  typingTimer =
+  typeTimer =
     setInterval(() => {
 
       i++;
 
       text.textContent =
-        line.slice(0,i);
+        fullText.slice(0,i);
 
-      if(i >= line.length){
+      if(i >= fullText.length){
 
-        stopTyping();
+        clearInterval(typeTimer);
 
         typing = false;
 
-        nextMark.style.display =
+        $("nextMark")
+          .style.display =
           "block";
       }
 
-    },22);
+    },20);
 }
 
 
-/* =========================
-   CHOICES
-========================= */
+function renderStory(){
 
-function renderChoices(node){
+  const node =
+    STORY[state.node];
 
-  stopTyping();
+  if(!node){
+    return;
+  }
+
+  if(node.type === "training"){
+
+    openTraining();
+
+    return;
+  }
+
+  $("seasonLabel").textContent =
+    `SEASON ${state.season}`;
+
+  $("chapter").textContent =
+    node.chapter ||
+    `WEEK ${state.week}`;
+
+  $("speaker").textContent =
+    node.speaker ||
+    "MANAGER";
+
+  setBackground(node.bg);
+
+  setCharacter(
+    node.member,
+    node.expression
+  );
+
+  setReaction(
+    node.reaction
+  );
+
+  $("dialogue").dataset.mode =
+    node.choices
+      ? "choice"
+      : "story";
+
+  if(node.choices){
+
+    renderStoryChoices(node);
+
+  }else{
+
+    typeText(
+      node.text || ""
+    );
+  }
+}
+
+
+function renderStoryChoices(node){
 
   typing = false;
 
-  nextMark.style.display =
+  $("nextMark").style.display =
     "none";
 
-  dialogue.dataset.mode =
-    "choice";
-
   const lead =
-    String(node.text || "")
+    String(node.text)
       .split("\n")
       .join("<br>");
 
   const buttons =
     node.choices
-      .map((choice,index) => `
-        <button
-          class="choiceBtn"
-          data-choice="${index}"
-        >
-          ${choice.text}
-        </button>
-      `)
+      .map(
+        (choice,index) => `
+          <button
+            class="choiceBtn"
+            data-choice="${index}"
+          >
+            ${choice.text}
+          </button>
+        `
+      )
       .join("");
 
-  text.innerHTML = `
+  $("text").innerHTML = `
     <div class="choiceLead">
       ${lead}
     </div>
@@ -645,114 +723,20 @@ function renderChoices(node){
 }
 
 
-/* =========================
-   STORY
-========================= */
-
-async function renderNode(){
-
-  const version =
-    ++renderVersion;
-
-  stopTyping();
-
-  if(state.node === "weekComplete"){
-
-    renderWeekEnd();
-
-    return;
-  }
+$("dialogue").onclick =
+event => {
 
   const node =
     STORY[state.node];
 
   if(!node){
-
-    state.node = "m1";
-
-    saveState();
-
-    renderNode();
-
     return;
   }
-
-  dialogue.scrollTop = 0;
-
-  chapter.textContent =
-    node.chapter ||
-    `WEEK ${state.week}`;
-
-  speaker.textContent =
-    node.speaker ||
-    "MANAGER";
-
-  text.textContent = "";
-
-  nextMark.style.display =
-    "none";
-
-  setBackground(
-    node.bg
-  );
-
-  setReaction(
-    node.reaction
-  );
-
-  await setCharacter(
-    node.member,
-    node.expression,
-    version
-  );
-
-  if(version !== renderVersion){
-    return;
-  }
-
-  if(node.choices){
-
-    renderChoices(node);
-
-  }else{
-
-    typeDialogue(
-      node.text || ""
-    );
-  }
-
-  tapGuide.classList.toggle(
-    "show",
-    !state.tutorialSeen
-  );
-}
-
-
-/* =========================
-   DIALOGUE CLICK
-========================= */
-
-dialogue.onclick = event => {
-
-  if(!state.tutorialSeen){
-
-    state.tutorialSeen = true;
-
-    saveState();
-
-    tapGuide.classList.remove(
-      "show"
-    );
-  }
-
-  const node =
-    STORY[state.node];
-
-  if(!node) return;
 
   if(
-    dialogue.dataset.mode ===
-    "choice"
+    $("dialogue")
+      .dataset.mode ===
+      "choice"
   ){
 
     const button =
@@ -760,7 +744,9 @@ dialogue.onclick = event => {
         "[data-choice]"
       );
 
-    if(!button) return;
+    if(!button){
+      return;
+    }
 
     const choice =
       node.choices[
@@ -769,59 +755,31 @@ dialogue.onclick = event => {
         )
       ];
 
-    if(!choice) return;
+    applyStoryResult(
+      choice.result
+    );
 
     state.node =
       choice.next;
 
     saveState();
 
-    renderNode();
+    renderStory();
 
     return;
   }
 
-  advanceDialogue();
-};
-
-
-/* =========================
-   ADVANCE
-========================= */
-
-function advanceDialogue(){
-
-  const node =
-    STORY[state.node];
-
-  if(!node) return;
-
   if(typing){
 
-    stopTyping();
+    clearInterval(typeTimer);
 
-    text.textContent =
+    $("text").textContent =
       fullText;
 
     typing = false;
 
-    nextMark.style.display =
+    $("nextMark").style.display =
       "block";
-
-    return;
-  }
-
-  if(node.resultId){
-
-    const data =
-      applyResult(
-        node.resultId
-      );
-
-    showResult(
-      data,
-      node.next
-    );
 
     return;
   }
@@ -833,599 +791,802 @@ function advanceDialogue(){
 
     saveState();
 
-    renderNode();
+    renderStory();
   }
-}
+};
 
 
 /* =========================
-   STAT CHANGE
+   WEEK1 STORY RESULT
 ========================= */
 
-function changeMember(
-  id,
-  metric,
-  delta
-){
+function applyStoryResult(type){
 
-  const before =
-    state.members[id][metric];
+  if(type === "teach"){
 
-  const after =
-    clamp(
-      before + delta
+    changeStat(
+      "kilua",
+      "bond",
+      6
     );
-
-  state.members[id][metric] =
-    after;
-
-  return {
-    name:MEMBERS[id].name,
-    metric,
-    before,
-    after,
-    delta
-  };
-}
-
-function changeReach(delta){
-
-  const before =
-    state.reach;
-
-  const after =
-    clamp(
-      before + delta
-    );
-
-  state.reach =
-    after;
-
-  return {
-    name:"GROUP",
-    metric:"reach",
-    before,
-    after,
-    delta
-  };
-}
-
-function changeCash(delta){
-
-  const before =
-    state.cash;
-
-  const after =
-    clamp(
-      before + delta
-    );
-
-  state.cash =
-    after;
-
-  return {
-    name:"GROUP",
-    metric:"cash",
-    before,
-    after,
-    delta
-  };
-}
-
-
-/* =========================
-   RESULT LOGIC
-========================= */
-
-function applyResult(id){
-
-  const changes = [];
-
-  let mini = "RESULT";
-  let title = "";
-
-  if(id === "teachResult"){
-
-    mini = "LESSON RESULT";
-
-    title =
-      "教えることも、練習。";
-
-    changes.push(
-      changeMember("sarina","dance",5),
-      changeMember("miyu","dance",5),
-      changeMember("raisa","dance",4),
-      changeMember("kilua","dance",3),
-      changeMember("kilua","bond",6)
-    );
-
-    MEMBER_IDS.forEach(id =>
-      changes.push(
-        changeMember(
-          id,
-          "energy",
-          -7
-        )
-      )
-    );
-  }
-
-  else if(id === "splitResult"){
-
-    mini = "LESSON RESULT";
-
-    title =
-      "少しずつなら、4人で揃えられる。";
 
     MEMBER_IDS.forEach(id => {
 
-      changes.push(
-        changeMember(id,"dance",4),
-        changeMember(id,"bond",3),
-        changeMember(id,"energy",-6)
+      changeStat(
+        id,
+        "dance",
+        id === "kilua"
+          ? 3
+          : 5
       );
+
+      changeStat(
+        id,
+        "energy",
+        -7
+      );
+
+      addExp(id,30);
     });
   }
 
-  else if(id === "pushResult"){
 
-    mini = "LESSON RESULT";
-
-    title =
-      "伸びた。でも、少し無理をした。";
-
-    changes.push(
-      changeMember("sarina","dance",6),
-      changeMember("miyu","dance",6),
-      changeMember("kilua","dance",4),
-      changeMember("raisa","dance",5),
-
-      changeMember("sarina","bond",-2),
-      changeMember("miyu","bond",-2),
-      changeMember("raisa","bond",-3),
-
-      changeMember("sarina","energy",-12),
-      changeMember("miyu","energy",-12),
-      changeMember("kilua","energy",-8),
-      changeMember("raisa","energy",-13)
-    );
-  }
-
-  else if(id === "restResult"){
-
-    mini = "LESSON RESULT";
-
-    title =
-      "空気を戻したから、前へ進めた。";
+  if(type === "split"){
 
     MEMBER_IDS.forEach(id => {
 
-      changes.push(
-        changeMember(id,"bond",4),
-        changeMember(id,"dance",2),
-        changeMember(id,"energy",-3)
+      changeStat(
+        id,
+        "dance",
+        4
       );
+
+      changeStat(
+        id,
+        "bond",
+        3
+      );
+
+      changeStat(
+        id,
+        "energy",
+        -6
+      );
+
+      addExp(id,30);
     });
   }
 
-  else if(id === "snsResult"){
 
-    mini = "SNS RESULT";
+  if(type === "push"){
 
-    title =
-      "はじめて、画面の向こうに届いた。";
+    MEMBER_IDS.forEach(id => {
 
-    changes.push(
-      changeReach(8),
-      changeCash(-2000),
-      changeMember("miyu","bond",2)
-    );
+      changeStat(
+        id,
+        "dance",
+        5
+      );
 
-    MEMBER_IDS.forEach(id =>
-      changes.push(
-        changeMember(
-          id,
-          "energy",
-          -3
-        )
-      )
-    );
+      changeStat(
+        id,
+        "bond",
+        -2
+      );
+
+      changeStat(
+        id,
+        "energy",
+        -11
+      );
+
+      addExp(id,35);
+    });
   }
 
-  else if(id === "flyerResult"){
 
-    mini =
-      "PROMOTION RESULT";
+  if(type === "break"){
 
-    title =
-      "一枚ずつ、名前を知ってもらう。";
+    MEMBER_IDS.forEach(id => {
 
-    changes.push(
-      changeReach(12),
-      changeCash(-5000)
-    );
+      changeStat(
+        id,
+        "dance",
+        2
+      );
 
-    MEMBER_IDS.forEach(id =>
-      changes.push(
-        changeMember(
-          id,
-          "energy",
-          -7
-        )
-      )
-    );
-  }
+      changeStat(
+        id,
+        "bond",
+        4
+      );
 
-  else if(id === "vocalResult"){
+      changeStat(
+        id,
+        "energy",
+        -3
+      );
 
-    mini =
-      "VOCAL RESULT";
-
-    title =
-      "認知は増えない。でも歌は前に進む。";
-
-    changes.push(
-      changeMember("sarina","vocal",5),
-      changeMember("miyu","vocal",5),
-      changeMember("kilua","vocal",4),
-      changeMember("raisa","vocal",4),
-      changeCash(-3000)
-    );
-
-    MEMBER_IDS.forEach(id =>
-      changes.push(
-        changeMember(
-          id,
-          "energy",
-          -6
-        )
-      )
-    );
-  }
-
-  else if(id === "recoverResult"){
-
-    mini = "RECOVERY";
-
-    title =
-      "休むことも、デビューまでの仕事。";
-
-    MEMBER_IDS.forEach(id =>
-      changes.push(
-        changeMember(
-          id,
-          "energy",
-          8
-        )
-      )
-    );
+      addExp(id,25);
+    });
   }
 
   saveState();
-
-  return {
-    mini,
-    title,
-    changes
-  };
 }
 
 
 /* =========================
-   RESULT UI
+   TRAINING
 ========================= */
 
-function formatValue(
-  metric,
-  value
-){
+function openTraining(){
 
-  if(metric === "cash"){
+  state.node =
+    "openTraining";
 
-    return (
-      "¥" +
-      value.toLocaleString("ja-JP")
-    );
-  }
+  saveState();
 
-  return value;
+  showScreen("training");
+
+  $("trainingSeason")
+    .textContent =
+    `SEASON ${state.season}`;
+
+  $("trainingWeek")
+    .textContent =
+    `WEEK ${state.week}`;
+
+  renderTrainingMembers();
+
+  renderCommands();
 }
 
-function formatDelta(
-  metric,
-  value
-){
 
-  const abs =
-    Math.abs(value);
+function renderTrainingMembers(){
 
-  if(metric === "cash"){
+  $("trainingMembers")
+    .innerHTML =
+    MEMBER_IDS.map(id => {
 
-    return (
-      "¥" +
-      abs.toLocaleString("ja-JP")
-    );
-  }
+      const data =
+        MEMBERS[id];
 
-  return abs;
-}
+      const member =
+        state.members[id];
 
-function showResult(
-  data,
-  nextNode
-){
+      const needed =
+        expNeeded(
+          member.level
+        );
 
-  const rows =
-    data.changes.map(change => {
-
-      const sign =
-        change.delta > 0
-          ? "+"
-          : change.delta < 0
-            ? "-"
-            : "";
-
-      const cls =
-        change.delta < 0
-          ? "minus"
-          : "";
+      const pct =
+        Math.round(
+          member.exp /
+          needed *
+          100
+        );
 
       return `
-        <div class="resultRow">
+        <div class="miniMember">
 
-          <span>
-            ${change.name}・
-            ${metricLabel(change.metric)}
-          </span>
+          <img
+            src="${IMAGES[id].smile}"
+            alt=""
+          >
 
-          <span>
-            ${formatValue(
-              change.metric,
-              change.before
-            )}
-            →
-            ${formatValue(
-              change.metric,
-              change.after
-            )}
-          </span>
+          <div>
 
-          <span class="resultDelta ${cls}">
-            ${sign}${formatDelta(
-              change.metric,
-              change.delta
-            )}
-          </span>
+            <strong
+              style="color:${data.color}"
+            >
+              ${data.name}
+            </strong>
+
+            <small>
+              Lv.${member.level}
+            </small>
+
+            <div class="expTrack">
+
+              <span
+                style="width:${pct}%"
+              ></span>
+
+            </div>
+
+          </div>
 
         </div>
       `;
-    }).join("");
 
-  resultBox.innerHTML = `
+    }).join("");
+}
+
+
+function renderCommands(){
+
+  $("commandGrid")
+    .innerHTML =
+    DATA.commands.map(
+      command => `
+
+        <button
+          class="commandCard"
+          data-command="${command.id}"
+        >
+
+          <span class="commandIcon">
+            ${command.icon}
+          </span>
+
+          <strong>
+            ${command.name}
+          </strong>
+
+          <small>
+            ${command.desc}
+          </small>
+
+        </button>
+
+      `
+    ).join("");
+}
+
+
+$("commandGrid").onclick =
+event => {
+
+  const button =
+    event.target.closest(
+      "[data-command]"
+    );
+
+  if(!button){
+    return;
+  }
+
+  runCommand(
+    button.dataset.command
+  );
+};
+
+
+function runCommand(id){
+
+  const command =
+    DATA.commands.find(
+      item =>
+        item.id === id
+    );
+
+  if(!command){
+    return;
+  }
+
+  const changes = [];
+
+  state.cash +=
+    command.cash;
+
+  MEMBER_IDS.forEach(
+    memberId => {
+
+      if(id === "dance"){
+
+        changes.push(
+          changeStat(
+            memberId,
+            "dance",
+            memberId === "kilua"
+              ? 5
+              : 3
+          )
+        );
+
+        changes.push(
+          changeStat(
+            memberId,
+            "energy",
+            -7
+          )
+        );
+      }
+
+
+      if(id === "vocal"){
+
+        changes.push(
+          changeStat(
+            memberId,
+            "vocal",
+            (
+              memberId === "sarina" ||
+              memberId === "miyu"
+            )
+              ? 5
+              : 3
+          )
+        );
+
+        changes.push(
+          changeStat(
+            memberId,
+            "energy",
+            -6
+          )
+        );
+      }
+
+
+      if(id === "mc"){
+
+        changes.push(
+          changeStat(
+            memberId,
+            "mc",
+            4
+          )
+        );
+
+        changes.push(
+          changeStat(
+            memberId,
+            "bond",
+            2
+          )
+        );
+      }
+
+
+      if(id === "sns"){
+
+        changes.push(
+          changeStat(
+            memberId,
+            "mc",
+            2
+          )
+        );
+
+        changes.push(
+          changeStat(
+            memberId,
+            "energy",
+            -3
+          )
+        );
+      }
+
+
+      if(id === "flyer"){
+
+        changes.push(
+          changeStat(
+            memberId,
+            "energy",
+            -6
+          )
+        );
+      }
+
+
+      if(id === "rest"){
+
+        changes.push(
+          changeStat(
+            memberId,
+            "energy",
+            12
+          )
+        );
+      }
+
+
+      addExp(
+        memberId,
+        command.exp
+      );
+
+    }
+  );
+
+
+  if(id === "sns"){
+    state.reach =
+      clamp(
+        state.reach + 7
+      );
+  }
+
+  if(id === "flyer"){
+    state.reach =
+      clamp(
+        state.reach + 11
+      );
+  }
+
+
+  state.action++;
+
+  saveState();
+
+  showActionResult(
+    command,
+    changes
+  );
+}
+
+
+/* =========================
+   ACTION RESULT
+========================= */
+
+function showActionResult(
+  command,
+  changes
+){
+
+  const useful =
+    changes.filter(
+      change =>
+        change.delta !== 0
+    );
+
+
+  $("resultBox").innerHTML = `
+
+    <div class="resultIcon">
+      ${command.icon}
+    </div>
+
     <div class="resultMini">
-      ${data.mini}
+      ACTIVITY RESULT
     </div>
 
     <div class="resultTitle">
-      ${data.title}
+      ${command.name}
     </div>
 
     <div class="resultRows">
-      ${rows}
+
+      ${useful.slice(0,8)
+        .map(change => `
+
+          <div class="resultRow">
+
+            <span>
+              ${MEMBERS[change.id].name}
+              ${metricName(change.metric)}
+            </span>
+
+            <strong>
+              ${change.before}
+              →
+              ${change.after}
+            </strong>
+
+            <b class="${
+              change.delta < 0
+                ? "minus"
+                : "plus"
+            }">
+              ${
+                change.delta > 0
+                  ? "+"
+                  : ""
+              }${change.delta}
+            </b>
+
+          </div>
+
+        `).join("")}
+
     </div>
 
-    <div class="resultHint">
+    <div class="resultTap">
       タップして続ける
     </div>
   `;
 
-  result.classList.add(
-    "show"
-  );
 
-  result.onclick = () => {
+  $("result")
+    .classList.add("show");
 
-    result.classList.remove(
-      "show"
-    );
 
-    if(nextNode){
+  $("result").onclick = () => {
 
-      state.node =
-        nextNode;
+    $("result")
+      .classList.remove(
+        "show"
+      );
 
-      saveState();
+    if(state.action >= 3){
 
-      renderNode();
+      finishWeek();
+
+    }else{
+
+      openTraining();
     }
   };
 }
 
 
 /* =========================
-   WEEK END
+   WEEK RESULT
 ========================= */
 
-function buildWeekSummaryRows(){
+function statDelta(
+  id,
+  metric
+){
 
-  const rows = [];
-
-  if(
-    state.snapshot.reach !==
-    state.reach
-  ){
-
-    const d =
-      state.reach -
-      state.snapshot.reach;
-
-    rows.push(`
-      <div class="weekRow">
-
-        <span>
-          GROUP｜認知
-        </span>
-
-        <strong>
-          ${state.snapshot.reach}
-          →
-          ${state.reach}
-          (${d >= 0 ? "+" : ""}${d})
-        </strong>
-
-      </div>
-    `);
+  if(!state.weekSnapshot){
+    return 0;
   }
 
-  if(
-    state.snapshot.cash !==
-    state.cash
-  ){
+  return (
+    state.members[id][metric] -
+    state.weekSnapshot.members[id][metric]
+  );
+}
 
-    rows.push(`
-      <div class="weekRow">
 
-        <span>
-          GROUP｜活動資金
-        </span>
+function renderWeekCard(id){
 
-        <strong>
-          ¥${state.snapshot.cash.toLocaleString("ja-JP")}
-          →
-          ¥${state.cash.toLocaleString("ja-JP")}
-        </strong>
+  const member =
+    state.members[id];
 
-      </div>
-    `);
-  }
+  const data =
+    MEMBERS[id];
 
-  MEMBER_IDS.forEach(id => {
+  const stats = [
+    "vocal",
+    "dance",
+    "mc",
+    "bond",
+    "energy"
+  ];
 
-    [
-      "vocal",
-      "dance",
-      "bond",
-      "energy"
-    ].forEach(metric => {
 
-      const before =
-        state.snapshot.members[id][metric];
+  return `
 
-      const after =
-        state.members[id][metric];
+    <div class="weekMemberCard">
 
-      if(before === after){
-        return;
-      }
+      <div class="weekMemberTop">
 
-      const d =
-        after - before;
+        <img
+          src="${IMAGES[id].smile}"
+          alt=""
+        >
 
-      rows.push(`
-        <div class="weekRow">
+        <div>
 
-          <span>
-            ${MEMBERS[id].name}｜
-            ${metricLabel(metric)}
-          </span>
-
-          <strong>
-            ${before}
-            →
-            ${after}
-            (${d >= 0 ? "+" : ""}${d})
+          <strong
+            style="color:${data.color}"
+          >
+            ${data.name}
           </strong>
 
-        </div>
-      `);
-    });
-  });
+          <small>
+            Lv.${member.level}
+          </small>
 
-  return rows.join("") || `
-    <div class="weekRow">
-      <span>変化なし</span>
-      <strong>--</strong>
+        </div>
+
+      </div>
+
+
+      <div class="weekStatList">
+
+        ${stats.map(metric => {
+
+          const value =
+            member[metric];
+
+          const delta =
+            statDelta(
+              id,
+              metric
+            );
+
+          return `
+
+            <div class="weekStat">
+
+              <span>
+                ${metricName(metric)}
+              </span>
+
+              <b class="rank rank${rankOf(value)}">
+                ${rankOf(value)}
+              </b>
+
+              <strong>
+                ${value}
+              </strong>
+
+              <em class="${
+                delta < 0
+                  ? "down"
+                  : delta > 0
+                    ? "up"
+                    : ""
+              }">
+                ${
+                  delta === 0
+                    ? ""
+                    : delta > 0
+                      ? `+${delta}`
+                      : delta
+                }
+              </em>
+
+            </div>
+
+          `;
+
+        }).join("")}
+
+      </div>
+
     </div>
   `;
 }
 
-function renderWeekEnd(){
 
-  stopTyping();
+function finishWeek(){
 
-  weekEnd.innerHTML = `
-    <div class="weekTag">
-      WEEK 1 COMPLETE
-    </div>
+  const completedWeek =
+    state.week;
 
-    <div class="weekTitle">
-      最初の1週間、<br>
-      ここから始まった。
-    </div>
+  $("weekEndInner")
+    .innerHTML = `
 
-    <div class="weekText">
-      まだ4人は完成していない。<br>
-      でも、選んだ判断のぶんだけ
-      前に進んでいる。
-    </div>
+      <div class="weekCompleteTag">
+        WEEK ${completedWeek} COMPLETE
+      </div>
 
-    <div class="weekSummary">
-      ${buildWeekSummaryRows()}
-    </div>
+      <h1>
+        4人の成長
+      </h1>
 
-    <div class="weekDays">
-      デビューまで
-      <strong>
-        あと21日
-      </strong>
-    </div>
+      <div class="weekGroupInfo">
 
-    <div class="weekBtns">
+        <div>
+          <small>認知度</small>
+          <strong>
+            ${state.reach}
+          </strong>
+        </div>
+
+        <div>
+          <small>活動資金</small>
+          <strong>
+            ¥${state.cash.toLocaleString("ja-JP")}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="weekCardGrid">
+
+        ${MEMBER_IDS
+          .map(renderWeekCard)
+          .join("")}
+
+      </div>
+
+
+      <div class="weekNextInfo">
+
+        ${
+          state.season === 1
+            ? `デビューまであと${Math.max(
+                0,
+                28 -
+                completedWeek * 7
+              )}日`
+            : DATA.seasons.titles[
+                state.season
+              ]
+        }
+
+      </div>
+
 
       <button
-        class="weekBtn primary"
-        id="restartWeekBtn"
+        id="nextWeekBtn"
+        class="nextWeekBtn"
       >
-        もう一度WEEK 1をやる
+        WEEK ${completedWeek + 1}へ進む
       </button>
 
       <button
-        class="weekBtn sub"
-        id="backTitleBtn"
+        id="weekStatusBtn"
+        class="subBtn"
+      >
+        STATUSを見る
+      </button>
+
+      <button
+        id="weekTitleBtn"
+        class="subBtn"
       >
         タイトルへ戻る
       </button>
 
-    </div>
-  `;
+    `;
 
-  weekEnd.classList.add(
-    "show"
-  );
 
-  $("restartWeekBtn").onclick =
+  $("weekEnd")
+    .classList.add("show");
+
+
+  $("nextWeekBtn").onclick =
+    nextWeek;
+
+
+  $("weekStatusBtn").onclick =
+    openStatus;
+
+
+  $("weekTitleBtn").onclick =
     () => {
 
-      resetGame();
-
-      weekEnd.classList.remove(
-        "show"
-      );
-
-      showScreen("game");
-
-      renderNode();
-    };
-
-  $("backTitleBtn").onclick =
-    () => {
-
-      weekEnd.classList.remove(
-        "show"
-      );
+      $("weekEnd")
+        .classList.remove(
+          "show"
+        );
 
       showScreen("title");
     };
+}
+
+
+function nextWeek(){
+
+  $("weekEnd")
+    .classList.remove(
+      "show"
+    );
+
+
+  state.week++;
+
+  state.action = 0;
+
+
+  if(
+    state.week >
+    DATA.seasons.weeksPerSeason
+  ){
+
+    state.week = 1;
+    state.season++;
+  }
+
+
+  if(
+    state.season >
+    DATA.seasons.total
+  ){
+
+    state.season =
+      DATA.seasons.total;
+
+    state.week =
+      DATA.seasons.weeksPerSeason;
+  }
+
+
+  makeWeekSnapshot();
+
+  saveState();
+
+  openTraining();
 }
 
 
@@ -1433,72 +1594,153 @@ function renderWeekEnd(){
    STATUS
 ========================= */
 
-$("statusBtn").onclick = () => {
+function openStatus(){
 
   const cards =
     MEMBER_IDS.map(id => {
 
       const member =
-        MEMBERS[id];
-
-      const stats =
         state.members[id];
 
+      const data =
+        MEMBERS[id];
+
+      const needed =
+        expNeeded(
+          member.level
+        );
+
       return `
-        <div class="memberCard">
 
-          <h3 style="color:${member.color}">
-            ${member.name}
-          </h3>
+        <div class="statusCard">
 
-          <div class="memberGrid">
+          <div class="statusCharacter">
 
-            <div>
-              🎤 歌唱 ${stats.vocal}
+            <img
+              src="${IMAGES[id].smile}"
+              alt=""
+            >
+
+          </div>
+
+
+          <div class="statusData">
+
+            <div class="statusName">
+
+              <strong
+                style="color:${data.color}"
+              >
+                ${data.name}
+              </strong>
+
+              <span>
+                Lv.${member.level}
+              </span>
+
             </div>
 
-            <div>
-              💃 ダンス ${stats.dance}
+
+            <div class="statusExp">
+
+              EXP
+              ${member.exp}
+              /
+              ${needed}
+
             </div>
 
-            <div>
-              🤝 連携 ${stats.bond}
+
+            <div class="statusStats">
+
+              ${[
+                "vocal",
+                "dance",
+                "mc",
+                "bond",
+                "energy"
+              ].map(metric => `
+
+                <div>
+
+                  <span>
+                    ${metricName(metric)}
+                  </span>
+
+                  <b class="rank rank${rankOf(member[metric])}">
+                    ${rankOf(member[metric])}
+                  </b>
+
+                  <strong>
+                    ${member[metric]}
+                  </strong>
+
+                  ${
+                    metric !== "energy" &&
+                    member.points > 0
+                      ? `
+                        <button
+                          data-point="${id}"
+                          data-metric="${metric}"
+                        >
+                          ＋
+                        </button>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+              `).join("")}
+
             </div>
 
-            <div>
-              ❤️ 体力 ${stats.energy}
+
+            <div class="statusPoints">
+
+              育成PT
+              <strong>
+                ${member.points}
+              </strong>
+
             </div>
 
           </div>
 
         </div>
       `;
+
     }).join("");
 
-  modalBox.innerHTML = `
 
-    <h2>
+  $("modalBox").innerHTML = `
+
+    <div class="modalTitle">
       O-VER-KiLL STATUS
-    </h2>
+    </div>
 
-    <div class="statusHead">
+    <div class="groupStatus">
 
-      認知：
-      ${state.reach}
+      <span>
+        SEASON ${state.season}
+        / WEEK ${state.week}
+      </span>
 
-      <br>
+      <span>
+        認知 ${state.reach}
+      </span>
 
-      活動資金：
-      ¥${state.cash.toLocaleString("ja-JP")}
-
-      <br>
-
-      連携平均：
-      ${avgBond()}
+      <span>
+        ¥${state.cash.toLocaleString("ja-JP")}
+      </span>
 
     </div>
 
-    ${cards}
+
+    <div class="statusCards">
+      ${cards}
+    </div>
+
 
     <button
       class="modalClose"
@@ -1508,21 +1750,72 @@ $("statusBtn").onclick = () => {
     </button>
   `;
 
-  modal.classList.add(
-    "show"
-  );
-};
 
-modal.onclick = event => {
+  $("modal")
+    .classList.add("show");
+}
+
+
+$("statusBtn").onclick =
+  openStatus;
+
+$("trainingStatusBtn").onclick =
+  openStatus;
+
+
+$("modal").onclick =
+event => {
+
+  const pointButton =
+    event.target.closest(
+      "[data-point]"
+    );
+
+
+  if(pointButton){
+
+    const id =
+      pointButton.dataset.point;
+
+    const metric =
+      pointButton.dataset.metric;
+
+    const member =
+      state.members[id];
+
+
+    if(
+      member.points > 0 &&
+      member[metric] < 100
+    ){
+
+      member.points--;
+
+      member[metric] =
+        clamp(
+          member[metric] + 1
+        );
+
+      saveState();
+
+      openStatus();
+    }
+
+    return;
+  }
+
 
   if(
     event.target.id === "modal" ||
-    event.target.matches("[data-close]")
+    event.target.closest(
+      "[data-close]"
+    )
   ){
 
-    modal.classList.remove(
-      "show"
-    );
+    $("modal")
+      .classList.remove(
+        "show"
+      );
   }
 };
 
