@@ -433,7 +433,8 @@ function renderChoices(node){
 
 /* STORY */
 
-function renderNode(){
+async function renderNode(){
+
   if(state.node === "weekComplete"){
     renderWeekEnd();
     return;
@@ -460,12 +461,12 @@ function renderNode(){
 
   setBackground(node.bg);
 
-  setCharacter(
+  setReaction(node.reaction);
+
+  await setCharacter(
     node.member,
     node.expression
   );
-
-  setReaction(node.reaction);
 
   if(node.choices){
     renderChoices(node);
