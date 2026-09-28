@@ -1,20 +1,22 @@
+/* =========================================================
+   O-VER-KiLL | MANAGER'S STORY
+   story.js
+   v0.22
+========================================================= */
+
 window.GAME_STORY = {
+
+  /* =======================================================
+     PROLOGUE
+     ※ game.js側で4人のミニキャラを表示
+  ======================================================= */
 
   prologue: [
 
-`あなたは今日から、
-4人組アイドルグループ
-『O-VER-KiLL』のマネージャー。`,
+    `これは、
+まだ何者でもない4人の物語。`,
 
-`デビューライブまで、
-残された時間はわずか。
-
-場所は豊洲公園。
-
-まだ4人は、
-ひとつのグループとは言えない。`,
-
-`歌。
+    `歌。
 
 ダンス。
 
@@ -24,69 +26,67 @@ MC。
 
 そして体力。
 
-全部を伸ばす時間はない。`,
+全部を完璧にするには、
+時間が足りない。`,
 
-`誰を育てるか。
+    `それでも4人は、
+ステージに立とうとしている。`,
 
-何を優先するか。
+    `デビューライブまで、
+残された時間はわずか。
 
-どんな4人にするか。
+場所は――豊洲公園。`,
 
-それを決めるのは、
-マネージャーであるあなた。`
+    `そして今日。
+
+あなたは、
+4人組アイドルグループ
+
+『O-VER-KiLL』
+
+のマネージャーになる。`
 
   ],
 
 
+  /* =======================================================
+     WEEK DATA
+  ======================================================= */
+
   weeks: {
 
     1: {
-
-      title:
-        "4人でやるって、難しい。",
-
-      start:
-        "w1_01",
-
-      trainingIntro:
-        "w1_training_01",
-
-      afterTraining:
-        "w1_after_training",
-
-      ending:
-        "w1_end_01"
+      title: "4人でやるって、難しい。",
+      start: "w1_01",
+      trainingIntro: "w1_training_01",
+      afterTraining: "w1_after_training",
+      ending: "w1_end_01"
     },
 
     2: {
-
-      title:
-        "誰にも知られていない。",
-
-      start:
-        "w2_01"
+      title: "誰にも知られていない。",
+      start: "w2_01"
     }
+
   },
 
 
+  /* =======================================================
+     STORY NODES
+  ======================================================= */
+
   nodes: {
 
-    /* =========================
+
+    /* =====================================================
        WEEK 1
-       INTRO
-    ========================= */
+       MANAGER
+    ===================================================== */
 
     w1_01: {
-
-      chapter:
-        "WEEK 1｜マネージャー就任",
-
-      bg:
-        "manager",
-
-      speaker:
-        "MANAGER",
-
+      chapter: "WEEK 1｜マネージャー就任",
+      bg: "manager",
+      speaker: "MANAGER",
       text:
 `今日からあなたは、
 O-VER-KiLLのマネージャー。
@@ -96,507 +96,268 @@ O-VER-KiLLのマネージャー。
 ファンもほとんどない。
 
 まずは4人に会いに行こう。`,
-
-      next:
-        "w1_02"
+      next: "w1_02"
     },
 
 
+    /* =====================================================
+       STUDIO
+    ===================================================== */
+
     w1_02: {
-
-      chapter:
-        "WEEK 1｜初顔合わせ",
-
-      bg:
-        "manager",
-
-      member:
-        "sarina",
-
-      expression:
-        "normal",
-
-      speaker:
-        "SARiNA",
-
+      chapter: "WEEK 1｜初顔合わせ",
+      bg: "studio",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
       text:
 `今日から
 マネージャーなんだよね？
 
 よろしく。`,
-
-      next:
-        "w1_03"
+      next: "w1_03"
     },
-
 
     w1_03: {
-
-      chapter:
-        "WEEK 1｜初顔合わせ",
-
-      bg:
-        "manager",
-
-      member:
-        "miyu",
-
-      expression:
-        "smile",
-
-      speaker:
-        "MiYU",
-
-      reaction:
-        "✨",
-
+      chapter: "WEEK 1｜初顔合わせ",
+      bg: "studio",
+      member: "miyu",
+      expression: "smile",
+      reaction: "✨",
+      speaker: "MiYU",
       text:
-`よろしくー！
+`おおー。
 
-なんか本当に
-始まるんだって感じするね。`,
+マネージャーだ。
 
-      next:
-        "w1_04"
+よろしくね！`,
+      next: "w1_04"
     },
-
 
     w1_04: {
-
-      chapter:
-        "WEEK 1｜初顔合わせ",
-
-      bg:
-        "manager",
-
-      member:
-        "raisa",
-
-      expression:
-        "normal",
-
-      speaker:
-        "RAiSA",
-
+      chapter: "WEEK 1｜初顔合わせ",
+      bg: "studio",
+      member: "raisa",
+      expression: "troubled",
+      speaker: "RAiSA",
       text:
-`よろしくお願いします。
+`よろしくお願いします……！
 
-……ちょっと緊張する。`,
-
-      next:
-        "w1_05"
+なんか、
+ちょっと緊張するね。`,
+      next: "w1_05"
     },
 
-
     w1_05: {
-
-      chapter:
-        "WEEK 1｜初顔合わせ",
-
-      bg:
-        "manager",
-
-      member:
-        "kilua",
-
-      expression:
-        "normal",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜初顔合わせ",
+      bg: "studio",
+      member: "kilua",
+      expression: "normal",
+      speaker: "KiLUA",
       text:
 `よろしく。
 
-それで、
-今日はもう踊る？`,
+……で、
 
-      next:
-        "w1_06"
+今日は踊る？`,
+      next: "w1_06"
     },
-
 
     w1_06: {
-
-      chapter:
-        "WEEK 1｜初顔合わせ",
-
-      bg:
-        "manager",
-
-      speaker:
-        "MANAGER",
-
+      chapter: "WEEK 1｜初顔合わせ",
+      bg: "studio",
+      speaker: "MANAGER",
       text:
-`デビューライブは豊洲公園。
+`もちろん。
 
-4人に残された時間は、
-決して長くない。
+デビューライブは
+豊洲公園。
 
-最初の全体レッスンが始まる。`,
-
-      next:
-        "w1_07"
+そこまでに、
+4人のステージを作る。`,
+      next: "w1_07"
     },
 
 
-    /* =========================
-       FIRST LESSON
-    ========================= */
+    /* =====================================================
+       FIRST DANCE LESSON
+    ===================================================== */
 
     w1_07: {
-
-      chapter:
-        "WEEK 1｜初レッスン",
-
-      bg:
-        "studio",
-
-      member:
-        "sarina",
-
-      expression:
-        "normal",
-
-      speaker:
-        "SARiNA",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "sarina",
+      expression: "normal",
+      speaker: "SARiNA",
       text:
-`まず一回、
-4人で合わせてみよっか。`,
+`じゃあ……
 
-      next:
-        "w1_08"
+まず一回、
+合わせてみようか。`,
+      next: "w1_08"
     },
-
 
     w1_08: {
-
-      chapter:
-        "WEEK 1｜初レッスン",
-
-      bg:
-        "studio",
-
-      member:
-        "miyu",
-
-      expression:
-        "smile",
-
-      speaker:
-        "MiYU",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "miyu",
+      expression: "troubled",
+      speaker: "MiYU",
       text:
-`歌ならまだしも、
+`先に言っとくけど……
 
-ダンスはちょっと
-不安なんだけど。`,
-
-      next:
-        "w1_09"
+ダンス、
+そんな得意じゃないからね？`,
+      next: "w1_09"
     },
 
-
     w1_09: {
-
-      chapter:
-        "WEEK 1｜初レッスン",
-
-      bg:
-        "studio",
-
-      member:
-        "raisa",
-
-      expression:
-        "troubled",
-
-      speaker:
-        "RAiSA",
-
-      reaction:
-        "💧",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "raisa",
+      expression: "troubled",
+      reaction: "💧",
+      speaker: "RAiSA",
       text:
 `私も……。
 
-ちゃんと
-ついていけるかな。`,
-
-      next:
-        "w1_10"
+置いていかれたら
+どうしよう。`,
+      next: "w1_10"
     },
 
-
     w1_10: {
-
-      chapter:
-        "WEEK 1｜初レッスン",
-
-      bg:
-        "studio",
-
-      member:
-        "kilua",
-
-      expression:
-        "smile",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "kilua",
+      expression: "smile",
+      reaction: "🔥",
+      speaker: "KiLUA",
       text:
 `大丈夫。
 
-とりあえず
-最初から通してみよう。
+まず通してみよ。
 
-5、6、7、8！`,
-
-      next:
-        "w1_11"
+5、6、7、8――`,
+      next: "w1_11"
     },
 
-
     w1_11: {
-
-      chapter:
-        "WEEK 1｜ダンス合わせ",
-
-      bg:
-        "studio",
-
-      member:
-        "sarina",
-
-      expression:
-        "troubled",
-
-      speaker:
-        "SARiNA",
-
-      reaction:
-        "💦",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "sarina",
+      expression: "troubled",
+      reaction: "💦",
+      speaker: "SARiNA",
       text:
 `待って待って！
 
-今どこ！？
-
-もう一回！`,
-
-      next:
-        "w1_12"
+そこ、
+もう一回いい？`,
+      next: "w1_12"
     },
-
 
     w1_12: {
-
-      chapter:
-        "WEEK 1｜ダンス合わせ",
-
-      bg:
-        "studio",
-
-      member:
-        "kilua",
-
-      expression:
-        "normal",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "kilua",
+      expression: "normal",
+      speaker: "KiLUA",
       text:
-`ここから。
+`ここで右。
 
-右、左、ターンして、
+次のカウントで左。
+
 そのまま次。`,
-
-      next:
-        "w1_13"
+      next: "w1_13"
     },
-
 
     w1_13: {
-
-      chapter:
-        "WEEK 1｜ダンス合わせ",
-
-      bg:
-        "studio",
-
-      member:
-        "miyu",
-
-      expression:
-        "troubled",
-
-      speaker:
-        "MiYU",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "miyu",
+      expression: "troubled",
+      speaker: "MiYU",
       text:
-`いやいや、
+`ごめん。
 
 「そのまま次」が
-分かんないって！`,
-
-      next:
-        "w1_14"
+分かんない。`,
+      next: "w1_14"
     },
-
 
     w1_14: {
-
-      chapter:
-        "WEEK 1｜ダンス合わせ",
-
-      bg:
-        "studio",
-
-      member:
-        "raisa",
-
-      expression:
-        "troubled",
-
-      speaker:
-        "RAiSA",
-
-      reaction:
-        "💦",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "raisa",
+      expression: "troubled",
+      reaction: "💦",
+      speaker: "RAiSA",
       text:
-`待って……。
+`私も……。
 
-私まだ、
-最初のターンも
-出来てない……。`,
-
-      next:
-        "w1_15"
+途中から
+分からなくなっちゃった。`,
+      next: "w1_15"
     },
 
-
     w1_15: {
-
-      chapter:
-        "WEEK 1｜ダンス合わせ",
-
-      bg:
-        "studio",
-
-      member:
-        "kilua",
-
-      expression:
-        "angry",
-
-      speaker:
-        "KiLUA",
-
-      reaction:
-        "💢",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "kilua",
+      expression: "angry",
+      reaction: "💢",
+      speaker: "KiLUA",
       text:
 `でも、
 
-この速さで入れないと
-本番に間に合わないよ？`,
-
-      next:
-        "w1_16"
+ここで止まってたら
+本番に間に合わないよ。`,
+      next: "w1_16"
     },
-
 
     w1_16: {
-
-      chapter:
-        "WEEK 1｜ダンス合わせ",
-
-      bg:
-        "studio",
-
-      member:
-        "sarina",
-
-      expression:
-        "angry",
-
-      speaker:
-        "SARiNA",
-
-      reaction:
-        "💢",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "sarina",
+      expression: "angry",
+      reaction: "💢",
+      speaker: "SARiNA",
       text:
-`できる人の感覚で
-進められても困る。
+`分かってる。
 
-3人が分かってなかったら
-意味ないじゃん。`,
-
-      next:
-        "w1_17"
+でも、
+分からないまま進んでも
+揃わないでしょ。`,
+      next: "w1_17"
     },
-
 
     w1_17: {
-
-      chapter:
-        "WEEK 1｜ダンス合わせ",
-
-      bg:
-        "studio",
-
-      member:
-        "miyu",
-
-      expression:
-        "angry",
-
-      speaker:
-        "MiYU",
-
+      chapter: "WEEK 1｜最初のレッスン",
+      bg: "studio",
+      member: "miyu",
+      expression: "angry",
+      speaker: "MiYU",
       text:
-`KiLUAは踊れるよ。
+`踊れるのと、
 
-でもさ、
-
-踊れるのと
-教えられるのって
-別じゃない？`,
-
-      next:
-        "w1_decision"
+人に教えるのって
+違うからね。`,
+      next: "w1_decision"
     },
 
 
-    /* =========================
-       MANAGER DECISION
-    ========================= */
+    /* =====================================================
+       FIRST MANAGER DECISION
+    ===================================================== */
 
     w1_decision: {
-
-      chapter:
-        "WEEK 1｜最初の判断",
-
-      bg:
-        "studio",
-
-      member:
-        "kilua",
-
-      expression:
-        "angry",
-
-      reaction:
-        "💢",
-
-      speaker:
-        "MANAGER",
-
+      chapter: "WEEK 1｜最初の判断",
+      bg: "studio",
+      member: "kilua",
+      expression: "angry",
+      reaction: "💢",
+      speaker: "MANAGER",
       text:
 `4人の空気が張りつめる。
 
@@ -606,859 +367,499 @@ O-VER-KiLLのマネージャー。
       choices: [
 
         {
-          title:
-            "KiLUAに“教える側”を任せる",
-
-          hint:
-            "KiLUAの連携・MC成長",
-
-          result:
-            "teach",
-
-          next:
-            "w1_teach"
+          title: "KiLUAに“教える側”を任せる",
+          hint: "KiLUAの連携・MC成長",
+          result: "teach",
+          next: "w1_teach"
         },
 
         {
-          title:
-            "8カウントずつ4人で確認する",
-
-          hint:
-            "全員のダンス・連携を安定成長",
-
-          result:
-            "split",
-
-          next:
-            "w1_split"
+          title: "8カウントずつ4人で確認する",
+          hint: "ダンス・連携を安定成長",
+          result: "split",
+          next: "w1_split"
         },
 
         {
-          title:
-            "本番速度で最後まで通す",
-
-          hint:
-            "ダンス大幅成長 / 体力・連携リスク",
-
-          result:
-            "push",
-
-          next:
-            "w1_push"
+          title: "本番速度で最後まで通す",
+          hint: "ダンス大幅成長 / 高負荷",
+          result: "push",
+          next: "w1_push"
         },
 
         {
-          title:
-            "一度休憩して4人で話す",
-
-          hint:
-            "連携・MC重視",
-
-          result:
-            "talk",
-
-          next:
-            "w1_talk"
+          title: "一度休憩して話す",
+          hint: "連携・MC重視",
+          result: "talk",
+          next: "w1_talk"
         }
+
       ]
     },
 
 
-    /* =========================
-       DECISION RESPONSES
-    ========================= */
+    /* =====================================================
+       DECISION : TEACH
+    ===================================================== */
 
     w1_teach: {
-
-      chapter:
-        "WEEK 1｜教えるということ",
-
-      bg:
-        "studio",
-
-      member:
-        "kilua",
-
-      expression:
-        "troubled",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜教える",
+      bg: "studio",
+      member: "kilua",
+      expression: "troubled",
+      speaker: "KiLUA",
       text:
-`教える側……。
+`……教える側？
 
-私、
-人に教えたこと
-ほとんどないんだけど。`,
-
-      next:
-        "w1_teach2"
+私が？`,
+      next: "w1_teach2"
     },
-
 
     w1_teach2: {
-
-      chapter:
-        "WEEK 1｜教えるということ",
-
-      bg:
-        "studio",
-
-      member:
-        "sarina",
-
-      expression:
-        "smile",
-
-      speaker:
-        "SARiNA",
-
+      chapter: "WEEK 1｜教える",
+      bg: "studio",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
       text:
-`じゃあ、
-今日から覚えればいいじゃん。
+`うん。
 
-私たちも覚えるから。`,
-
-      next:
-        "w1_after_decision"
+KiLUAが分かってることを
+私たちにも分かるように
+教えてみて。`,
+      next: "w1_after_decision"
     },
 
 
+    /* =====================================================
+       DECISION : SPLIT
+    ===================================================== */
+
     w1_split: {
-
-      chapter:
-        "WEEK 1｜8カウント",
-
-      bg:
-        "studio",
-
-      member:
-        "raisa",
-
-      expression:
-        "smile",
-
-      speaker:
-        "RAiSA",
-
-      reaction:
-        "✨",
-
+      chapter: "WEEK 1｜8カウントずつ",
+      bg: "studio",
+      member: "raisa",
+      expression: "smile",
+      reaction: "✨",
+      speaker: "RAiSA",
       text:
 `あ。
 
-これなら分かる！
-
-さっきより全然できる。`,
-
-      next:
-        "w1_split2"
+これなら
+分かるかも！`,
+      next: "w1_split2"
     },
 
-
     w1_split2: {
-
-      chapter:
-        "WEEK 1｜8カウント",
-
-      bg:
-        "studio",
-
-      member:
-        "kilua",
-
-      expression:
-        "normal",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜8カウントずつ",
+      bg: "studio",
+      member: "kilua",
+      expression: "normal",
+      speaker: "KiLUA",
       text:
 `……なるほど。
 
-私が速すぎたのか。`,
-
-      next:
-        "w1_after_decision"
+この方が
+揃うの早いか。`,
+      next: "w1_after_decision"
     },
 
 
+    /* =====================================================
+       DECISION : PUSH
+    ===================================================== */
+
     w1_push: {
-
-      chapter:
-        "WEEK 1｜本番速度",
-
-      bg:
-        "studio",
-
-      member:
-        "kilua",
-
-      expression:
-        "smile",
-
-      speaker:
-        "KiLUA",
-
-      reaction:
-        "🔥",
-
+      chapter: "WEEK 1｜通し練習",
+      bg: "studio",
+      member: "kilua",
+      expression: "smile",
+      reaction: "🔥",
+      speaker: "KiLUA",
       text:
 `OK。
 
-じゃあ止めないよ。
-
-5、6、7、8！`,
-
-      next:
-        "w1_push2"
+じゃあ本番と同じ速さで
+最後までいくよ！`,
+      next: "w1_push2"
     },
-
 
     w1_push2: {
-
-      chapter:
-        "WEEK 1｜本番速度",
-
-      bg:
-        "studio",
-
-      member:
-        "raisa",
-
-      expression:
-        "cry",
-
-      speaker:
-        "RAiSA",
-
-      reaction:
-        "💦",
-
+      chapter: "WEEK 1｜通し練習",
+      bg: "studio",
+      member: "raisa",
+      expression: "cry",
+      reaction: "💦",
+      speaker: "RAiSA",
       text:
-`速っ……！
+`はぁ……
 
-足がもう
-動かない……！`,
+はぁ……
 
-      next:
-        "w1_after_decision"
+ちょっと待って……！`,
+      next: "w1_after_decision"
     },
 
+
+    /* =====================================================
+       DECISION : TALK
+    ===================================================== */
 
     w1_talk: {
-
-      chapter:
-        "WEEK 1｜休憩",
-
-      bg:
-        "lounge",
-
-      member:
-        "miyu",
-
-      expression:
-        "normal",
-
-      speaker:
-        "MiYU",
-
+      chapter: "WEEK 1｜休憩",
+      bg: "studio",
+      member: "miyu",
+      expression: "normal",
+      speaker: "MiYU",
       text:
-`KiLUAさ、
-
-教えるの
-初めてなんでしょ？`,
-
-      next:
-        "w1_talk2"
+`一回、
+何が分からないか整理しよ。`,
+      next: "w1_talk2"
     },
-
 
     w1_talk2: {
-
-      chapter:
-        "WEEK 1｜休憩",
-
-      bg:
-        "lounge",
-
-      member:
-        "kilua",
-
-      expression:
-        "troubled",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜休憩",
+      bg: "studio",
+      member: "kilua",
+      expression: "troubled",
+      speaker: "KiLUA",
       text:
-`……うん。
+`私、
 
-見れば分かるって
-思ってた。`,
-
-      next:
-        "w1_talk3"
+自分が分かってるから
+みんなも分かると思ってた。`,
+      next: "w1_talk3"
     },
-
 
     w1_talk3: {
-
-      chapter:
-        "WEEK 1｜休憩",
-
-      bg:
-        "lounge",
-
-      member:
-        "sarina",
-
-      expression:
-        "smile",
-
-      speaker:
-        "SARiNA",
-
+      chapter: "WEEK 1｜休憩",
+      bg: "studio",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
       text:
-`じゃあそこからだね。
+`じゃあ、
 
-4人とも
-まだ初めてなんだから。`,
-
-      next:
-        "w1_after_decision"
+ここから
+4人で作ってけばいいよ。`,
+      next: "w1_after_decision"
     },
 
 
-    /* =========================
+    /* =====================================================
        AFTER DECISION
-    ========================= */
+    ===================================================== */
 
     w1_after_decision: {
-
-      chapter:
-        "WEEK 1｜レッスン後",
-
-      bg:
-        "lounge",
-
-      member:
-        "kilua",
-
-      expression:
-        "troubled",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜4人で合わせる",
+      bg: "studio",
+      member: "kilua",
+      expression: "troubled",
+      speaker: "KiLUA",
       text:
-`ダンスだけ出来ても、
+`……もう一回、
 
-グループって
-出来ないんだね。`,
-
-      next:
-        "w1_after_02"
+頭からやっていい？`,
+      next: "w1_after_02"
     },
-
 
     w1_after_02: {
-
-      chapter:
-        "WEEK 1｜レッスン後",
-
-      bg:
-        "lounge",
-
-      member:
-        "miyu",
-
-      expression:
-        "smile",
-
-      speaker:
-        "MiYU",
-
+      chapter: "WEEK 1｜4人で合わせる",
+      bg: "studio",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
       text:
-`まあ、
-
-まだ初日だし。
-
-これからでしょ。`,
-
-      next:
-        "w1_after_03"
+`今度は
+さっきよりいけそう。`,
+      next: "w1_after_03"
     },
-
 
     w1_after_03: {
-
-      chapter:
-        "WEEK 1｜レッスン後",
-
-      bg:
-        "lounge",
-
-      member:
-        "raisa",
-
-      expression:
-        "smile",
-
-      speaker:
-        "RAiSA",
-
+      chapter: "WEEK 1｜4人で合わせる",
+      bg: "studio",
+      member: "raisa",
+      expression: "smile",
+      speaker: "RAiSA",
       text:
-`私ももっと
-練習したい。
+`私も！
 
-さっきよりは
-ちょっと楽しくなってきた。`,
-
-      next:
-        "w1_after_04"
+もう一回やりたい。`,
+      next: "w1_after_04"
     },
-
 
     w1_after_04: {
-
-      chapter:
-        "WEEK 1｜レッスン後",
-
-      bg:
-        "lounge",
-
-      member:
-        "sarina",
-
-      expression:
-        "normal",
-
-      speaker:
-        "SARiNA",
-
+      chapter: "WEEK 1｜レッスン後",
+      bg: "studio",
+      member: "sarina",
+      expression: "normal",
+      speaker: "SARiNA",
       text:
-`でも、
+`ステージの練習も大事だけど……
 
-練習だけしてても
-誰にも知られない。
+私たちのこと、
 
-活動も始めないとね。`,
-
-      next:
-        "w1_training_01"
+まだ誰も知らないんだよね。`,
+      next: "w1_training_01"
     },
 
 
-    /* =========================
-       MANAGEMENT INTRO
-    ========================= */
+    /* =====================================================
+       TRAINING INTRO
+
+       ★説明文を削除。
+       UIへ自然に移る。
+    ===================================================== */
 
     w1_training_01: {
-
-      chapter:
-        "WEEK 1｜MANAGEMENT",
-
-      bg:
-        "manager",
-
-      speaker:
-        "MANAGER",
-
+      chapter: "WEEK 1｜活動開始",
+      bg: "manager",
+      speaker: "MANAGER",
       text:
-`ここからは、
-マネージャーとして
-1週間の活動を決める。
+`今日の残り時間。
 
-育成できるのは3回。
+誰と、
+何をする？`,
+      next: "w1_training"
+    },
 
-誰を重点的に育てるか。
-
-何を優先するか。
-
-全部を選ぶことはできない。`,
-
-      next:
-        "training"
+    w1_training: {
+      type: "training"
     },
 
 
-    training: {
-      type:
-        "training"
-    },
-
-
-    /* =========================
-       MID WEEK EVENT
-    ========================= */
+    /* =====================================================
+       AFTER TRAINING
+    ===================================================== */
 
     w1_after_training: {
-
-      chapter:
-        "WEEK 1｜夜",
-
-      bg:
-        "night",
-
-      member:
-        "raisa",
-
-      expression:
-        "normal",
-
-      speaker:
-        "RAiSA",
-
+      chapter: "WEEK 1｜帰り道",
+      bg: "night",
+      member: "raisa",
+      expression: "smile",
+      speaker: "RAiSA",
       text:
-`今日さ、
+`今日ね。
 
 知らない人に
 「頑張ってね」って
-言われたんだ。`,
-
-      next:
-        "w1_after_training2"
+言ってもらえた。`,
+      next: "w1_after_training2"
     },
-
 
     w1_after_training2: {
-
-      chapter:
-        "WEEK 1｜夜",
-
-      bg:
-        "night",
-
-      member:
-        "miyu",
-
-      expression:
-        "smile",
-
-      speaker:
-        "MiYU",
-
-      reaction:
-        "✨",
-
+      chapter: "WEEK 1｜帰り道",
+      bg: "night",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
       text:
-`え、
-もうファンじゃん！
+`え。
 
-1人目じゃない？`,
-
-      next:
-        "w1_after_training3"
+それもう
+ファンじゃん。`,
+      next: "w1_after_training3"
     },
-
 
     w1_after_training3: {
-
-      chapter:
-        "WEEK 1｜夜",
-
-      bg:
-        "night",
-
-      member:
-        "sarina",
-
-      expression:
-        "smile",
-
-      speaker:
-        "SARiNA",
-
+      chapter: "WEEK 1｜帰り道",
+      bg: "night",
+      member: "sarina",
+      expression: "smile",
+      speaker: "SARiNA",
       text:
-`1人でも、
+`まだ1人でも、
 
-私たちを見てくれる人が
-増えたなら大きいよ。`,
-
-      next:
-        "w1_after_training4"
+その1人が
+来てくれるなら大事だよ。`,
+      next: "w1_after_training4"
     },
 
-
     w1_after_training4: {
-
-      chapter:
-        "WEEK 1｜夜",
-
-      bg:
-        "night",
-
-      member:
-        "kilua",
-
-      expression:
-        "normal",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜帰り道",
+      bg: "night",
+      member: "kilua",
+      expression: "smile",
+      reaction: "🔥",
+      speaker: "KiLUA",
       text:
 `じゃあ、
 
 その1人が
-100人になるまで
-やればいい。`,
-
-      next:
-        "w1_end_01"
+100人になるまでやろ。`,
+      next: "w1_end_01"
     },
 
 
-    /* =========================
-       WEEK1 ENDING
-    ========================= */
+    /* =====================================================
+       WEEK 1 END
+    ===================================================== */
 
     w1_end_01: {
-
-      chapter:
-        "WEEK 1｜週末",
-
-      bg:
-        "live",
-
-      speaker:
-        "MANAGER",
-
+      chapter: "WEEK 1｜週末",
+      bg: "manager",
+      speaker: "MANAGER",
       text:
-`最初の1週間が終わった。
+`O-VER-KiLLとしての
+最初の1週間が終わる。
 
-歌も。
-
-ダンスも。
-
-4人の関係も。
-
-まだ完成には遠い。`,
-
-      next:
-        "w1_end_02"
+4人はまだ、
+始まったばかりだ。`,
+      next: "w1_end_02"
     },
-
 
     w1_end_02: {
-
-      chapter:
-        "WEEK 1｜週末",
-
-      bg:
-        "live",
-
-      member:
-        "raisa",
-
-      expression:
-        "smile",
-
-      speaker:
-        "RAiSA",
-
+      chapter: "WEEK 1｜週末",
+      bg: "manager",
+      member: "raisa",
+      expression: "smile",
+      speaker: "RAiSA",
       text:
-`最初は、
+`来週も、
 
-私には無理かもって
-思ってたけど……。
-
-もうちょっと
-やってみたい。`,
-
-      next:
-        "w1_end_03"
+もっとやりたい。`,
+      next: "w1_end_03"
     },
 
-
     w1_end_03: {
-
-      chapter:
-        "WEEK 1｜週末",
-
-      bg:
-        "live",
-
-      member:
-        "kilua",
-
-      expression:
-        "smile",
-
-      speaker:
-        "KiLUA",
-
+      chapter: "WEEK 1｜週末",
+      bg: "manager",
+      member: "kilua",
+      expression: "normal",
+      speaker: "KiLUA",
       text:
 `次は、
 
-ちゃんと4人で
+4人でもっと
 揃えたい。`,
-
-      next:
-        "w1_end_04"
+      next: "w1_end_04"
     },
 
-
     w1_end_04: {
-
-      chapter:
-        "WEEK 1｜週末",
-
-      bg:
-        "live",
-
-      member:
-        "miyu",
-
-      expression:
-        "smile",
-
-      speaker:
-        "MiYU",
-
+      chapter: "WEEK 1｜週末",
+      bg: "manager",
+      member: "miyu",
+      expression: "smile",
+      speaker: "MiYU",
       text:
 `その前にさ。
 
-まずもっと
-知ってもらわないとね。`,
-
-      next:
-        "w1_end_05"
+もうちょっと
+知られないとね。`,
+      next: "w1_end_05"
     },
 
-
     w1_end_05: {
-
-      chapter:
-        "WEEK 1｜週末",
-
-      bg:
-        "live",
-
-      member:
-        "sarina",
-
-      expression:
-        "smile",
-
-      speaker:
-        "SARiNA",
-
-      reaction:
-        "✨",
-
+      chapter: "WEEK 1｜週末",
+      bg: "manager",
+      member: "sarina",
+      expression: "smile",
+      reaction: "✨",
+      speaker: "SARiNA",
       text:
 `うん。
 
 ここから
 大きくなってみせよう。`,
+      next: "w1_complete"
+    },
 
-      next:
-        "weekComplete"
+    w1_complete: {
+      type: "weekComplete"
     },
 
 
-    weekComplete: {
-      type:
-        "weekComplete"
-    },
-
-
-    /* =========================
+    /* =====================================================
        WEEK 2
-    ========================= */
+
+       「誰にも知られていない」
+       黒背景ではなく事務所→SNS背景へ
+    ===================================================== */
 
     w2_01: {
-
-      chapter:
-        "WEEK 2｜月曜日",
-
-      bg:
-        "manager",
-
-      speaker:
-        "MANAGER",
-
+      chapter: "WEEK 2｜月曜日",
+      bg: "manager",
+      speaker: "MANAGER",
       text:
 `WEEK 2。
 
-少しだけ4人らしくなった
-O-VER-KiLL。
+4人の空気は、
+少しずつ変わってきた。
 
-しかし、
-次の問題はもっと単純だった。
+次に必要なのは――
 
-――誰にも知られていない。`,
-
-      next:
-        "w2_02"
+O-VER-KiLLを
+知ってもらうこと。`,
+      next: "w2_02"
     },
-
 
     w2_02: {
-
-      chapter:
-        "WEEK 2｜認知度",
-
-      bg:
-        "manager",
-
-      member:
-        "miyu",
-
-      expression:
-        "troubled",
-
-      speaker:
-        "MiYU",
-
+      chapter: "WEEK 2｜SNS",
+      bg: "sns",
+      member: "miyu",
+      expression: "troubled",
+      speaker: "MiYU",
       text:
-`SNSの数字、
+`投稿してるけど……
 
-びっくりするくらい
-増えないね……。`,
-
-      next:
-        "w2_03"
+全然数字
+伸びないね。`,
+      next: "w2_03"
     },
 
-
     w2_03: {
+      chapter: "WEEK 2｜SNS",
+      bg: "sns",
+      member: "raisa",
+      expression: "troubled",
+      speaker: "RAiSA",
+      text:
+`見てくれてる人、
 
-      chapter:
-        "WEEK 2｜認知度",
+ほとんど
+私たちの知り合いかも……。`,
+      next: "w2_04"
+    },
 
-      bg:
-        "manager",
-
-      member:
-        "sarina",
-
-      expression:
-        "normal",
-
-      speaker:
-        "SARiNA",
-
+    w2_04: {
+      chapter: "WEEK 2｜SNS",
+      bg: "sns",
+      member: "kilua",
+      expression: "normal",
+      speaker: "KiLUA",
       text:
 `待ってても
-見つけてもらえない。
+増えないんじゃない？`,
+      next: "w2_05"
+    },
 
-だったら、
+    w2_05: {
+      chapter: "WEEK 2｜SNS",
+      bg: "sns",
+      member: "sarina",
+      expression: "smile",
+      reaction: "✨",
+      speaker: "SARiNA",
+      text:
+`だったら、
 
 こっちから
 見つけてもらいに行こう。`,
-
-      next:
-        "w2_training"
+      next: "w2_training_intro"
     },
 
+    w2_training_intro: {
+      chapter: "WEEK 2｜活動開始",
+      bg: "manager",
+      speaker: "MANAGER",
+      text:
+`今日は、
+どう動く？`,
+      next: "w2_training"
+    },
 
     w2_training: {
-      type:
-        "training"
+      type: "training"
     }
 
   }
