@@ -1,7 +1,7 @@
 /* =========================================================
    O-VER-KiLL | MANAGER'S STORY
    game.js
-   v0.20
+   v0.21
 ========================================================= */
 
 const DATA = window.GAME_DATA;
@@ -9,11 +9,7 @@ const STORY = window.GAME_STORY;
 
 const STORAGE_KEY = "overkill_manager_v20";
 
-/* =========================================================
-   DOM
-========================================================= */
-
-const $ = (id) => document.getElementById(id);
+const $ = id => document.getElementById(id);
 
 const loadingScreen = $("loading");
 const titleScreen = $("title");
@@ -42,16 +38,14 @@ const trainingWeek = $("trainingWeek");
 const trainingMembers = $("trainingMembers");
 const commandGrid = $("commandGrid");
 
-const audioEl = $("song");
-
 /* =========================================================
-   HELPERS
+   BASIC
 ========================================================= */
 
 const clamp = (value, min = 0, max = 100) =>
   Math.max(min, Math.min(max, value));
 
-const wait = (ms) =>
+const wait = ms =>
   new Promise(resolve => setTimeout(resolve, ms));
 
 function deepClone(obj) {
@@ -66,30 +60,25 @@ function statLabel(stat) {
   return DATA.statLabels?.[stat] || stat;
 }
 
+/*
+  体力はランク対象外。
+*/
 function rankOf(value) {
-  const found = DATA.ranks.find(r => value >= r.min);
+  const found =
+    DATA.ranks.find(rank => value >= rank.min);
+
   return found ? found.rank : "E";
 }
 
+function rankIndex(rank) {
+  const order = ["E", "D", "C", "B", "A", "S"];
+  return order.indexOf(rank);
+}
+
 function expNeeded(level) {
-  return DATA.exp.base + ((level - 1) * DATA.exp.growth);
-}
-
-function averageStat(stat) {
-  const values = DATA.memberOrder.map(id =>
-    state.members[id].stats[stat]
-  );
-
-  return Math.round(
-    values.reduce((a, b) => a + b, 0) / values.length
-  );
-}
-
-function minimumStat(stat) {
-  return Math.min(
-    ...DATA.memberOrder.map(id =>
-      state.members[id].stats[stat]
-    )
+  return (
+    DATA.exp.base +
+    ((level - 1) * DATA.exp.growth)
   );
 }
 
@@ -97,24 +86,43 @@ function formatMoney(value) {
   return `¥${Math.max(0, value).toLocaleString("ja-JP")}`;
 }
 
+function averageStat(stat) {
+  const values =
+    DATA.memberOrder.map(
+      id => state.members[id].stats[stat]
+    );
+
+  return Math.round(
+    values.reduce((a, b) => a + b, 0) /
+    values.length
+  );
+}
+
+function minimumStat(stat) {
+  return Math.min(
+    ...DATA.memberOrder.map(
+      id => state.members[id].stats[stat]
+    )
+  );
+}
+
 /* =========================================================
    STATE
 ========================================================= */
 
 function createMemberState(id) {
-  const base = DATA.members[id];
-
   return {
     id,
     level: 1,
     exp: 0,
     sp: 0,
-    stats: deepClone(base.initial)
+    stats: deepClone(
+      DATA.members[id].initial
+    )
   };
 }
 
 function createInitialState() {
-
   const members = {};
 
   DATA.memberOrder.forEach(id => {
@@ -141,12 +149,12 @@ function createInitialState() {
     members,
 
     actionsUsed: 0,
-
     selectedMember: "all",
 
     pendingStoryNext: null,
 
     weekSnapshot: null,
+    weekRewardClaimed: false,
 
     collection: {},
     achievements: [],
@@ -157,7 +165,7 @@ function createInitialState() {
 let state = loadState();
 
 /* =========================================================
-   SAVE / LOAD
+   SAVE
 ========================================================= */
 
 function saveState() {
@@ -168,16 +176,16 @@ function saveState() {
 }
 
 function loadState() {
-
   try {
-
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw =
+      localStorage.getItem(STORAGE_KEY);
 
     if (!raw) {
       return createInitialState();
     }
 
-    const parsed = JSON.parse(raw);
+    const parsed =
+      JSON.parse(raw);
 
     if (
       !parsed.members ||
@@ -189,27 +197,32 @@ function loadState() {
     return parsed;
 
   } catch (error) {
-
     console.error(error);
     return createInitialState();
   }
 }
 
 function resetRun() {
-
   const permanent = {
-    ovkPoints: state.ovkPoints || 0,
-    collection: state.collection || {},
-    achievements: state.achievements || [],
-    clearHistory: state.clearHistory || []
+    ovkPoints:
+      state.ovkPoints || 0,
+
+    collection:
+      state.collection || {},
+
+    achievements:
+      state.achievements || [],
+
+    clearHistory:
+      state.clearHistory || []
   };
 
   state = createInitialState();
 
-  state.ovkPoints = permanent.ovkPoints;
-  state.collection = permanent.collection;
-  state.achievements = permanent.achievements;
-  state.clearHistory = permanent.clearHistory;
+  Object.assign(
+    state,
+    permanent
+  );
 
   saveState();
 }
@@ -219,7 +232,6 @@ function resetRun() {
 ========================================================= */
 
 function hideAllScreens() {
-
   [
     loadingScreen,
     titleScreen,
@@ -228,43 +240,39 @@ function hideAllScreens() {
     trainingScreen,
     actionResultScreen,
     weekEndScreen
-  ].forEach(el => {
-    if (el) el.classList.remove("active");
+  ].forEach(screen => {
+    screen?.classList.remove("active");
   });
 }
 
 function showScreen(screen) {
-
   hideAllScreens();
-
-  if (screen) {
-    screen.classList.add("active");
-  }
+  screen?.classList.add("active");
 }
 
 /* =========================================================
-   IMAGE PRELOAD
+   IMAGE CACHE
 ========================================================= */
 
 const imageCache = new Map();
 
 function preloadImage(src) {
-
-  if (!src) return Promise.resolve();
+  if (!src) {
+    return Promise.resolve();
+  }
 
   if (imageCache.has(src)) {
     return imageCache.get(src);
   }
 
-  const promise = new Promise(resolve => {
+  const promise =
+    new Promise(resolve => {
+      const img = new Image();
 
-    const img = new Image();
-
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
-
-    img.src = src;
-  });
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = src;
+    });
 
   imageCache.set(src, promise);
 
@@ -272,46 +280,50 @@ function preloadImage(src) {
 }
 
 async function preloadAssets() {
-
   const sources = [];
 
-  Object.values(DATA.images).forEach(member => {
-    Object.values(member).forEach(src => {
+  Object.values(DATA.images)
+    .forEach(expressions => {
+      Object.values(expressions)
+        .forEach(src => {
+          sources.push(src);
+        });
+    });
+
+  Object.values(DATA.backgrounds)
+    .forEach(src => {
       sources.push(src);
     });
-  });
 
-  Object.values(DATA.backgrounds).forEach(src => {
-    sources.push(src);
-  });
+  const unique =
+    [...new Set(sources)];
 
-  const unique = [...new Set(sources)];
-
-  let loaded = 0;
-
-  for (const src of unique) {
-
-    await preloadImage(src);
-
-    loaded++;
+  for (
+    let i = 0;
+    i < unique.length;
+    i++
+  ) {
+    await preloadImage(unique[i]);
 
     const percent =
-      Math.round((loaded / unique.length) * 100);
+      Math.round(
+        ((i + 1) / unique.length) * 100
+      );
 
     const progress =
-      $("loadingProgress") ||
-      document.querySelector(".loadingProgress");
-
-    if (progress) {
-      progress.style.width = `${percent}%`;
-    }
+      $("loadingProgress");
 
     const number =
-      $("loadingPercent") ||
-      document.querySelector(".loadingPercent");
+      $("loadingPercent");
+
+    if (progress) {
+      progress.style.width =
+        `${percent}%`;
+    }
 
     if (number) {
-      number.textContent = `${percent}%`;
+      number.textContent =
+        `${percent}%`;
     }
   }
 }
@@ -321,19 +333,22 @@ async function preloadAssets() {
 ========================================================= */
 
 async function setBackground(bgKey) {
+  const src =
+    DATA.backgrounds[bgKey];
 
-  const src = DATA.backgrounds[bgKey];
-
-  if (!envEl || !src) return;
+  if (!envEl || !src) {
+    return;
+  }
 
   await preloadImage(src);
 
-  envEl.style.backgroundImage =
-    `linear-gradient(
+  envEl.style.backgroundImage = `
+    linear-gradient(
       rgba(4,6,13,.13),
-      rgba(4,6,13,.26)
+      rgba(4,6,13,.28)
     ),
-    url("${src}")`;
+    url("${src}")
+  `;
 }
 
 /* =========================================================
@@ -344,23 +359,15 @@ async function setCharacter(
   memberId,
   expression = "normal"
 ) {
-
   if (!charEl) return;
 
   charEl.classList.remove("show");
 
-  if (managerMark) {
-    managerMark.classList.remove("show");
-  }
+  managerMark?.classList.remove("show");
 
   if (!memberId) {
-
     charEl.style.display = "none";
-
-    if (managerMark) {
-      managerMark.classList.add("show");
-    }
-
+    managerMark?.classList.add("show");
     return;
   }
 
@@ -368,42 +375,25 @@ async function setCharacter(
     DATA.images?.[memberId]?.[expression] ||
     DATA.images?.[memberId]?.normal;
 
-  if (!src) {
-    charEl.style.display = "none";
-    return;
-  }
-
-  /*
-    重要：
-    画像の読み込み完了を待ってから
-    DOMへ表示する。
-
-    これで
-    「文字 → 後から人物」
-    を防止する。
-  */
+  if (!src) return;
 
   await preloadImage(src);
 
-  charEl.style.display = "block";
   charEl.src = src;
+  charEl.style.display = "block";
 
-  await new Promise(resolve => {
-
-    if (charEl.complete) {
-      resolve();
-      return;
-    }
-
-    charEl.onload = () => resolve();
-    charEl.onerror = () => resolve();
-  });
+  if (!charEl.complete) {
+    await new Promise(resolve => {
+      charEl.onload = resolve;
+      charEl.onerror = resolve;
+    });
+  }
 
   requestAnimationFrame(() => {
     charEl.classList.add("show");
   });
 
-  await wait(120);
+  await wait(130);
 }
 
 /* =========================================================
@@ -411,7 +401,6 @@ async function setCharacter(
 ========================================================= */
 
 function setReaction(reaction) {
-
   if (!reactionEl) return;
 
   reactionEl.classList.remove("show");
@@ -419,7 +408,8 @@ function setReaction(reaction) {
 
   if (!reaction) return;
 
-  reactionEl.textContent = reaction;
+  reactionEl.textContent =
+    reaction;
 
   void reactionEl.offsetWidth;
 
@@ -432,30 +422,44 @@ function setReaction(reaction) {
 
 let typing = false;
 let skipTyping = false;
+let typingToken = 0;
 
-async function typeText(text, speed = 24) {
+async function typeText(
+  element,
+  text,
+  speed = 23
+) {
+  if (!element) return;
 
-  if (!textEl) return;
+  const myToken =
+    ++typingToken;
 
   typing = true;
   skipTyping = false;
 
-  textEl.innerHTML = "";
+  element.innerHTML = "";
 
-  const chars = Array.from(String(text));
+  const chars =
+    Array.from(String(text));
 
   for (const char of chars) {
+    if (myToken !== typingToken) {
+      return;
+    }
 
     if (skipTyping) {
-      textEl.innerHTML =
-        String(text).replace(/\n/g, "<br>");
+      element.innerHTML =
+        String(text)
+          .replace(/\n/g, "<br>");
       break;
     }
 
     if (char === "\n") {
-      textEl.innerHTML += "<br>";
+      element.appendChild(
+        document.createElement("br")
+      );
     } else {
-      textEl.append(
+      element.append(
         document.createTextNode(char)
       );
     }
@@ -463,16 +467,25 @@ async function typeText(text, speed = 24) {
     await wait(speed);
   }
 
-  typing = false;
+  if (myToken === typingToken) {
+    typing = false;
+  }
 }
 
 /* =========================================================
    STORY
 ========================================================= */
 
-async function renderStory() {
+let storyRenderToken = 0;
 
-  const node = STORY.nodes[state.node];
+async function renderStory() {
+  const renderToken =
+    ++storyRenderToken;
+
+  typingToken++;
+
+  const node =
+    STORY.nodes[state.node];
 
   if (!node) {
     console.error(
@@ -509,45 +522,58 @@ async function renderStory() {
       node.speaker || "";
   }
 
+  if (textEl) {
+    textEl.innerHTML = "";
+  }
+
   if (choicesEl) {
     choicesEl.innerHTML = "";
   }
 
   if (dialogueEl) {
     dialogueEl.dataset.mode =
-      node.choices ? "choice" : "normal";
+      node.choices
+        ? "choice"
+        : "normal";
   }
 
-  /*
-    表示順を固定
+  await setBackground(
+    node.bg || "manager"
+  );
 
-    1. 背景
-    2. キャラ画像ロード
-    3. キャラ表示
-    4. リアクション
-    5. 少し待つ
-    6. 文字開始
-  */
-
-  await setBackground(node.bg || "manager");
+  if (
+    renderToken !== storyRenderToken
+  ) return;
 
   await setCharacter(
     node.member,
     node.expression || "normal"
   );
 
+  if (
+    renderToken !== storyRenderToken
+  ) return;
+
   setReaction(node.reaction);
 
-  await wait(140);
+  await wait(130);
 
-  await typeText(node.text || "");
+  if (
+    renderToken !== storyRenderToken
+  ) return;
+
+  await typeText(
+    textEl,
+    node.text || ""
+  );
+
+  if (
+    renderToken !== storyRenderToken
+  ) return;
 
   if (node.choices) {
-
     renderStoryChoices(node);
-
   } else {
-
     renderNextButton(node);
   }
 
@@ -555,7 +581,6 @@ async function renderStory() {
 }
 
 function renderNextButton(node) {
-
   if (!choicesEl) return;
 
   const button =
@@ -568,21 +593,22 @@ function renderNextButton(node) {
     "NEXT ›";
 
   button.onclick = () => {
-
-    if (node.next) {
-
-      state.node = node.next;
-      saveState();
-
-      renderStory();
+    if (typing) {
+      skipTyping = true;
+      return;
     }
+
+    if (!node.next) return;
+
+    state.node = node.next;
+    saveState();
+    renderStory();
   };
 
   choicesEl.appendChild(button);
 }
 
 function renderStoryChoices(node) {
-
   if (!choicesEl) return;
 
   choicesEl.innerHTML = "";
@@ -594,39 +620,29 @@ function renderStoryChoices(node) {
     "choiceGrid";
 
   node.choices.forEach(choice => {
-
     const button =
       document.createElement("button");
 
     button.className =
       "choiceBtn";
 
-    const title =
-      choice.title ||
-      choice.text ||
-      "";
-
-    const hint =
-      choice.hint || "";
-
     button.innerHTML = `
       <span class="choiceTitle">
-        ${title}
+        ${choice.title || choice.text || ""}
       </span>
 
       ${
-        hint
-        ? `
-          <span class="choiceHint">
-            ${hint}
-          </span>
-        `
-        : ""
+        choice.hint
+          ? `
+            <span class="choiceHint">
+              ${choice.hint}
+            </span>
+          `
+          : ""
       }
     `;
 
     button.onclick = async () => {
-
       document
         .querySelectorAll(".choiceBtn")
         .forEach(btn => {
@@ -643,7 +659,13 @@ function renderStoryChoices(node) {
 
       saveState();
 
-      showDecisionResult(result);
+      await playDecisionEffect(
+        result
+      );
+
+      showDecisionResult(
+        result
+      );
     };
 
     grid.appendChild(button);
@@ -653,11 +675,10 @@ function renderStoryChoices(node) {
 }
 
 /* =========================================================
-   STORY DECISION EFFECTS
+   MEMBER / STATS
 ========================================================= */
 
 function snapshotMember(id) {
-
   const member =
     state.members[id];
 
@@ -665,12 +686,12 @@ function snapshotMember(id) {
     level: member.level,
     exp: member.exp,
     sp: member.sp,
-    stats: deepClone(member.stats)
+    stats:
+      deepClone(member.stats)
   };
 }
 
 function snapshotAllMembers() {
-
   const snapshot = {};
 
   DATA.memberOrder.forEach(id => {
@@ -686,7 +707,6 @@ function changeStat(
   stat,
   amount
 ) {
-
   const member =
     state.members[id];
 
@@ -698,11 +718,7 @@ function changeStat(
     );
 }
 
-function addExp(
-  id,
-  amount
-) {
-
+function addExp(id, amount) {
   const member =
     state.members[id];
 
@@ -716,7 +732,6 @@ function addExp(
     member.exp >=
     expNeeded(member.level)
   ) {
-
     member.exp -=
       expNeeded(member.level);
 
@@ -733,55 +748,28 @@ function addExp(
   return levelUps;
 }
 
-function applyStoryDecision(type) {
+/* =========================================================
+   MANAGER DECISION
+========================================================= */
 
+function applyStoryDecision(type) {
   const before =
     snapshotAllMembers();
 
   switch (type) {
-
     case "teach":
-
-      changeStat(
-        "kilua",
-        "mc",
-        5
-      );
-
-      changeStat(
-        "kilua",
-        "bond",
-        6
-      );
-
-      changeStat(
-        "kilua",
-        "dance",
-        3
-      );
+      changeStat("kilua", "mc", 5);
+      changeStat("kilua", "bond", 6);
+      changeStat("kilua", "dance", 3);
 
       ["sarina", "miyu", "raisa"]
         .forEach(id => {
-
-          changeStat(
-            id,
-            "dance",
-            3
-          );
-
-          changeStat(
-            id,
-            "bond",
-            2
-          );
+          changeStat(id, "dance", 3);
+          changeStat(id, "bond", 2);
         });
 
       DATA.memberOrder.forEach(id => {
-        changeStat(
-          id,
-          "energy",
-          -5
-        );
+        changeStat(id, "energy", -5);
       });
 
       addExp("kilua", 45);
@@ -793,181 +781,143 @@ function applyStoryDecision(type) {
 
       break;
 
-
     case "split":
-
       DATA.memberOrder.forEach(id => {
-
-        changeStat(
-          id,
-          "dance",
-          4
-        );
-
-        changeStat(
-          id,
-          "bond",
-          3
-        );
-
-        changeStat(
-          id,
-          "energy",
-          -6
-        );
-
-        addExp(
-          id,
-          30
-        );
+        changeStat(id, "dance", 4);
+        changeStat(id, "bond", 3);
+        changeStat(id, "energy", -6);
+        addExp(id, 30);
       });
-
       break;
-
 
     case "push":
-
       DATA.memberOrder.forEach(id => {
-
-        const gain =
-          id === "kilua"
-            ? 4
-            : 6;
-
         changeStat(
           id,
           "dance",
-          gain
+          id === "kilua" ? 4 : 6
         );
 
-        changeStat(
-          id,
-          "bond",
-          -2
-        );
-
-        changeStat(
-          id,
-          "energy",
-          -11
-        );
-
-        addExp(
-          id,
-          35
-        );
+        changeStat(id, "bond", -2);
+        changeStat(id, "energy", -11);
+        addExp(id, 35);
       });
-
       break;
 
-
     case "talk":
-
       DATA.memberOrder.forEach(id => {
-
-        changeStat(
-          id,
-          "bond",
-          4
-        );
-
-        changeStat(
-          id,
-          "mc",
-          2
-        );
-
-        changeStat(
-          id,
-          "dance",
-          1
-        );
-
-        changeStat(
-          id,
-          "energy",
-          2
-        );
-
-        addExp(
-          id,
-          25
-        );
+        changeStat(id, "bond", 4);
+        changeStat(id, "mc", 2);
+        changeStat(id, "dance", 1);
+        changeStat(id, "energy", 2);
+        addExp(id, 25);
       });
-
       break;
   }
 
-  const after =
-    snapshotAllMembers();
-
   return {
-    title:
-      "MANAGER DECISION",
+    title: "MANAGER DECISION",
     before,
-    after
+    after:
+      snapshotAllMembers()
   };
 }
 
 /* =========================================================
-   DECISION RESULT
+   COLLECT CHANGES
 ========================================================= */
 
 function collectChanges(
   before,
   after
 ) {
-
-  const result = [];
-
-  DATA.memberOrder.forEach(id => {
-
+  return DATA.memberOrder.map(id => {
     const changes = [];
 
-    Object.keys(
-      DATA.statLabels
-    ).forEach(stat => {
+    Object.keys(DATA.statLabels)
+      .forEach(stat => {
+        const oldValue =
+          before[id].stats[stat];
 
-      const oldValue =
-        before[id].stats[stat];
+        const newValue =
+          after[id].stats[stat];
 
-      const newValue =
-        after[id].stats[stat];
+        const diff =
+          newValue - oldValue;
 
-      const diff =
-        newValue - oldValue;
+        if (diff === 0) return;
 
-      if (diff === 0) return;
+        const change = {
+          stat,
+          oldValue,
+          newValue,
+          diff,
+          oldRank: null,
+          newRank: null,
+          rankDirection: 0
+        };
 
-      changes.push({
-        stat,
-        oldValue,
-        newValue,
-        diff,
-        oldRank:
-          rankOf(oldValue),
-        newRank:
-          rankOf(newValue)
+        /*
+          体力にはランクを付けない。
+        */
+        if (stat !== "energy") {
+          change.oldRank =
+            rankOf(oldValue);
+
+          change.newRank =
+            rankOf(newValue);
+
+          change.rankDirection =
+            rankIndex(change.newRank) -
+            rankIndex(change.oldRank);
+        }
+
+        changes.push(change);
       });
-    });
 
-    const levelDiff =
-      after[id].level -
-      before[id].level;
-
-    result.push({
+    return {
       id,
       changes,
-      levelDiff
-    });
+      levelDiff:
+        after[id].level -
+        before[id].level
+    };
   });
-
-  return result;
 }
 
-function showDecisionResult(result) {
+/* =========================================================
+   FLOAT EFFECT
+========================================================= */
 
-  showScreen(actionResultScreen);
+async function playDecisionEffect(result) {
+  if (!gameScreen) return;
+
+  /*
+    選択肢を一旦消して、
+    キャラ＋背景を残す。
+  */
+  if (dialogueEl) {
+    dialogueEl.classList.add(
+      "decisionFade"
+    );
+  }
+
+  await wait(180);
+
+  const old =
+    document.getElementById(
+      "decisionFloatLayer"
+    );
+
+  old?.remove();
+
+  const layer =
+    document.createElement("div");
+
+  layer.id =
+    "decisionFloatLayer";
+
+  gameScreen.appendChild(layer);
 
   const changes =
     collectChanges(
@@ -975,17 +925,214 @@ function showDecisionResult(result) {
       result.after
     );
 
-  if (!actionResultScreen) {
-    state.node =
-      state.pendingStoryNext;
+  /*
+    同じ内容をある程度まとめて、
+    一瞬で読み取れるようにする。
+  */
+  const messages = [];
 
-    state.pendingStoryNext =
-      null;
+  changes.forEach(member => {
+    member.changes.forEach(change => {
+      const sign =
+        change.diff > 0 ? "+" : "";
 
-    renderStory();
+      messages.push({
+        member: member.id,
+        stat: change.stat,
+        text:
+          `${getMemberName(member.id)}　${statLabel(change.stat)} ${sign}${change.diff}`,
+        positive:
+          change.diff > 0
+      });
+    });
+  });
 
-    return;
+  /*
+    最大6件程度を優先表示。
+    詳細は次のRESULTで確認できる。
+  */
+  const important =
+    messages
+      .sort((a, b) =>
+        Math.abs(
+          parseInt(
+            b.text.match(/[+-]\d+/)?.[0] || 0
+          )
+        ) -
+        Math.abs(
+          parseInt(
+            a.text.match(/[+-]\d+/)?.[0] || 0
+          )
+        )
+      )
+      .slice(0, 6);
+
+  for (
+    let i = 0;
+    i < important.length;
+    i++
+  ) {
+    const item =
+      important[i];
+
+    const pop =
+      document.createElement("div");
+
+    pop.className =
+      `statFloat ${
+        item.positive
+          ? "positive"
+          : "negative"
+      }`;
+
+    pop.textContent =
+      item.text;
+
+    layer.appendChild(pop);
+
+    requestAnimationFrame(() => {
+      pop.classList.add("show");
+    });
+
+    await wait(220);
   }
+
+  await wait(600);
+
+  const button =
+    document.createElement("button");
+
+  button.className =
+    "floatResultBtn";
+
+  button.textContent =
+    "RESULTを見る";
+
+  layer.appendChild(button);
+
+  await new Promise(resolve => {
+    button.onclick = resolve;
+  });
+
+  layer.classList.add("hide");
+
+  await wait(220);
+
+  layer.remove();
+
+  dialogueEl?.classList.remove(
+    "decisionFade"
+  );
+}
+
+/* =========================================================
+   RESULT
+========================================================= */
+
+function resultChangeHTML(change) {
+  const sign =
+    change.diff > 0 ? "+" : "";
+
+  /*
+    体力
+  */
+  if (change.stat === "energy") {
+    const percent =
+      clamp(change.newValue);
+
+    return `
+      <div class="compactStat energyStat">
+
+        <div class="compactStatTop">
+          <span>体力</span>
+
+          <b>
+            ${change.oldValue}
+            →
+            ${change.newValue}
+          </b>
+
+          <em class="${
+            change.diff >= 0
+              ? "up"
+              : "down"
+          }">
+            ${sign}${change.diff}
+          </em>
+        </div>
+
+        <div class="energyBar">
+          <i
+            style="width:${percent}%"
+          ></i>
+        </div>
+
+      </div>
+    `;
+  }
+
+  let rankText = "";
+
+  if (change.rankDirection > 0) {
+    rankText = `
+      <small class="rankUpLabel">
+        RANK UP!
+      </small>
+    `;
+  }
+
+  if (change.rankDirection < 0) {
+    rankText = `
+      <small class="rankDownLabel">
+        RANK DOWN
+      </small>
+    `;
+  }
+
+  return `
+    <div class="
+      compactStat
+      ${
+        change.rankDirection > 0
+          ? "rankUp"
+          : ""
+      }
+    ">
+
+      <span>
+        ${statLabel(change.stat)}
+      </span>
+
+      <b>
+        ${change.oldRank}${change.oldValue}
+        →
+        ${change.newRank}${change.newValue}
+      </b>
+
+      <em class="${
+        change.diff >= 0
+          ? "up"
+          : "down"
+      }">
+        ${sign}${change.diff}
+      </em>
+
+      ${rankText}
+
+    </div>
+  `;
+}
+
+function showDecisionResult(result) {
+  showScreen(actionResultScreen);
+
+  if (!actionResultScreen) return;
+
+  const changes =
+    collectChanges(
+      result.before,
+      result.after
+    );
 
   actionResultScreen.innerHTML = `
     <div class="resultWrap">
@@ -998,23 +1145,25 @@ function showDecisionResult(result) {
         ${result.title}
       </h2>
 
-      <div class="decisionResultList">
+      <div class="resultMemberGrid">
 
         ${changes.map(item => {
-
-          const member =
+          const base =
             DATA.members[item.id];
 
+          const member =
+            state.members[item.id];
+
           return `
-            <div
-              class="decisionMemberCard"
+            <article
+              class="resultMemberCard"
               style="
                 --member-rgb:
-                ${member.rgb};
+                ${base.rgb};
               "
             >
 
-              <div class="decisionMemberHead">
+              <div class="resultMemberHead">
 
                 <img
                   src="${
@@ -1026,102 +1175,35 @@ function showDecisionResult(result) {
 
                 <div>
                   <strong>
-                    ${member.name}
+                    ${base.name}
                   </strong>
 
                   <span>
-                    Lv.
-                    ${
-                      state.members[item.id]
-                        .level
-                    }
+                    Lv.${member.level}
                   </span>
                 </div>
 
               </div>
 
-              <div class="decisionChanges">
+              <div class="compactStats">
 
                 ${
                   item.changes.length
-                  ? item.changes
-                      .map(change => {
-
-                        const sign =
-                          change.diff > 0
-                            ? "+"
-                            : "";
-
-                        const rankUp =
-                          change.oldRank !==
-                          change.newRank;
-
-                        return `
-                          <div
-                            class="
-                              decisionChange
-                              ${
-                                rankUp
-                                  ? "rankUp"
-                                  : ""
-                              }
-                            "
-                          >
-
-                            <span>
-                              ${
-                                statLabel(
-                                  change.stat
-                                )
-                              }
-                            </span>
-
-                            <b>
-                              ${
-                                change.oldRank
-                              }
-                              ${
-                                change.oldValue
-                              }
-                              →
-                              ${
-                                change.newRank
-                              }
-                              ${
-                                change.newValue
-                              }
-                            </b>
-
-                            <em>
-                              ${sign}${
-                                change.diff
-                              }
-                            </em>
-
-                            ${
-                              rankUp
-                              ? `
-                                <small>
-                                  RANK UP!
-                                </small>
-                              `
-                              : ""
-                            }
-
-                          </div>
-                        `;
-                      })
-                      .join("")
-                  : `
-                    <div class="noChange">
-                      能力変化なし
-                    </div>
-                  `
+                    ? item.changes
+                        .map(
+                          resultChangeHTML
+                        )
+                        .join("")
+                    : `
+                      <div class="noChange">
+                        変化なし
+                      </div>
+                    `
                 }
 
               </div>
 
-            </div>
+            </article>
           `;
         }).join("")}
 
@@ -1141,7 +1223,6 @@ function showDecisionResult(result) {
     ?.addEventListener(
       "click",
       () => {
-
         state.node =
           state.pendingStoryNext;
 
@@ -1159,9 +1240,7 @@ function showDecisionResult(result) {
 ========================================================= */
 
 function makeWeekSnapshot() {
-
   state.weekSnapshot = {
-
     season:
       state.season,
 
@@ -1189,7 +1268,6 @@ function makeWeekSnapshot() {
 ========================================================= */
 
 function openTraining() {
-
   if (!state.weekSnapshot) {
     makeWeekSnapshot();
   }
@@ -1202,14 +1280,12 @@ function openTraining() {
 }
 
 function renderTrainingHeader() {
-
   if (trainingSeason) {
     trainingSeason.textContent =
       `SEASON ${state.season}`;
   }
 
   if (trainingWeek) {
-
     const remaining =
       Math.max(
         0,
@@ -1225,35 +1301,25 @@ function renderTrainingHeader() {
     `;
   }
 
-  const reachEl =
-    $("trainingReach");
-
-  const cashEl =
-    $("trainingCash");
-
-  const fanEl =
-    $("trainingFans");
-
-  if (reachEl) {
-    reachEl.textContent =
+  if ($("trainingReach")) {
+    $("trainingReach").textContent =
       state.reach;
   }
 
-  if (cashEl) {
-    cashEl.textContent =
-      formatMoney(state.cash);
+  if ($("trainingFans")) {
+    $("trainingFans").textContent =
+      state.fans;
   }
 
-  if (fanEl) {
-    fanEl.textContent =
-      state.fans;
+  if ($("trainingCash")) {
+    $("trainingCash").textContent =
+      formatMoney(state.cash);
   }
 
   const days =
     $("trainingDays");
 
   if (days) {
-
     const totalWeeks =
       (
         (state.season - 1) *
@@ -1274,11 +1340,10 @@ function renderTrainingHeader() {
 }
 
 /* =========================================================
-   MEMBER SELECT
+   TRAINING MEMBER
 ========================================================= */
 
 function renderTrainingMembers() {
-
   if (!trainingMembers) return;
 
   trainingMembers.innerHTML = "";
@@ -1308,7 +1373,6 @@ function renderTrainingMembers() {
   );
 
   DATA.memberOrder.forEach(id => {
-
     const base =
       DATA.members[id];
 
@@ -1322,15 +1386,14 @@ function renderTrainingMembers() {
       Math.min(
         100,
         Math.round(
-          (member.exp / needed) *
+          member.exp /
+          needed *
           100
         )
       );
 
     const button =
-      document.createElement(
-        "button"
-      );
+      document.createElement("button");
 
     button.className =
       `trainingMember ${
@@ -1351,7 +1414,6 @@ function renderTrainingMembers() {
       >
 
       <div class="trainingMemberInfo">
-
         <strong>
           ${base.name}
         </strong>
@@ -1362,19 +1424,14 @@ function renderTrainingMembers() {
 
         <div class="miniExp">
           <i
-            style="
-              width:${percent}%
-            "
+            style="width:${percent}%"
           ></i>
         </div>
-
       </div>
     `;
 
     button.onclick = () => {
-
       state.selectedMember = id;
-
       renderTrainingMembers();
     };
 
@@ -1385,31 +1442,27 @@ function renderTrainingMembers() {
 }
 
 /* =========================================================
-   COMMANDS
+   COMMAND
 ========================================================= */
 
 function renderCommands() {
-
   if (!commandGrid) return;
 
   commandGrid.innerHTML = "";
 
   DATA.trainingCommands.forEach(
     command => {
-
       const button =
-        document.createElement(
-          "button"
-        );
+        document.createElement("button");
 
       button.className =
         "commandCard";
 
       const cost =
         command.cash < 0
-          ? `${formatMoney(
+          ? formatMoney(
               Math.abs(command.cash)
-            )}`
+            )
           : "FREE";
 
       button.innerHTML = `
@@ -1418,7 +1471,6 @@ function renderCommands() {
         </div>
 
         <div class="commandText">
-
           <strong>
             ${command.title}
           </strong>
@@ -1434,18 +1486,14 @@ function renderCommands() {
                 : cost
             }
           </small>
-
         </div>
       `;
 
       button.onclick = () => {
-
         if (
           state.actionsUsed >=
           DATA.weekActions
-        ) {
-          return;
-        }
+        ) return;
 
         runTrainingCommand(
           command
@@ -1459,12 +1507,7 @@ function renderCommands() {
   );
 }
 
-/* =========================================================
-   TRAINING EFFECT
-========================================================= */
-
 function runTrainingCommand(command) {
-
   const before =
     snapshotAllMembers();
 
@@ -1473,42 +1516,27 @@ function runTrainingCommand(command) {
       ? [...DATA.memberOrder]
       : [state.selectedMember];
 
-  /*
-    個人育成は効果が高い。
-    全体育成は広く伸びる。
-
-    これで
-    「誰を育てるか」
-    の意味を作る。
-  */
-
   const multiplier =
     state.selectedMember === "all"
       ? 1
       : 1.6;
 
   targets.forEach(id => {
-
     if (command.primary) {
-
-      const gain =
+      changeStat(
+        id,
+        command.primary,
         Math.max(
           1,
           Math.round(
             command.primaryGain *
             multiplier
           )
-        );
-
-      changeStat(
-        id,
-        command.primary,
-        gain
+        )
       );
     }
 
     if (command.bondGain) {
-
       changeStat(
         id,
         "bond",
@@ -1520,7 +1548,6 @@ function runTrainingCommand(command) {
     }
 
     if (command.energy) {
-
       changeStat(
         id,
         "energy",
@@ -1545,56 +1572,35 @@ function runTrainingCommand(command) {
     );
   });
 
-  /*
-    SNS・チラシは
-    認知度を上げる。
-
-    レッスンでは
-    認知度は上がらない。
-  */
-
   if (command.reach) {
-
-    const reachGain =
+    const gain =
       state.selectedMember === "all"
         ? command.reach
         : Math.max(
             1,
             Math.round(
-              command.reach * .7
+              command.reach * 0.7
             )
           );
 
-    state.reach +=
-      reachGain;
-
-    /*
-      小規模な初期ファン増加。
-    */
+    state.reach += gain;
 
     if (
       command.id === "sns" ||
       command.id === "flyer"
     ) {
-
-      const fanGain =
+      state.fans +=
         Math.max(
           0,
-          Math.floor(
-            reachGain / 4
-          )
+          Math.floor(gain / 4)
         );
-
-      state.fans +=
-        fanGain;
     }
   }
 
   state.cash =
     Math.max(
       0,
-      state.cash +
-      command.cash
+      state.cash + command.cash
     );
 
   state.actionsUsed++;
@@ -1620,19 +1626,12 @@ function showTrainingResult(
   before,
   after
 ) {
-
   showScreen(actionResultScreen);
 
   const changes =
     collectChanges(
       before,
       after
-    );
-
-  const activeChanges =
-    changes.filter(
-      item =>
-        item.changes.length > 0
     );
 
   actionResultScreen.innerHTML = `
@@ -1649,147 +1648,73 @@ function showTrainingResult(
 
       <div class="resultSub">
         ${
-          state.selectedMember ===
-          "all"
+          state.selectedMember === "all"
             ? "4人で活動"
-            : `${
-                getMemberName(
-                  state.selectedMember
-                )
-              }を重点育成`
+            : `${getMemberName(state.selectedMember)}を重点育成`
         }
       </div>
 
-      <div class="decisionResultList">
+      <div class="resultMemberGrid">
 
-        ${
-          activeChanges.map(item => {
+        ${changes.map(item => {
+          const base =
+            DATA.members[item.id];
 
-            const base =
-              DATA.members[item.id];
+          const member =
+            state.members[item.id];
 
-            return `
-              <div
-                class="
-                  decisionMemberCard
-                "
-                style="
-                  --member-rgb:
-                  ${base.rgb};
-                "
-              >
+          return `
+            <article
+              class="resultMemberCard"
+              style="
+                --member-rgb:
+                ${base.rgb};
+              "
+            >
 
-                <div
-                  class="
-                    decisionMemberHead
-                  "
+              <div class="resultMemberHead">
+
+                <img
+                  src="${
+                    DATA.images[item.id]
+                      .smile
+                  }"
+                  alt=""
                 >
 
-                  <img
-                    src="${
-                      DATA.images[item.id]
-                        .smile
-                    }"
-                    alt=""
-                  >
+                <div>
+                  <strong>
+                    ${base.name}
+                  </strong>
 
-                  <div>
-                    <strong>
-                      ${base.name}
-                    </strong>
-
-                    <span>
-                      Lv.${
-                        state.members[
-                          item.id
-                        ].level
-                      }
-                    </span>
-                  </div>
-
-                </div>
-
-                <div
-                  class="
-                    decisionChanges
-                  "
-                >
-
-                  ${item.changes
-                    .map(change => {
-
-                      const sign =
-                        change.diff > 0
-                          ? "+"
-                          : "";
-
-                      const rankUp =
-                        change.oldRank !==
-                        change.newRank;
-
-                      return `
-                        <div
-                          class="
-                            decisionChange
-                            ${
-                              rankUp
-                                ? "rankUp"
-                                : ""
-                            }
-                          "
-                        >
-
-                          <span>
-                            ${
-                              statLabel(
-                                change.stat
-                              )
-                            }
-                          </span>
-
-                          <b>
-                            ${
-                              change.oldRank
-                            }
-                            ${
-                              change.oldValue
-                            }
-                            →
-                            ${
-                              change.newRank
-                            }
-                            ${
-                              change.newValue
-                            }
-                          </b>
-
-                          <em>
-                            ${sign}${
-                              change.diff
-                            }
-                          </em>
-
-                          ${
-                            rankUp
-                            ? `
-                              <small>
-                                RANK UP!
-                              </small>
-                            `
-                            : ""
-                          }
-
-                        </div>
-                      `;
-                    })
-                    .join("")}
-
+                  <span>
+                    Lv.${member.level}
+                  </span>
                 </div>
 
               </div>
-            `;
-          }).join("")
-        }
+
+              <div class="compactStats">
+
+                ${
+                  item.changes.length
+                    ? item.changes
+                        .map(
+                          resultChangeHTML
+                        )
+                        .join("")
+                    : `
+                      <div class="noChange">
+                        変化なし
+                      </div>
+                    `
+                }
+
+              </div>
+
+            </article>
+          `;
+        }).join("")}
 
       </div>
 
@@ -1810,35 +1735,18 @@ function showTrainingResult(
     );
 }
 
-/* =========================================================
-   TRAINING FLOW
-========================================================= */
-
 function continueAfterTraining() {
-
-  /*
-    WEEK1では3回の育成を終えたら
-    夜イベントへ。
-
-    WEEK2以降は、
-    今後それぞれ専用イベントを
-    追加していける。
-  */
-
   if (
     state.actionsUsed >=
     DATA.weekActions
   ) {
-
     if (state.week === 1) {
-
       state.node =
         STORY.weeks[1]
           .afterTraining;
 
       saveState();
       renderStory();
-
       return;
     }
 
@@ -1854,27 +1762,22 @@ function continueAfterTraining() {
 ========================================================= */
 
 function checkWeek1Missions() {
-
   return DATA.week1Mission.map(
     mission => {
-
       let value = 0;
 
       if (
-        mission.type ===
-        "average"
+        mission.type === "average"
       ) {
-
         value =
           averageStat(
             mission.stat
           );
+      }
 
-      } else if (
-        mission.type ===
-        "minimum"
+      if (
+        mission.type === "minimum"
       ) {
-
         value =
           minimumStat(
             mission.stat
@@ -1892,17 +1795,13 @@ function checkWeek1Missions() {
 }
 
 /* =========================================================
-   WEEK END
+   WEEK RESULT
 ========================================================= */
 
 function finishWeek() {
-
   showScreen(weekEndScreen);
 
-  const before =
-    state.weekSnapshot;
-
-  if (!before) {
+  if (!state.weekSnapshot) {
     makeWeekSnapshot();
   }
 
@@ -1916,32 +1815,21 @@ function finishWeek() {
 
   const successCount =
     missions.filter(
-      m => m.success
+      mission => mission.success
     ).length;
-
-  /*
-    WEEK1ミッション報酬
-  */
 
   if (
     state.week === 1 &&
     !state.weekRewardClaimed
   ) {
-
     const bonusExp =
       successCount * 15;
 
-    DATA.memberOrder.forEach(
-      id => {
-        addExp(
-          id,
-          bonusExp
-        );
-      }
-    );
+    DATA.memberOrder.forEach(id => {
+      addExp(id, bonusExp);
+    });
 
-    state.weekRewardClaimed =
-      true;
+    state.weekRewardClaimed = true;
   }
 
   weekEndScreen.innerHTML = `
@@ -1961,8 +1849,7 @@ function finishWeek() {
           <span>認知度</span>
           <strong>
             ${snapshot.reach}
-            →
-            ${state.reach}
+            → ${state.reach}
           </strong>
         </div>
 
@@ -1970,17 +1857,14 @@ function finishWeek() {
           <span>ファン</span>
           <strong>
             ${snapshot.fans}
-            →
-            ${state.fans}
+            → ${state.fans}
           </strong>
         </div>
 
         <div>
           <span>活動資金</span>
           <strong>
-            ${formatMoney(
-              state.cash
-            )}
+            ${formatMoney(state.cash)}
           </strong>
         </div>
 
@@ -1988,240 +1872,202 @@ function finishWeek() {
 
       ${
         missions.length
-        ? `
-          <section
-            class="
-              weekMissionSection
-            "
-          >
+          ? `
+            <section class="weekMissionSection">
 
-            <h2>
-              WEEK MISSION
-            </h2>
+              <h2>
+                WEEK MISSION
+              </h2>
 
-            <div
-              class="
-                weekMissionList
-              "
-            >
+              <div class="weekMissionList">
 
-              ${missions
-                .map(mission => `
-                  <div
-                    class="
+                ${missions.map(
+                  mission => `
+                    <div class="
                       weekMission
                       ${
                         mission.success
                           ? "success"
                           : "failed"
                       }
-                    "
-                  >
+                    ">
 
-                    <span>
-                      ${
-                        mission.success
-                          ? "✓"
-                          : "—"
-                      }
-                    </span>
-
-                    <div>
-                      <strong>
+                      <span>
                         ${
-                          mission.label
+                          mission.success
+                            ? "✓"
+                            : "—"
                         }
-                      </strong>
+                      </span>
 
-                      <small>
-                        現在
-                        ${mission.value}
-                      </small>
+                      <div>
+                        <strong>
+                          ${mission.label}
+                        </strong>
+
+                        <small>
+                          現在 ${mission.value}
+                        </small>
+                      </div>
+
                     </div>
+                  `
+                ).join("")}
 
-                  </div>
-                `)
-                .join("")}
+              </div>
 
-            </div>
+              <div class="missionReward">
+                達成
+                ${successCount}/${missions.length}
+                ・ 全員EXP
+                +${successCount * 15}
+              </div>
 
-            <div
-              class="
-                missionReward
-              "
-            >
-              達成
-              ${successCount}
-              /${missions.length}
-
-              ・
-
-              全員EXP
-              +${successCount * 15}
-            </div>
-
-          </section>
-        `
-        : ""
+            </section>
+          `
+          : ""
       }
 
-      <div
-        class="
-          weekMemberGrid
-        "
-      >
+      <div class="weekMemberGrid">
 
-        ${DATA.memberOrder
-          .map(id => {
+        ${DATA.memberOrder.map(id => {
+          const base =
+            DATA.members[id];
 
-            const base =
-              DATA.members[id];
+          const member =
+            state.members[id];
 
-            const member =
-              state.members[id];
+          const old =
+            snapshot.members[id];
 
-            const old =
-              snapshot.members[id];
+          const needed =
+            expNeeded(member.level);
 
-            const needed =
-              expNeeded(
-                member.level
-              );
+          const expPercent =
+            Math.min(
+              100,
+              Math.round(
+                member.exp /
+                needed *
+                100
+              )
+            );
 
-            const expPercent =
-              Math.min(
-                100,
-                Math.round(
-                  (
-                    member.exp /
-                    needed
-                  ) *
-                  100
-                )
-              );
+          const abilityStats =
+            [
+              "vocal",
+              "dance",
+              "mc",
+              "bond"
+            ];
 
-            return `
-              <article
-                class="
-                  weekMemberCard
-                "
-                style="
-                  --member-rgb:
-                  ${base.rgb};
-                "
-              >
+          return `
+            <article
+              class="weekMemberCard"
+              style="
+                --member-rgb:
+                ${base.rgb};
+              "
+            >
+
+              <div class="weekMemberTop">
 
                 <img
                   src="${
-                    DATA.images[id]
-                      .smile
+                    DATA.images[id].smile
                   }"
                   alt=""
                 >
 
-                <div
-                  class="
-                    weekMemberName
-                  "
-                >
-                  ${base.name}
+                <div>
+                  <div class="weekMemberName">
+                    ${base.name}
+                  </div>
+
+                  <div class="weekMemberLevel">
+                    Lv.${member.level}
+                  </div>
                 </div>
 
-                <div
-                  class="
-                    weekMemberLevel
+              </div>
+
+              <div class="weekExpBar">
+                <i
+                  style="
+                    width:${expPercent}%
                   "
-                >
-                  Lv.${member.level}
+                ></i>
+              </div>
+
+              <div class="weekStats">
+
+                ${abilityStats.map(stat => {
+                  const now =
+                    member.stats[stat];
+
+                  const oldValue =
+                    old.stats[stat];
+
+                  const diff =
+                    now - oldValue;
+
+                  const sign =
+                    diff > 0 ? "+" : "";
+
+                  return `
+                    <div>
+                      <span>
+                        ${statLabel(stat)}
+                      </span>
+
+                      <b>
+                        ${rankOf(now)}
+                        ${now}
+                      </b>
+
+                      <em class="${
+                        diff > 0
+                          ? "plus"
+                          : diff < 0
+                            ? "minus"
+                            : ""
+                      }">
+                        ${
+                          diff !== 0
+                            ? `${sign}${diff}`
+                            : "±0"
+                        }
+                      </em>
+                    </div>
+                  `;
+                }).join("")}
+
+              </div>
+
+              <div class="weekEnergy">
+
+                <div>
+                  <span>体力</span>
+
+                  <strong>
+                    ${member.stats.energy}
+                  </strong>
                 </div>
 
-                <div
-                  class="
-                    weekExpBar
-                  "
-                >
+                <div class="energyBar">
                   <i
                     style="
                       width:
-                      ${expPercent}%
+                      ${member.stats.energy}%
                     "
                   ></i>
                 </div>
 
-                <div
-                  class="
-                    weekStats
-                  "
-                >
+              </div>
 
-                  ${[
-                    "vocal",
-                    "dance",
-                    "mc",
-                    "bond",
-                    "energy"
-                  ].map(stat => {
-
-                    const now =
-                      member.stats[
-                        stat
-                      ];
-
-                    const oldValue =
-                      old.stats[
-                        stat
-                      ];
-
-                    const diff =
-                      now -
-                      oldValue;
-
-                    const sign =
-                      diff > 0
-                        ? "+"
-                        : "";
-
-                    return `
-                      <div>
-                        <span>
-                          ${
-                            statLabel(
-                              stat
-                            )
-                          }
-                        </span>
-
-                        <b>
-                          ${
-                            rankOf(now)
-                          }
-                          ${now}
-                        </b>
-
-                        <em
-                          class="${
-                            diff > 0
-                              ? "plus"
-                              : diff < 0
-                                ? "minus"
-                                : ""
-                          }"
-                        >
-                          ${
-                            diff !== 0
-                              ? `${sign}${diff}`
-                              : "±0"
-                          }
-                        </em>
-                      </div>
-                    `;
-                  }).join("")}
-
-                </div>
-
-              </article>
-            `;
-          }).join("")}
+            </article>
+          `;
+        }).join("")}
 
       </div>
 
@@ -2232,12 +2078,8 @@ function finishWeek() {
         ${
           state.week ===
           DATA.seasons.weeksPerSeason
-            ? `SEASON ${
-                state.season + 1
-              }へ`
-            : `WEEK ${
-                state.week + 1
-              }へ`
+            ? `SEASON ${state.season + 1}へ`
+            : `WEEK ${state.week + 1}へ`
         }
       </button>
 
@@ -2258,23 +2100,17 @@ function finishWeek() {
 ========================================================= */
 
 function nextWeek() {
-
   state.actionsUsed = 0;
   state.selectedMember = "all";
-
   state.weekSnapshot = null;
-  state.weekRewardClaimed =
-    false;
+  state.weekRewardClaimed = false;
 
   if (
     state.week <
     DATA.seasons.weeksPerSeason
   ) {
-
     state.week++;
-
   } else {
-
     state.week = 1;
 
     if (
@@ -2285,26 +2121,15 @@ function nextWeek() {
     }
   }
 
-  /*
-    現在はWEEK1・2に
-    専用ストーリーがある。
-
-    WEEK3以降は今後
-    順番に追加する。
-  */
-
   if (
     state.season === 1 &&
     STORY.weeks[state.week]
   ) {
-
     state.node =
-      STORY.weeks[state.week]
-        .start;
+      STORY.weeks[state.week].start;
 
     saveState();
     renderStory();
-
     return;
   }
 
@@ -2317,25 +2142,17 @@ function nextWeek() {
 ========================================================= */
 
 function openStatus() {
-
   if (!statusModal) return;
 
-  statusModal.classList.add(
-    "show"
-  );
-
+  statusModal.classList.add("show");
   renderStatus();
 }
 
 function closeStatus() {
-
-  statusModal?.classList.remove(
-    "show"
-  );
+  statusModal?.classList.remove("show");
 }
 
 function renderStatus() {
-
   if (!statusModal) return;
 
   statusModal.innerHTML = `
@@ -2344,13 +2161,8 @@ function renderStatus() {
       <div class="statusTop">
 
         <div>
-          <small>
-            O-VER-KiLL
-          </small>
-
-          <h2>
-            MEMBER STATUS
-          </h2>
+          <small>O-VER-KiLL</small>
+          <h2>MEMBER STATUS</h2>
         </div>
 
         <button
@@ -2362,184 +2174,146 @@ function renderStatus() {
 
       </div>
 
-      <div
-        class="
-          statusMemberList
-        "
-      >
+      <div class="statusMemberList">
 
-        ${DATA.memberOrder
-          .map(id => {
+        ${DATA.memberOrder.map(id => {
+          const base =
+            DATA.members[id];
 
-            const base =
-              DATA.members[id];
+          const member =
+            state.members[id];
 
-            const member =
-              state.members[id];
+          const needed =
+            expNeeded(member.level);
 
-            const needed =
-              expNeeded(
-                member.level
-              );
+          const percent =
+            Math.min(
+              100,
+              Math.round(
+                member.exp /
+                needed *
+                100
+              )
+            );
 
-            const percent =
-              Math.min(
-                100,
-                Math.round(
-                  (
-                    member.exp /
-                    needed
-                  ) * 100
-                )
-              );
+          return `
+            <section
+              class="statusMember"
+              style="
+                --member-rgb:
+                ${base.rgb};
+              "
+            >
 
-            return `
-              <section
-                class="
-                  statusMember
-                "
-                style="
-                  --member-rgb:
-                  ${base.rgb};
-                "
-              >
+              <div class="statusMemberHead">
 
-                <div
-                  class="
-                    statusMemberHead
-                  "
+                <img
+                  src="${
+                    DATA.images[id].smile
+                  }"
+                  alt=""
                 >
 
-                  <img
-                    src="${
-                      DATA.images[id]
-                        .smile
-                    }"
-                    alt=""
-                  >
+                <div>
+                  <strong>
+                    ${base.name}
+                  </strong>
 
-                  <div>
+                  <span>
+                    Lv.${member.level}
+                  </span>
 
-                    <strong>
-                      ${base.name}
-                    </strong>
-
-                    <span>
-                      Lv.${member.level}
-                    </span>
-
-                    <div
-                      class="
-                        statusExp
+                  <div class="statusExp">
+                    <i
+                      style="
+                        width:${percent}%
                       "
-                    >
-                      <i
-                        style="
-                          width:
-                          ${percent}%
-                        "
-                      ></i>
-                    </div>
-
-                    <small>
-                      EXP
-                      ${member.exp}
-                      /
-                      ${needed}
-                    </small>
-
+                    ></i>
                   </div>
 
+                  <small>
+                    EXP ${member.exp}/${needed}
+                  </small>
                 </div>
 
-                <div
-                  class="
-                    statusStats
-                  "
-                >
+              </div>
 
-                  ${[
-                    "vocal",
-                    "dance",
-                    "mc",
-                    "bond",
-                    "energy"
-                  ].map(stat => {
+              <div class="statusStats">
 
-                    const value =
-                      member.stats[
-                        stat
-                      ];
+                ${[
+                  "vocal",
+                  "dance",
+                  "mc",
+                  "bond"
+                ].map(stat => {
+                  const value =
+                    member.stats[stat];
 
-                    return `
-                      <div
-                        class="
-                          statusStat
-                        "
-                      >
+                  return `
+                    <div class="statusStat">
 
-                        <span>
-                          ${
-                            statLabel(
-                              stat
-                            )
-                          }
-                        </span>
+                      <span>
+                        ${statLabel(stat)}
+                      </span>
 
-                        <b>
-                          <i>
-                            ${
-                              rankOf(
-                                value
-                              )
-                            }
-                          </i>
+                      <b>
+                        <i>
+                          ${rankOf(value)}
+                        </i>
+                        ${value}
+                      </b>
 
-                          ${value}
-                        </b>
-
-                        ${
-                          stat !==
-                            "energy" &&
-                          member.sp > 0
+                      ${
+                        member.sp > 0
                           ? `
                             <button
-                              class="
-                                statPlus
-                              "
-                              data-member="
-                                ${id}
-                              "
-                              data-stat="
-                                ${stat}
-                              "
+                              class="statPlus"
+                              data-member="${id}"
+                              data-stat="${stat}"
                             >
                               ＋
                             </button>
                           `
                           : ""
-                        }
+                      }
 
-                      </div>
-                    `;
-                  }).join("")}
+                    </div>
+                  `;
+                }).join("")}
 
-                </div>
+              </div>
 
-                <div
-                  class="
-                    statusPoints
-                  "
-                >
-                  育成PT
+              <div class="statusEnergy">
+
+                <div>
+                  <span>体力</span>
+
                   <strong>
-                    ${member.sp}
+                    ${member.stats.energy}/100
                   </strong>
                 </div>
 
-              </section>
-            `;
-          }).join("")}
+                <div class="energyBar">
+                  <i
+                    style="
+                      width:
+                      ${member.stats.energy}%
+                    "
+                  ></i>
+                </div>
+
+              </div>
+
+              <div class="statusPoints">
+                育成PT
+                <strong>
+                  ${member.sp}
+                </strong>
+              </div>
+
+            </section>
+          `;
+        }).join("")}
 
       </div>
 
@@ -2553,24 +2327,14 @@ function renderStatus() {
     );
 
   statusModal
-    .querySelectorAll(
-      ".statPlus"
-    )
+    .querySelectorAll(".statPlus")
     .forEach(button => {
-
       button.addEventListener(
         "click",
         () => {
-
-          const id =
-            button.dataset.member;
-
-          const stat =
-            button.dataset.stat;
-
           useStatPoint(
-            id,
-            stat
+            button.dataset.member,
+            button.dataset.stat
           );
         }
       );
@@ -2581,7 +2345,6 @@ function useStatPoint(
   memberId,
   stat
 ) {
-
   const member =
     state.members[memberId];
 
@@ -2603,38 +2366,12 @@ function useStatPoint(
 }
 
 /* =========================================================
-   TITLE / PROLOGUE
+   PROLOGUE
 ========================================================= */
 
-function showTitle() {
-
-  showScreen(titleScreen);
-
-  const continueBtn =
-    $("continueBtn");
-
-  if (continueBtn) {
-
-    continueBtn.style.display =
-      state.started
-        ? ""
-        : "none";
-  }
-}
-
-function startNewGame() {
-
-  resetRun();
-
-  state.started = true;
-
-  saveState();
-
-  startPrologue();
-}
+let prologueRunning = false;
 
 async function startPrologue() {
-
   showScreen(prologueScreen);
 
   const prologueText =
@@ -2646,59 +2383,56 @@ async function startPrologue() {
   let index = 0;
 
   async function showPage() {
+    /*
+      前ページ描画中は次へ行かない。
+      これで文章が重なるバグを止める。
+    */
+    if (prologueRunning) {
+      skipTyping = true;
+      return;
+    }
 
     if (
-      index >=
-      STORY.prologue.length
+      index >= STORY.prologue.length
     ) {
-
-      state.prologueSeen =
-        true;
-
+      state.prologueSeen = true;
       state.node =
         STORY.weeks[1].start;
 
       makeWeekSnapshot();
-
       saveState();
-
       renderStory();
-
       return;
     }
 
-    if (prologueText) {
+    prologueRunning = true;
 
-      prologueText.innerHTML = "";
-
-      const text =
-        STORY.prologue[index];
-
-      for (
-        const char of
-        Array.from(text)
-      ) {
-
-        if (char === "\n") {
-          prologueText.innerHTML +=
-            "<br>";
-        } else {
-          prologueText.append(
-            document.createTextNode(
-              char
-            )
-          );
-        }
-
-        await wait(25);
-      }
+    if (prologueNext) {
+      prologueNext.disabled = true;
+      prologueNext.textContent = "…";
     }
 
+    await typeText(
+      prologueText,
+      STORY.prologue[index],
+      22
+    );
+
     index++;
+
+    prologueRunning = false;
+
+    if (prologueNext) {
+      prologueNext.disabled = false;
+
+      prologueNext.textContent =
+        index >= STORY.prologue.length
+          ? "START"
+          : "NEXT";
+    }
   }
 
   if (prologueNext) {
-
     prologueNext.onclick =
       showPage;
   }
@@ -2706,8 +2440,34 @@ async function startPrologue() {
   await showPage();
 }
 
-function continueGame() {
+/* =========================================================
+   TITLE
+========================================================= */
 
+function showTitle() {
+  showScreen(titleScreen);
+
+  const continueBtn =
+    $("continueBtn");
+
+  if (continueBtn) {
+    continueBtn.style.display =
+      state.started
+        ? ""
+        : "none";
+  }
+}
+
+function startNewGame() {
+  resetRun();
+
+  state.started = true;
+
+  saveState();
+  startPrologue();
+}
+
+function continueGame() {
   if (!state.started) {
     startNewGame();
     return;
@@ -2722,30 +2482,24 @@ function continueGame() {
 }
 
 /* =========================================================
-   TAP TO SKIP TEXT
+   SKIP
 ========================================================= */
 
-if (dialogueEl) {
+dialogueEl?.addEventListener(
+  "click",
+  event => {
+    if (
+      event.target.closest("button")
+    ) return;
 
-  dialogueEl.addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target.closest(
-          "button"
-        )
-      ) return;
-
-      if (typing) {
-        skipTyping = true;
-      }
+    if (typing) {
+      skipTyping = true;
     }
-  );
-}
+  }
+);
 
 /* =========================================================
-   BUTTON BINDINGS
+   BUTTONS
 ========================================================= */
 
 $("startBtn")
@@ -2773,26 +2527,14 @@ $("trainingStatusBtn")
   );
 
 /* =========================================================
-   INITIALIZE
+   INIT
 ========================================================= */
 
 async function initializeGame() {
-
   showScreen(loadingScreen);
 
-  /*
-    20枚のキャラ＋背景を
-    最初にキャッシュ。
-
-    初回ロードは少し長くなるが、
-    会話中の
-    「文字が先・人物が後」
-    を防ぐことを優先。
-  */
-
   await preloadAssets();
-
-  await wait(250);
+  await wait(220);
 
   showTitle();
 }
