@@ -1,24 +1,39 @@
 /* =========================================================
    O-VER-KiLL | MANAGER'S STORY
    game.js
-   v0.21
+   v0.22
 ========================================================= */
 
 const DATA = window.GAME_DATA;
 const STORY = window.GAME_STORY;
 
-const STORAGE_KEY = "overkill_manager_v20";
+const STORAGE_KEY = "overkill_manager_v22";
 
 const $ = id => document.getElementById(id);
 
-const loadingScreen = $("loading");
-const titleScreen = $("title");
-const prologueScreen = $("prologue");
-const gameScreen = $("game");
-const trainingScreen = $("training");
-const actionResultScreen = $("actionResult");
-const weekEndScreen = $("weekEnd");
-const statusModal = $("statusModal");
+const clamp = (v, min = 0, max = 100) =>
+  Math.max(min, Math.min(max, v));
+
+const wait = ms =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+const clone = obj =>
+  JSON.parse(JSON.stringify(obj));
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const screens = {
+  loading: $("loading"),
+  title: $("title"),
+  prologue: $("prologue"),
+  game: $("game"),
+  training: $("training"),
+  actionResult: $("actionResult"),
+  weekEnd: $("weekEnd")
+};
 
 const charEl = $("char");
 const reactionEl = $("reaction");
@@ -38,87 +53,59 @@ const trainingWeek = $("trainingWeek");
 const trainingMembers = $("trainingMembers");
 const commandGrid = $("commandGrid");
 
+const statusModal = $("statusModal");
+
+const audio = $("bgm") || document.querySelector("audio");
+
+
 /* =========================================================
-   BASIC
+   HELPERS
 ========================================================= */
 
-const clamp = (value, min = 0, max = 100) =>
-  Math.max(min, Math.min(max, value));
-
-const wait = ms =>
-  new Promise(resolve => setTimeout(resolve, ms));
-
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
+function statLabel(stat) {
+  return DATA.statLabels?.[stat] || stat;
 }
 
 function getMemberName(id) {
   return DATA.members[id]?.name || id;
 }
 
-function statLabel(stat) {
-  return DATA.statLabels?.[stat] || stat;
-}
-
-/*
-  体力はランク対象外。
-*/
 function rankOf(value) {
   const found =
-    DATA.ranks.find(rank => value >= rank.min);
+    DATA.ranks.find(r => value >= r.min);
 
-  return found ? found.rank : "E";
+  return found?.rank || "E";
 }
 
 function rankIndex(rank) {
-  const order = ["E", "D", "C", "B", "A", "S"];
-  return order.indexOf(rank);
+  return ["E", "D", "C", "B", "A", "S"]
+    .indexOf(rank);
 }
 
 function expNeeded(level) {
   return (
     DATA.exp.base +
-    ((level - 1) * DATA.exp.growth)
+    (level - 1) * DATA.exp.growth
   );
 }
 
 function formatMoney(value) {
-  return `¥${Math.max(0, value).toLocaleString("ja-JP")}`;
+  return `¥${Math.max(0, value)
+    .toLocaleString("ja-JP")}`;
 }
 
-function averageStat(stat) {
-  const values =
-    DATA.memberOrder.map(
-      id => state.members[id].stats[stat]
-    );
-
-  return Math.round(
-    values.reduce((a, b) => a + b, 0) /
-    values.length
-  );
-}
-
-function minimumStat(stat) {
-  return Math.min(
-    ...DATA.memberOrder.map(
-      id => state.members[id].stats[stat]
-    )
-  );
-}
 
 /* =========================================================
    STATE
 ========================================================= */
 
-function createMemberState(id) {
+function createMember(id) {
   return {
     id,
     level: 1,
     exp: 0,
     sp: 0,
-    stats: deepClone(
-      DATA.members[id].initial
-    )
+    stats: clone(DATA.members[id].initial)
   };
 }
 
@@ -126,11 +113,11 @@ function createInitialState() {
   const members = {};
 
   DATA.memberOrder.forEach(id => {
-    members[id] = createMemberState(id);
+    members[id] = createMember(id);
   });
 
   return {
-    version: DATA.version,
+    version: "0.22",
 
     started: false,
     prologueSeen: false,
@@ -149,12 +136,11 @@ function createInitialState() {
     members,
 
     actionsUsed: 0,
-    selectedMember: "all",
-
-    pendingStoryNext: null,
+    selectedMember: null,
 
     weekSnapshot: null,
-    weekRewardClaimed: false,
+
+    pendingStoryNext: null,
 
     collection: {},
     achievements: [],
@@ -162,11 +148,28 @@ function createInitialState() {
   };
 }
 
-let state = loadState();
+function loadState() {
+  try {
+    const raw =
+      localStorage.getItem(STORAGE_KEY);
 
-/* =========================================================
-   SAVE
-========================================================= */
+    if (!raw)
+      return createInitialState();
+
+    const saved = JSON.parse(raw);
+
+    if (!saved.members)
+      return createInitialState();
+
+    return saved;
+
+  } catch (e) {
+    console.error(e);
+    return createInitialState();
+  }
+}
+
+let state = loadState();
 
 function saveState() {
   localStorage.setItem(
@@ -175,80 +178,63 @@ function saveState() {
   );
 }
 
-function loadState() {
-  try {
-    const raw =
-      localStorage.getItem(STORAGE_KEY);
-
-    if (!raw) {
-      return createInitialState();
-    }
-
-    const parsed =
-      JSON.parse(raw);
-
-    if (
-      !parsed.members ||
-      parsed.version !== DATA.version
-    ) {
-      return createInitialState();
-    }
-
-    return parsed;
-
-  } catch (error) {
-    console.error(error);
-    return createInitialState();
-  }
-}
-
-function resetRun() {
-  const permanent = {
-    ovkPoints:
-      state.ovkPoints || 0,
-
-    collection:
-      state.collection || {},
-
-    achievements:
-      state.achievements || [],
-
-    clearHistory:
-      state.clearHistory || []
-  };
-
-  state = createInitialState();
-
-  Object.assign(
-    state,
-    permanent
-  );
-
-  saveState();
-}
 
 /* =========================================================
    SCREEN
 ========================================================= */
 
-function hideAllScreens() {
-  [
-    loadingScreen,
-    titleScreen,
-    prologueScreen,
-    gameScreen,
-    trainingScreen,
-    actionResultScreen,
-    weekEndScreen
-  ].forEach(screen => {
-    screen?.classList.remove("active");
-  });
+function hideScreens() {
+  Object.values(screens)
+    .forEach(screen => {
+      screen?.classList.remove("active");
+    });
 }
 
 function showScreen(screen) {
-  hideAllScreens();
+  hideScreens();
   screen?.classList.add("active");
 }
+
+
+/* =========================================================
+   BGM
+========================================================= */
+
+let bgmStarted = false;
+
+async function startBGM() {
+  if (!audio) return;
+
+  try {
+    if (!audio.src ||
+        !audio.src.includes("akunaki-kodou")) {
+      audio.src = "./akunaki-kodou.mp3";
+    }
+
+    audio.loop = true;
+    audio.volume = 0.28;
+
+    await audio.play();
+
+    bgmStarted = true;
+
+  } catch (e) {
+    /*
+      Safariはユーザー操作前の再生を
+      ブロックするのでここでは無視。
+    */
+    console.log("BGM waiting for user gesture");
+  }
+}
+
+function ensureBGM() {
+  if (!audio) return;
+
+  if (audio.paused) {
+    startBGM();
+  }
+}
+
 
 /* =========================================================
    IMAGE CACHE
@@ -257,13 +243,11 @@ function showScreen(screen) {
 const imageCache = new Map();
 
 function preloadImage(src) {
-  if (!src) {
+  if (!src)
     return Promise.resolve();
-  }
 
-  if (imageCache.has(src)) {
+  if (imageCache.has(src))
     return imageCache.get(src);
-  }
 
   const promise =
     new Promise(resolve => {
@@ -283,26 +267,23 @@ async function preloadAssets() {
   const sources = [];
 
   Object.values(DATA.images)
-    .forEach(expressions => {
-      Object.values(expressions)
-        .forEach(src => {
-          sources.push(src);
-        });
+    .forEach(member => {
+      Object.values(member)
+        .forEach(src => sources.push(src));
     });
 
   Object.values(DATA.backgrounds)
-    .forEach(src => {
-      sources.push(src);
-    });
+    .forEach(src => sources.push(src));
 
   const unique =
     [...new Set(sources)];
 
-  for (
-    let i = 0;
-    i < unique.length;
-    i++
-  ) {
+  /*
+    ロード画面の4人をJS側で追加
+  */
+  createLoadingMembers();
+
+  for (let i = 0; i < unique.length; i++) {
     await preloadImage(unique[i]);
 
     const percent =
@@ -316,40 +297,82 @@ async function preloadAssets() {
     const number =
       $("loadingPercent");
 
-    if (progress) {
+    if (progress)
       progress.style.width =
         `${percent}%`;
-    }
 
-    if (number) {
+    if (number)
       number.textContent =
         `${percent}%`;
-    }
   }
 }
+
+
+/* =========================================================
+   LOADING MEMBERS
+========================================================= */
+
+function createLoadingMembers() {
+  const loading = screens.loading;
+
+  if (!loading) return;
+
+  let stage =
+    document.getElementById(
+      "loadingMembers"
+    );
+
+  if (stage) return;
+
+  stage = document.createElement("div");
+  stage.id = "loadingMembers";
+
+  DATA.memberOrder.forEach(
+    (id, index) => {
+      const img =
+        document.createElement("img");
+
+      img.src =
+        DATA.images[id].smile ||
+        DATA.images[id].normal;
+
+      img.alt =
+        DATA.members[id].name;
+
+      img.style.animationDelay =
+        `${index * 0.12}s`;
+
+      stage.appendChild(img);
+    }
+  );
+
+  /*
+    ロゴより上に配置
+  */
+  loading.prepend(stage);
+}
+
 
 /* =========================================================
    BACKGROUND
 ========================================================= */
 
-async function setBackground(bgKey) {
+async function setBackground(key) {
   const src =
-    DATA.backgrounds[bgKey];
+    DATA.backgrounds[key];
 
-  if (!envEl || !src) {
-    return;
-  }
+  if (!envEl || !src) return;
 
   await preloadImage(src);
 
-  envEl.style.backgroundImage = `
-    linear-gradient(
-      rgba(4,6,13,.13),
-      rgba(4,6,13,.28)
+  envEl.style.backgroundImage =
+    `linear-gradient(
+      rgba(4,6,12,.10),
+      rgba(4,6,12,.28)
     ),
-    url("${src}")
-  `;
+    url("${src}")`;
 }
+
 
 /* =========================================================
    CHARACTER
@@ -365,9 +388,12 @@ async function setCharacter(
 
   managerMark?.classList.remove("show");
 
+  /*
+    MANAGERでもロゴを中央に出さない。
+    背景を見せる。
+  */
   if (!memberId) {
     charEl.style.display = "none";
-    managerMark?.classList.add("show");
     return;
   }
 
@@ -382,39 +408,39 @@ async function setCharacter(
   charEl.src = src;
   charEl.style.display = "block";
 
-  if (!charEl.complete) {
-    await new Promise(resolve => {
-      charEl.onload = resolve;
-      charEl.onerror = resolve;
-    });
+  if (charEl.decode) {
+    try {
+      await charEl.decode();
+    } catch (_) {}
   }
 
   requestAnimationFrame(() => {
     charEl.classList.add("show");
   });
 
-  await wait(130);
+  await wait(120);
 }
+
 
 /* =========================================================
    REACTION
 ========================================================= */
 
-function setReaction(reaction) {
+function setReaction(value) {
   if (!reactionEl) return;
 
   reactionEl.classList.remove("show");
   reactionEl.textContent = "";
 
-  if (!reaction) return;
+  if (!value) return;
 
-  reactionEl.textContent =
-    reaction;
+  reactionEl.textContent = value;
 
   void reactionEl.offsetWidth;
 
   reactionEl.classList.add("show");
 }
+
 
 /* =========================================================
    TYPEWRITER
@@ -427,12 +453,11 @@ let typingToken = 0;
 async function typeText(
   element,
   text,
-  speed = 23
+  speed = 21
 ) {
   if (!element) return;
 
-  const myToken =
-    ++typingToken;
+  const token = ++typingToken;
 
   typing = true;
   skipTyping = false;
@@ -443,14 +468,14 @@ async function typeText(
     Array.from(String(text));
 
   for (const char of chars) {
-    if (myToken !== typingToken) {
+    if (token !== typingToken)
       return;
-    }
 
     if (skipTyping) {
       element.innerHTML =
         String(text)
           .replace(/\n/g, "<br>");
+
       break;
     }
 
@@ -467,20 +492,21 @@ async function typeText(
     await wait(speed);
   }
 
-  if (myToken === typingToken) {
+  if (token === typingToken)
     typing = false;
-  }
 }
+
 
 /* =========================================================
    STORY
 ========================================================= */
 
-let storyRenderToken = 0;
+let storyToken = 0;
 
 async function renderStory() {
-  const renderToken =
-    ++storyRenderToken;
+  ensureBGM();
+
+  const token = ++storyToken;
 
   typingToken++;
 
@@ -489,7 +515,7 @@ async function renderStory() {
 
   if (!node) {
     console.error(
-      "Story node not found:",
+      "Missing story node:",
       state.node
     );
     return;
@@ -505,30 +531,25 @@ async function renderStory() {
     return;
   }
 
-  showScreen(gameScreen);
+  showScreen(screens.game);
 
-  if (seasonLabel) {
+  if (seasonLabel)
     seasonLabel.textContent =
       `SEASON ${state.season}`;
-  }
 
-  if (chapterEl) {
+  if (chapterEl)
     chapterEl.textContent =
       node.chapter || "";
-  }
 
-  if (speakerEl) {
+  if (speakerEl)
     speakerEl.textContent =
       node.speaker || "";
-  }
 
-  if (textEl) {
+  if (textEl)
     textEl.innerHTML = "";
-  }
 
-  if (choicesEl) {
+  if (choicesEl)
     choicesEl.innerHTML = "";
-  }
 
   if (dialogueEl) {
     dialogueEl.dataset.mode =
@@ -537,50 +558,53 @@ async function renderStory() {
         : "normal";
   }
 
+  /*
+    先に背景。
+  */
   await setBackground(
     node.bg || "manager"
   );
 
-  if (
-    renderToken !== storyRenderToken
-  ) return;
+  if (token !== storyToken)
+    return;
 
+  /*
+    次にキャラ。
+  */
   await setCharacter(
     node.member,
     node.expression || "normal"
   );
 
-  if (
-    renderToken !== storyRenderToken
-  ) return;
+  if (token !== storyToken)
+    return;
 
   setReaction(node.reaction);
 
-  await wait(130);
+  await wait(110);
 
-  if (
-    renderToken !== storyRenderToken
-  ) return;
-
+  /*
+    最後に文章。
+    これでキャラより先に文字が
+    出始めるのを防ぐ。
+  */
   await typeText(
     textEl,
     node.text || ""
   );
 
-  if (
-    renderToken !== storyRenderToken
-  ) return;
+  if (token !== storyToken)
+    return;
 
-  if (node.choices) {
-    renderStoryChoices(node);
-  } else {
-    renderNextButton(node);
-  }
+  if (node.choices)
+    renderChoices(node);
+  else
+    renderNext(node);
 
   saveState();
 }
 
-function renderNextButton(node) {
+function renderNext(node) {
   if (!choicesEl) return;
 
   const button =
@@ -601,6 +625,7 @@ function renderNextButton(node) {
     if (!node.next) return;
 
     state.node = node.next;
+
     saveState();
     renderStory();
   };
@@ -608,10 +633,8 @@ function renderNextButton(node) {
   choicesEl.appendChild(button);
 }
 
-function renderStoryChoices(node) {
+function renderChoices(node) {
   if (!choicesEl) return;
-
-  choicesEl.innerHTML = "";
 
   const grid =
     document.createElement("div");
@@ -628,7 +651,7 @@ function renderStoryChoices(node) {
 
     button.innerHTML = `
       <span class="choiceTitle">
-        ${choice.title || choice.text || ""}
+        ${choice.title}
       </span>
 
       ${
@@ -645,27 +668,26 @@ function renderStoryChoices(node) {
     button.onclick = async () => {
       document
         .querySelectorAll(".choiceBtn")
-        .forEach(btn => {
-          btn.disabled = true;
-        });
+        .forEach(b => b.disabled = true);
 
       const result =
-        applyStoryDecision(
-          choice.result
-        );
+        applyDecision(choice.result);
 
       state.pendingStoryNext =
         choice.next;
 
       saveState();
 
-      await playDecisionEffect(
-        result
+      /*
+        キャラを残したまま
+        能力変化演出。
+      */
+      await playStatPopSequence(
+        result,
+        "MANAGER DECISION"
       );
 
-      showDecisionResult(
-        result
-      );
+      showDecisionResult(result);
     };
 
     grid.appendChild(button);
@@ -674,32 +696,31 @@ function renderStoryChoices(node) {
   choicesEl.appendChild(grid);
 }
 
+
 /* =========================================================
-   MEMBER / STATS
+   MEMBER
 ========================================================= */
 
 function snapshotMember(id) {
-  const member =
-    state.members[id];
+  const m = state.members[id];
 
   return {
-    level: member.level,
-    exp: member.exp,
-    sp: member.sp,
-    stats:
-      deepClone(member.stats)
+    level: m.level,
+    exp: m.exp,
+    sp: m.sp,
+    stats: clone(m.stats)
   };
 }
 
-function snapshotAllMembers() {
-  const snapshot = {};
+function snapshotAll() {
+  const result = {};
 
   DATA.memberOrder.forEach(id => {
-    snapshot[id] =
+    result[id] =
       snapshotMember(id);
   });
 
-  return snapshot;
+  return result;
 }
 
 function changeStat(
@@ -722,9 +743,7 @@ function addExp(id, amount) {
   const member =
     state.members[id];
 
-  if (!member) return [];
-
-  const levelUps = [];
+  if (!member) return;
 
   member.exp += amount;
 
@@ -739,30 +758,27 @@ function addExp(id, amount) {
 
     member.sp +=
       DATA.exp.pointPerLevel;
-
-    levelUps.push(
-      member.level
-    );
   }
-
-  return levelUps;
 }
 
+
 /* =========================================================
-   MANAGER DECISION
+   DECISION
 ========================================================= */
 
-function applyStoryDecision(type) {
+function applyDecision(type) {
   const before =
-    snapshotAllMembers();
+    snapshotAll();
 
   switch (type) {
+
     case "teach":
+
       changeStat("kilua", "mc", 5);
       changeStat("kilua", "bond", 6);
       changeStat("kilua", "dance", 3);
 
-      ["sarina", "miyu", "raisa"]
+      ["sarina","miyu","raisa"]
         .forEach(id => {
           changeStat(id, "dance", 3);
           changeStat(id, "bond", 2);
@@ -774,23 +790,28 @@ function applyStoryDecision(type) {
 
       addExp("kilua", 45);
 
-      ["sarina", "miyu", "raisa"]
-        .forEach(id => {
-          addExp(id, 25);
-        });
+      ["sarina","miyu","raisa"]
+        .forEach(id =>
+          addExp(id, 25)
+        );
 
       break;
 
+
     case "split":
+
       DATA.memberOrder.forEach(id => {
         changeStat(id, "dance", 4);
         changeStat(id, "bond", 3);
         changeStat(id, "energy", -6);
         addExp(id, 30);
       });
+
       break;
 
+
     case "push":
+
       DATA.memberOrder.forEach(id => {
         changeStat(
           id,
@@ -800,31 +821,36 @@ function applyStoryDecision(type) {
 
         changeStat(id, "bond", -2);
         changeStat(id, "energy", -11);
+
         addExp(id, 35);
       });
+
       break;
 
+
     case "talk":
+
       DATA.memberOrder.forEach(id => {
         changeStat(id, "bond", 4);
         changeStat(id, "mc", 2);
         changeStat(id, "dance", 1);
         changeStat(id, "energy", 2);
+
         addExp(id, 25);
       });
+
       break;
   }
 
   return {
-    title: "MANAGER DECISION",
     before,
-    after:
-      snapshotAllMembers()
+    after: snapshotAll()
   };
 }
 
+
 /* =========================================================
-   COLLECT CHANGES
+   CHANGE DATA
 ========================================================= */
 
 function collectChanges(
@@ -845,148 +871,135 @@ function collectChanges(
         const diff =
           newValue - oldValue;
 
-        if (diff === 0) return;
+        if (!diff) return;
 
-        const change = {
+        let oldRank = null;
+        let newRank = null;
+        let rankDirection = 0;
+
+        /*
+          体力はランクなし。
+        */
+        if (stat !== "energy") {
+          oldRank = rankOf(oldValue);
+          newRank = rankOf(newValue);
+
+          rankDirection =
+            rankIndex(newRank) -
+            rankIndex(oldRank);
+        }
+
+        changes.push({
           stat,
           oldValue,
           newValue,
           diff,
-          oldRank: null,
-          newRank: null,
-          rankDirection: 0
-        };
-
-        /*
-          体力にはランクを付けない。
-        */
-        if (stat !== "energy") {
-          change.oldRank =
-            rankOf(oldValue);
-
-          change.newRank =
-            rankOf(newValue);
-
-          change.rankDirection =
-            rankIndex(change.newRank) -
-            rankIndex(change.oldRank);
-        }
-
-        changes.push(change);
+          oldRank,
+          newRank,
+          rankDirection
+        });
       });
 
     return {
       id,
-      changes,
-      levelDiff:
-        after[id].level -
-        before[id].level
+      changes
     };
   });
 }
 
+
 /* =========================================================
-   FLOAT EFFECT
+   STAT POP
 ========================================================= */
 
-async function playDecisionEffect(result) {
-  if (!gameScreen) return;
+async function playStatPopSequence(
+  result,
+  title
+) {
+  if (!screens.game) return;
 
-  /*
-    選択肢を一旦消して、
-    キャラ＋背景を残す。
-  */
-  if (dialogueEl) {
-    dialogueEl.classList.add(
-      "decisionFade"
-    );
-  }
+  dialogueEl?.classList.add(
+    "decisionFade"
+  );
 
   await wait(180);
 
-  const old =
-    document.getElementById(
-      "decisionFloatLayer"
-    );
-
-  old?.remove();
+  document
+    .getElementById("statPopLayer")
+    ?.remove();
 
   const layer =
     document.createElement("div");
 
-  layer.id =
-    "decisionFloatLayer";
+  layer.id = "statPopLayer";
 
-  gameScreen.appendChild(layer);
+  const label =
+    document.createElement("div");
 
-  const changes =
+  label.className =
+    "lessonPopTitle";
+
+  label.textContent = title;
+
+  layer.appendChild(label);
+
+  screens.game.appendChild(layer);
+
+  const memberChanges =
     collectChanges(
       result.before,
       result.after
     );
 
-  /*
-    同じ内容をある程度まとめて、
-    一瞬で読み取れるようにする。
-  */
   const messages = [];
 
-  changes.forEach(member => {
-    member.changes.forEach(change => {
-      const sign =
-        change.diff > 0 ? "+" : "";
-
+  memberChanges.forEach(item => {
+    item.changes.forEach(change => {
       messages.push({
-        member: member.id,
+        id: item.id,
         stat: change.stat,
-        text:
-          `${getMemberName(member.id)}　${statLabel(change.stat)} ${sign}${change.diff}`,
-        positive:
-          change.diff > 0
+        diff: change.diff
       });
     });
   });
 
   /*
-    最大6件程度を優先表示。
-    詳細は次のRESULTで確認できる。
+    画面が文字だらけにならないよう、
+    重要な変化を最大6個。
   */
-  const important =
-    messages
-      .sort((a, b) =>
-        Math.abs(
-          parseInt(
-            b.text.match(/[+-]\d+/)?.[0] || 0
-          )
-        ) -
-        Math.abs(
-          parseInt(
-            a.text.match(/[+-]\d+/)?.[0] || 0
-          )
-        )
-      )
-      .slice(0, 6);
+  messages.sort(
+    (a,b) =>
+      Math.abs(b.diff) -
+      Math.abs(a.diff)
+  );
 
   for (
-    let i = 0;
-    i < important.length;
-    i++
+    const item of messages.slice(0,6)
   ) {
-    const item =
-      important[i];
-
     const pop =
       document.createElement("div");
 
     pop.className =
-      `statFloat ${
-        item.positive
+      `statPop ${
+        item.diff >= 0
           ? "positive"
           : "negative"
       }`;
 
-    pop.textContent =
-      item.text;
+    pop.innerHTML = `
+      <small>
+        ${getMemberName(item.id)}
+      </small>
+
+      <strong>
+        ${statLabel(item.stat)}
+      </strong>
+
+      <b>
+        ${item.diff > 0 ? "+" : ""}
+        ${item.diff}
+      </b>
+    `;
 
     layer.appendChild(pop);
 
@@ -994,29 +1007,29 @@ async function playDecisionEffect(result) {
       pop.classList.add("show");
     });
 
-    await wait(220);
+    await wait(250);
   }
 
-  await wait(600);
+  await wait(500);
 
-  const button =
+  const btn =
     document.createElement("button");
 
-  button.className =
+  btn.className =
     "floatResultBtn";
 
-  button.textContent =
+  btn.textContent =
     "RESULTを見る";
 
-  layer.appendChild(button);
+  layer.appendChild(btn);
 
   await new Promise(resolve => {
-    button.onclick = resolve;
+    btn.onclick = resolve;
   });
 
   layer.classList.add("hide");
 
-  await wait(220);
+  await wait(180);
 
   layer.remove();
 
@@ -1025,25 +1038,47 @@ async function playDecisionEffect(result) {
   );
 }
 
+
 /* =========================================================
-   RESULT
+   DECISION RESULT
 ========================================================= */
 
-function resultChangeHTML(change) {
+function showDecisionResult(result) {
+  showScreen(screens.actionResult);
+
+  renderResultScreen({
+    kicker: "RESULT",
+    title: "MANAGER DECISION",
+    before: result.before,
+    after: result.after,
+    buttonText: "ストーリーへ戻る",
+    onContinue: () => {
+      state.node =
+        state.pendingStoryNext;
+
+      state.pendingStoryNext = null;
+
+      saveState();
+      renderStory();
+    }
+  });
+}
+
+
+/* =========================================================
+   RESULT HTML
+========================================================= */
+
+function resultStatHTML(change) {
   const sign =
     change.diff > 0 ? "+" : "";
 
-  /*
-    体力
-  */
   if (change.stat === "energy") {
-    const percent =
-      clamp(change.newValue);
-
     return `
       <div class="compactStat energyStat">
 
         <div class="compactStatTop">
+
           <span>体力</span>
 
           <b>
@@ -1059,44 +1094,29 @@ function resultChangeHTML(change) {
           }">
             ${sign}${change.diff}
           </em>
+
         </div>
 
         <div class="energyBar">
-          <i
-            style="width:${percent}%"
-          ></i>
+          <i style="
+            width:${change.newValue}%
+          "></i>
         </div>
 
       </div>
     `;
   }
 
-  let rankText = "";
+  const rankUp =
+    change.rankDirection > 0;
 
-  if (change.rankDirection > 0) {
-    rankText = `
-      <small class="rankUpLabel">
-        RANK UP!
-      </small>
-    `;
-  }
-
-  if (change.rankDirection < 0) {
-    rankText = `
-      <small class="rankDownLabel">
-        RANK DOWN
-      </small>
-    `;
-  }
+  const rankDown =
+    change.rankDirection < 0;
 
   return `
     <div class="
       compactStat
-      ${
-        change.rankDirection > 0
-          ? "rankUp"
-          : ""
-      }
+      ${rankUp ? "rankUp" : ""}
     ">
 
       <span>
@@ -1117,33 +1137,68 @@ function resultChangeHTML(change) {
         ${sign}${change.diff}
       </em>
 
-      ${rankText}
+      ${
+        rankUp
+          ? `
+            <small class="rankUpLabel">
+              RANK UP!
+            </small>
+          `
+          : ""
+      }
+
+      ${
+        rankDown
+          ? `
+            <small class="rankDownLabel">
+              RANK DOWN
+            </small>
+          `
+          : ""
+      }
 
     </div>
   `;
 }
 
-function showDecisionResult(result) {
-  showScreen(actionResultScreen);
+function renderResultScreen({
+  kicker,
+  title,
+  subtitle = "",
+  before,
+  after,
+  buttonText,
+  onContinue,
+  focusMember = null
+}) {
+  const screen =
+    screens.actionResult;
 
-  if (!actionResultScreen) return;
+  if (!screen) return;
 
   const changes =
-    collectChanges(
-      result.before,
-      result.after
-    );
+    collectChanges(before, after);
 
-  actionResultScreen.innerHTML = `
+  screen.innerHTML = `
     <div class="resultWrap">
 
       <div class="resultKicker">
-        RESULT
+        ${kicker}
       </div>
 
       <h2 class="resultTitle">
-        ${result.title}
+        ${title}
       </h2>
+
+      ${
+        subtitle
+          ? `
+            <div class="resultSub">
+              ${subtitle}
+            </div>
+          `
+          : ""
+      }
 
       <div class="resultMemberGrid">
 
@@ -1154,12 +1209,22 @@ function showDecisionResult(result) {
           const member =
             state.members[item.id];
 
+          const isFocus =
+            item.id === focusMember;
+
           return `
             <article
-              class="resultMemberCard"
+              class="
+                resultMemberCard
+                ${isFocus ? "focusResult" : ""}
+                ${
+                  item.changes.length
+                    ? ""
+                    : "noChangeCard"
+                }
+              "
               style="
-                --member-rgb:
-                ${base.rgb};
+                --member-rgb:${base.rgb};
               "
             >
 
@@ -1190,9 +1255,7 @@ function showDecisionResult(result) {
                 ${
                   item.changes.length
                     ? item.changes
-                        .map(
-                          resultChangeHTML
-                        )
+                        .map(resultStatHTML)
                         .join("")
                     : `
                       <div class="noChange">
@@ -1210,30 +1273,22 @@ function showDecisionResult(result) {
       </div>
 
       <button
-        id="decisionContinue"
+        id="resultContinueBtn"
         class="mainActionBtn"
       >
-        ストーリーへ戻る
+        ${buttonText}
       </button>
 
     </div>
   `;
 
-  $("decisionContinue")
+  $("resultContinueBtn")
     ?.addEventListener(
       "click",
-      () => {
-        state.node =
-          state.pendingStoryNext;
-
-        state.pendingStoryNext =
-          null;
-
-        saveState();
-        renderStory();
-      }
+      onContinue
     );
 }
+
 
 /* =========================================================
    WEEK SNAPSHOT
@@ -1241,38 +1296,31 @@ function showDecisionResult(result) {
 
 function makeWeekSnapshot() {
   state.weekSnapshot = {
-    season:
-      state.season,
+    season: state.season,
+    week: state.week,
 
-    week:
-      state.week,
+    reach: state.reach,
+    fans: state.fans,
+    cash: state.cash,
 
-    reach:
-      state.reach,
-
-    fans:
-      state.fans,
-
-    cash:
-      state.cash,
-
-    members:
-      snapshotAllMembers()
+    members: snapshotAll()
   };
 
   saveState();
 }
+
 
 /* =========================================================
    TRAINING
 ========================================================= */
 
 function openTraining() {
-  if (!state.weekSnapshot) {
-    makeWeekSnapshot();
-  }
+  ensureBGM();
 
-  showScreen(trainingScreen);
+  if (!state.weekSnapshot)
+    makeWeekSnapshot();
+
+  showScreen(screens.training);
 
   renderTrainingHeader();
   renderTrainingMembers();
@@ -1280,10 +1328,9 @@ function openTraining() {
 }
 
 function renderTrainingHeader() {
-  if (trainingSeason) {
+  if (trainingSeason)
     trainingSeason.textContent =
       `SEASON ${state.season}`;
-  }
 
   if (trainingWeek) {
     const remaining =
@@ -1293,54 +1340,29 @@ function renderTrainingHeader() {
         state.actionsUsed
       );
 
-    trainingWeek.innerHTML = `
-      WEEK ${state.week}
-      <span>
-        残り活動 ${remaining}
-      </span>
-    `;
+    trainingWeek.innerHTML =
+      `WEEK ${state.week}
+       <span>
+         残り活動 ${remaining}
+       </span>`;
   }
 
-  if ($("trainingReach")) {
+  if ($("trainingReach"))
     $("trainingReach").textContent =
       state.reach;
-  }
 
-  if ($("trainingFans")) {
+  if ($("trainingFans"))
     $("trainingFans").textContent =
       state.fans;
-  }
 
-  if ($("trainingCash")) {
+  if ($("trainingCash"))
     $("trainingCash").textContent =
       formatMoney(state.cash);
-  }
-
-  const days =
-    $("trainingDays");
-
-  if (days) {
-    const totalWeeks =
-      (
-        (state.season - 1) *
-        DATA.seasons.weeksPerSeason
-      ) +
-      state.week;
-
-    const remainingDays =
-      Math.max(
-        0,
-        28 -
-        ((totalWeeks - 1) * 7)
-      );
-
-    days.textContent =
-      `デビューまであと${remainingDays}日`;
-  }
 }
 
+
 /* =========================================================
-   TRAINING MEMBER
+   TRAINING MEMBERS
 ========================================================= */
 
 function renderTrainingMembers() {
@@ -1348,49 +1370,12 @@ function renderTrainingMembers() {
 
   trainingMembers.innerHTML = "";
 
-  const allButton =
-    document.createElement("button");
-
-  allButton.className =
-    `trainingMember allMember ${
-      state.selectedMember === "all"
-        ? "selected"
-        : ""
-    }`;
-
-  allButton.innerHTML = `
-    <strong>ALL</strong>
-    <span>4人全員</span>
-  `;
-
-  allButton.onclick = () => {
-    state.selectedMember = "all";
-    renderTrainingMembers();
-  };
-
-  trainingMembers.appendChild(
-    allButton
-  );
-
   DATA.memberOrder.forEach(id => {
     const base =
       DATA.members[id];
 
     const member =
       state.members[id];
-
-    const needed =
-      expNeeded(member.level);
-
-    const percent =
-      Math.min(
-        100,
-        Math.round(
-          member.exp /
-          needed *
-          100
-        )
-      );
 
     const button =
       document.createElement("button");
@@ -1407,6 +1392,16 @@ function renderTrainingMembers() {
       base.rgb
     );
 
+    const expPercent =
+      Math.min(
+        100,
+        Math.round(
+          member.exp /
+          expNeeded(member.level) *
+          100
+        )
+      );
+
     button.innerHTML = `
       <img
         src="${DATA.images[id].smile}"
@@ -1414,6 +1409,7 @@ function renderTrainingMembers() {
       >
 
       <div class="trainingMemberInfo">
+
         <strong>
           ${base.name}
         </strong>
@@ -1423,32 +1419,49 @@ function renderTrainingMembers() {
         </span>
 
         <div class="miniExp">
-          <i
-            style="width:${percent}%"
-          ></i>
+          <i style="
+            width:${expPercent}%
+          "></i>
         </div>
+
       </div>
     `;
 
     button.onclick = () => {
       state.selectedMember = id;
+
+      saveState();
+
       renderTrainingMembers();
+      renderCommands();
     };
 
-    trainingMembers.appendChild(
-      button
-    );
+    trainingMembers.appendChild(button);
   });
 }
 
+
 /* =========================================================
-   COMMAND
+   COMMANDS
 ========================================================= */
 
 function renderCommands() {
   if (!commandGrid) return;
 
   commandGrid.innerHTML = "";
+
+  /*
+    メンバー未選択時。
+    長い説明文は出さない。
+  */
+  if (!state.selectedMember) {
+    commandGrid.innerHTML = `
+      <div class="selectMemberPrompt">
+        ↑ メンバーを選択
+      </div>
+    `;
+    return;
+  }
 
   DATA.trainingCommands.forEach(
     command => {
@@ -1458,19 +1471,13 @@ function renderCommands() {
       button.className =
         "commandCard";
 
-      const cost =
-        command.cash < 0
-          ? formatMoney(
-              Math.abs(command.cash)
-            )
-          : "FREE";
-
       button.innerHTML = `
         <div class="commandIcon">
           ${command.icon}
         </div>
 
         <div class="commandText">
+
           <strong>
             ${command.title}
           </strong>
@@ -1483,107 +1490,126 @@ function renderCommands() {
             ${
               command.id === "rest"
                 ? "体力回復"
-                : cost
+                : command.cash < 0
+                  ? formatMoney(
+                      Math.abs(command.cash)
+                    )
+                  : "FREE"
             }
           </small>
+
         </div>
       `;
 
       button.onclick = () => {
-        if (
-          state.actionsUsed >=
-          DATA.weekActions
-        ) return;
-
-        runTrainingCommand(
-          command
-        );
+        beginTraining(command);
       };
 
-      commandGrid.appendChild(
-        button
-      );
+      commandGrid.appendChild(button);
     }
   );
 }
 
-function runTrainingCommand(command) {
+
+/* =========================================================
+   TRAINING START
+========================================================= */
+
+function beginTraining(command) {
+  if (!state.selectedMember)
+    return;
+
+  if (
+    state.actionsUsed >=
+    DATA.weekActions
+  )
+    return;
+
+  const memberId =
+    state.selectedMember;
+
+  /*
+    先に計算するが、
+    RESULTにはまだ行かない。
+  */
   const before =
-    snapshotAllMembers();
+    snapshotAll();
 
-  const targets =
-    state.selectedMember === "all"
-      ? [...DATA.memberOrder]
-      : [state.selectedMember];
+  applyTraining(
+    memberId,
+    command
+  );
 
-  const multiplier =
-    state.selectedMember === "all"
-      ? 1
-      : 1.6;
+  const after =
+    snapshotAll();
 
-  targets.forEach(id => {
-    if (command.primary) {
-      changeStat(
-        id,
-        command.primary,
-        Math.max(
-          1,
-          Math.round(
-            command.primaryGain *
-            multiplier
-          )
-        )
-      );
-    }
+  state.actionsUsed++;
 
-    if (command.bondGain) {
-      changeStat(
-        id,
-        "bond",
+  saveState();
+
+  /*
+    ここでレッスン場面へ。
+  */
+  showTrainingScene(
+    memberId,
+    command,
+    before,
+    after
+  );
+}
+
+
+/* =========================================================
+   APPLY TRAINING
+========================================================= */
+
+function applyTraining(
+  memberId,
+  command
+) {
+  /*
+    個人重点育成。
+  */
+  if (command.primary) {
+    const gain =
+      Math.max(
+        1,
         Math.round(
-          command.bondGain *
-          multiplier
+          command.primaryGain * 1.5
         )
       );
-    }
 
-    if (command.energy) {
-      changeStat(
-        id,
-        "energy",
-        Math.round(
-          command.energy *
-          (
-            state.selectedMember ===
-            "all"
-              ? 1
-              : 0.9
-          )
-        )
-      );
-    }
+    changeStat(
+      memberId,
+      command.primary,
+      gain
+    );
+  }
 
-    addExp(
-      id,
+  if (command.bondGain) {
+    changeStat(
+      memberId,
+      "bond",
       Math.round(
-        command.exp *
-        multiplier
+        command.bondGain * 1.5
       )
     );
-  });
+  }
 
+  if (command.energy) {
+    changeStat(
+      memberId,
+      "energy",
+      command.energy
+    );
+  }
+
+  /*
+    SNS / チラシだけ認知度UP。
+    レッスンでは認知度は増えない。
+  */
   if (command.reach) {
-    const gain =
-      state.selectedMember === "all"
-        ? command.reach
-        : Math.max(
-            1,
-            Math.round(
-              command.reach * 0.7
-            )
-          );
-
-    state.reach += gain;
+    state.reach += command.reach;
 
     if (
       command.id === "sns" ||
@@ -1591,8 +1617,10 @@ function runTrainingCommand(command) {
     ) {
       state.fans +=
         Math.max(
-          0,
-          Math.floor(gain / 4)
+          1,
+          Math.floor(
+            command.reach / 4
+          )
         );
     }
   }
@@ -1600,147 +1628,488 @@ function runTrainingCommand(command) {
   state.cash =
     Math.max(
       0,
-      state.cash + command.cash
+      state.cash +
+      command.cash
     );
 
-  state.actionsUsed++;
-
-  const after =
-    snapshotAllMembers();
-
-  saveState();
-
-  showTrainingResult(
-    command,
-    before,
-    after
+  addExp(
+    memberId,
+    Math.round(
+      command.exp * 1.6
+    )
   );
 }
+
+
+/* =========================================================
+   TRAINING SCENE
+========================================================= */
+
+function trainingSceneData(
+  memberId,
+  command
+) {
+  const lines = {
+
+    dance: {
+      sarina:
+        "もう一回、頭から合わせよう。",
+      miyu:
+        "よし。今度こそ合わせる。",
+      kilua:
+        "ここ、もっと揃えられる。",
+      raisa:
+        "もう一回やってみる！"
+    },
+
+    vocal: {
+      sarina:
+        "もう少し声、前に出してみる。",
+      miyu:
+        "ここ、もっと気持ち乗せたい。",
+      kilua:
+        "歌もちゃんと仕上げる。",
+      raisa:
+        "もう一回歌っていい？"
+    },
+
+    mc: {
+      sarina:
+        "4人の空気、もっと作りたいね。",
+      miyu:
+        "喋るなら任せて……たぶん。",
+      kilua:
+        "こういうのも練習いるんだ。",
+      raisa:
+        "ちゃんと話せるようになりたい。"
+    },
+
+    sns: {
+      sarina:
+        "見つけてもらえる投稿にしよう。",
+      miyu:
+        "これ、ちょっと盛れたかも。",
+      kilua:
+        "もっと攻めてもよくない？",
+      raisa:
+        "コメント来るかな……。"
+    },
+
+    flyer: {
+      sarina:
+        "一人ずつちゃんと渡そう。",
+      miyu:
+        "よし、声出してこ。",
+      kilua:
+        "全部配り切ろ。",
+      raisa:
+        "受け取ってくれるかな……。"
+    },
+
+    rest: {
+      sarina:
+        "今日はちゃんと休もう。",
+      miyu:
+        "休むのも仕事ってことで。",
+      kilua:
+        "……寝る。",
+      raisa:
+        "ちょっと元気戻ったかも。"
+    }
+  };
+
+  const backgrounds = {
+    dance: "studio",
+    vocal: "studio",
+    mc: "studio",
+    sns: "sns",
+    flyer: "city",
+    rest: "lounge"
+  };
+
+  const reactions = {
+    dance: "🔥",
+    vocal: "🎤",
+    mc: "💬",
+    sns: "📱",
+    flyer: "📄",
+    rest: "💤"
+  };
+
+  return {
+    bg:
+      backgrounds[command.id] ||
+      "studio",
+
+    reaction:
+      reactions[command.id] || "✨",
+
+    line:
+      lines[command.id]?.[memberId] ||
+      "もう一回やってみよう。"
+  };
+}
+
+
+/* =========================================================
+   TRAINING SCENE RENDER
+========================================================= */
+
+async function showTrainingScene(
+  memberId,
+  command,
+  before,
+  after
+) {
+  showScreen(screens.game);
+
+  const scene =
+    trainingSceneData(
+      memberId,
+      command
+    );
+
+  if (seasonLabel)
+    seasonLabel.textContent =
+      `SEASON ${state.season}`;
+
+  if (chapterEl)
+    chapterEl.textContent =
+      `WEEK ${state.week}｜${command.title}`;
+
+  if (speakerEl)
+    speakerEl.textContent =
+      getMemberName(memberId);
+
+  if (choicesEl)
+    choicesEl.innerHTML = "";
+
+  if (textEl)
+    textEl.innerHTML = "";
+
+  dialogueEl.dataset.mode =
+    "normal";
+
+  await setBackground(scene.bg);
+
+  /*
+    練習時は表情を少し変える。
+  */
+  let expression = "normal";
+
+  if (
+    command.id === "dance" ||
+    command.id === "vocal"
+  ) {
+    expression = "smile";
+  }
+
+  if (command.id === "rest") {
+    expression = "troubled";
+  }
+
+  await setCharacter(
+    memberId,
+    expression
+  );
+
+  setReaction(scene.reaction);
+
+  await wait(180);
+
+  /*
+    まず本人の一言。
+  */
+  await typeText(
+    textEl,
+    scene.line,
+    23
+  );
+
+  await wait(400);
+
+  /*
+    NEXTではなく、
+    「レッスン結果」を出す。
+  */
+  const button =
+    document.createElement("button");
+
+  button.className =
+    "storyNextBtn";
+
+  button.textContent =
+    "レッスン結果 ›";
+
+  choicesEl.appendChild(button);
+
+  button.onclick = async () => {
+    button.disabled = true;
+
+    await playTrainingStatPops(
+      memberId,
+      command,
+      before,
+      after
+    );
+
+    showTrainingResult(
+      memberId,
+      command,
+      before,
+      after
+    );
+  };
+}
+
+
+/* =========================================================
+   TRAINING POP
+========================================================= */
+
+async function playTrainingStatPops(
+  memberId,
+  command,
+  before,
+  after
+) {
+  dialogueEl.classList.add(
+    "decisionFade"
+  );
+
+  await wait(170);
+
+  const old =
+    document.getElementById(
+      "statPopLayer"
+    );
+
+  old?.remove();
+
+  const layer =
+    document.createElement("div");
+
+  layer.id = "statPopLayer";
+
+  screens.game.appendChild(layer);
+
+  const title =
+    document.createElement("div");
+
+  title.className =
+    "lessonPopTitle";
+
+  title.innerHTML = `
+    <small>
+      ${getMemberName(memberId)}
+    </small>
+
+    ${command.icon}
+    ${command.title.toUpperCase()}
+  `;
+
+  layer.appendChild(title);
+
+  const oldMember =
+    before[memberId];
+
+  const newMember =
+    after[memberId];
+
+  const changes = [];
+
+  Object.keys(DATA.statLabels)
+    .forEach(stat => {
+      const diff =
+        newMember.stats[stat] -
+        oldMember.stats[stat];
+
+      if (!diff) return;
+
+      changes.push({
+        stat,
+        diff
+      });
+    });
+
+  /*
+    EXP差も表示。
+    レベルアップをまたいでも
+    今回獲得したEXP量を表示。
+  */
+  const expGain =
+    Math.round(
+      command.exp * 1.6
+    );
+
+  changes.forEach(() => {});
+
+  for (const change of changes) {
+    const pop =
+      document.createElement("div");
+
+    pop.className =
+      `statPop ${
+        change.diff >= 0
+          ? "positive"
+          : "negative"
+      }`;
+
+    pop.innerHTML = `
+      <strong>
+        ${statLabel(change.stat)}
+      </strong>
+
+      <b>
+        ${change.diff > 0 ? "+" : ""}
+        ${change.diff}
+      </b>
+    `;
+
+    layer.appendChild(pop);
+
+    requestAnimationFrame(() => {
+      pop.classList.add("show");
+    });
+
+    await wait(300);
+  }
+
+  /*
+    EXP
+  */
+  const expPop =
+    document.createElement("div");
+
+  expPop.className =
+    "statPop positive";
+
+  expPop.innerHTML = `
+    <strong>EXP</strong>
+    <b>+${expGain}</b>
+  `;
+
+  layer.appendChild(expPop);
+
+  requestAnimationFrame(() => {
+    expPop.classList.add("show");
+  });
+
+  await wait(450);
+
+  /*
+    認知度が上がった活動だけ。
+  */
+  if (command.reach) {
+    const reachPop =
+      document.createElement("div");
+
+    reachPop.className =
+      "statPop positive";
+
+    reachPop.innerHTML = `
+      <strong>認知度</strong>
+      <b>+${command.reach}</b>
+    `;
+
+    layer.appendChild(reachPop);
+
+    requestAnimationFrame(() => {
+      reachPop.classList.add("show");
+    });
+
+    await wait(300);
+  }
+
+  await wait(400);
+
+  const resultButton =
+    document.createElement("button");
+
+  resultButton.className =
+    "floatResultBtn";
+
+  resultButton.textContent =
+    "RESULTを見る";
+
+  layer.appendChild(resultButton);
+
+  await new Promise(resolve => {
+    resultButton.onclick = resolve;
+  });
+
+  layer.classList.add("hide");
+
+  await wait(180);
+
+  layer.remove();
+
+  dialogueEl.classList.remove(
+    "decisionFade"
+  );
+}
+
 
 /* =========================================================
    TRAINING RESULT
 ========================================================= */
 
 function showTrainingResult(
+  memberId,
   command,
   before,
   after
 ) {
-  showScreen(actionResultScreen);
+  showScreen(screens.actionResult);
 
-  const changes =
-    collectChanges(
-      before,
-      after
-    );
+  renderResultScreen({
 
-  actionResultScreen.innerHTML = `
-    <div class="resultWrap">
+    kicker:
+      "TRAINING RESULT",
 
-      <div class="resultKicker">
-        TRAINING RESULT
-      </div>
+    title:
+      `${command.icon} ${command.title}`,
 
-      <h2 class="resultTitle">
-        ${command.icon}
-        ${command.title}
-      </h2>
+    subtitle:
+      `${getMemberName(memberId)}を重点育成`,
 
-      <div class="resultSub">
-        ${
-          state.selectedMember === "all"
-            ? "4人で活動"
-            : `${getMemberName(state.selectedMember)}を重点育成`
-        }
-      </div>
+    before,
+    after,
 
-      <div class="resultMemberGrid">
+    focusMember:
+      memberId,
 
-        ${changes.map(item => {
-          const base =
-            DATA.members[item.id];
+    buttonText:
+      state.actionsUsed >=
+      DATA.weekActions
+        ? "ストーリーへ"
+        : "次の活動へ",
 
-          const member =
-            state.members[item.id];
-
-          return `
-            <article
-              class="resultMemberCard"
-              style="
-                --member-rgb:
-                ${base.rgb};
-              "
-            >
-
-              <div class="resultMemberHead">
-
-                <img
-                  src="${
-                    DATA.images[item.id]
-                      .smile
-                  }"
-                  alt=""
-                >
-
-                <div>
-                  <strong>
-                    ${base.name}
-                  </strong>
-
-                  <span>
-                    Lv.${member.level}
-                  </span>
-                </div>
-
-              </div>
-
-              <div class="compactStats">
-
-                ${
-                  item.changes.length
-                    ? item.changes
-                        .map(
-                          resultChangeHTML
-                        )
-                        .join("")
-                    : `
-                      <div class="noChange">
-                        変化なし
-                      </div>
-                    `
-                }
-
-              </div>
-
-            </article>
-          `;
-        }).join("")}
-
-      </div>
-
-      <button
-        id="trainingContinue"
-        class="mainActionBtn"
-      >
-        CONTINUE
-      </button>
-
-    </div>
-  `;
-
-  $("trainingContinue")
-    ?.addEventListener(
-      "click",
+    onContinue:
       continueAfterTraining
-    );
+  });
 }
 
+
+/* =========================================================
+   AFTER TRAINING
+========================================================= */
+
 function continueAfterTraining() {
+  /*
+    次の活動では
+    もう一度メンバーを選ぶ。
+  */
+  state.selectedMember = null;
+
   if (
     state.actionsUsed >=
     DATA.weekActions
   ) {
-    if (state.week === 1) {
+    if (
+      state.season === 1 &&
+      state.week === 1
+    ) {
       state.node =
         STORY.weeks[1]
           .afterTraining;
@@ -1754,35 +2123,48 @@ function continueAfterTraining() {
     return;
   }
 
+  saveState();
   openTraining();
 }
 
+
 /* =========================================================
-   MISSIONS
+   WEEK RESULT
 ========================================================= */
+
+function averageStat(stat) {
+  const values =
+    DATA.memberOrder.map(
+      id =>
+        state.members[id]
+          .stats[stat]
+    );
+
+  return Math.round(
+    values.reduce(
+      (a,b) => a + b,
+      0
+    ) / values.length
+  );
+}
+
+function minimumStat(stat) {
+  return Math.min(
+    ...DATA.memberOrder.map(
+      id =>
+        state.members[id]
+          .stats[stat]
+    )
+  );
+}
 
 function checkWeek1Missions() {
   return DATA.week1Mission.map(
     mission => {
-      let value = 0;
-
-      if (
-        mission.type === "average"
-      ) {
-        value =
-          averageStat(
-            mission.stat
-          );
-      }
-
-      if (
+      const value =
         mission.type === "minimum"
-      ) {
-        value =
-          minimumStat(
-            mission.stat
-          );
-      }
+          ? minimumStat(mission.stat)
+          : averageStat(mission.stat);
 
       return {
         ...mission,
@@ -1794,16 +2176,11 @@ function checkWeek1Missions() {
   );
 }
 
-/* =========================================================
-   WEEK RESULT
-========================================================= */
-
 function finishWeek() {
-  showScreen(weekEndScreen);
+  showScreen(screens.weekEnd);
 
-  if (!state.weekSnapshot) {
+  if (!state.weekSnapshot)
     makeWeekSnapshot();
-  }
 
   const snapshot =
     state.weekSnapshot;
@@ -1813,26 +2190,10 @@ function finishWeek() {
       ? checkWeek1Missions()
       : [];
 
-  const successCount =
-    missions.filter(
-      mission => mission.success
-    ).length;
+  const screen =
+    screens.weekEnd;
 
-  if (
-    state.week === 1 &&
-    !state.weekRewardClaimed
-  ) {
-    const bonusExp =
-      successCount * 15;
-
-    DATA.memberOrder.forEach(id => {
-      addExp(id, bonusExp);
-    });
-
-    state.weekRewardClaimed = true;
-  }
-
-  weekEndScreen.innerHTML = `
+  screen.innerHTML = `
     <div class="weekResultWrap">
 
       <div class="resultKicker">
@@ -1875,52 +2236,37 @@ function finishWeek() {
           ? `
             <section class="weekMissionSection">
 
-              <h2>
-                WEEK MISSION
-              </h2>
+              <h2>WEEK MISSION</h2>
 
               <div class="weekMissionList">
 
-                ${missions.map(
-                  mission => `
-                    <div class="
-                      weekMission
-                      ${
-                        mission.success
-                          ? "success"
-                          : "failed"
-                      }
-                    ">
+                ${missions.map(m => `
+                  <div class="
+                    weekMission
+                    ${
+                      m.success
+                        ? "success"
+                        : "failed"
+                    }
+                  ">
 
-                      <span>
-                        ${
-                          mission.success
-                            ? "✓"
-                            : "—"
-                        }
-                      </span>
+                    <span>
+                      ${m.success ? "✓" : "—"}
+                    </span>
 
-                      <div>
-                        <strong>
-                          ${mission.label}
-                        </strong>
+                    <div>
+                      <strong>
+                        ${m.label}
+                      </strong>
 
-                        <small>
-                          現在 ${mission.value}
-                        </small>
-                      </div>
-
+                      <small>
+                        現在 ${m.value}
+                      </small>
                     </div>
-                  `
-                ).join("")}
 
-              </div>
+                  </div>
+                `).join("")}
 
-              <div class="missionReward">
-                達成
-                ${successCount}/${missions.length}
-                ・ 全員EXP
-                +${successCount * 15}
               </div>
 
             </section>
@@ -1940,42 +2286,18 @@ function finishWeek() {
           const old =
             snapshot.members[id];
 
-          const needed =
-            expNeeded(member.level);
-
-          const expPercent =
-            Math.min(
-              100,
-              Math.round(
-                member.exp /
-                needed *
-                100
-              )
-            );
-
-          const abilityStats =
-            [
-              "vocal",
-              "dance",
-              "mc",
-              "bond"
-            ];
-
           return `
             <article
               class="weekMemberCard"
               style="
-                --member-rgb:
-                ${base.rgb};
+                --member-rgb:${base.rgb};
               "
             >
 
               <div class="weekMemberTop">
 
                 <img
-                  src="${
-                    DATA.images[id].smile
-                  }"
+                  src="${DATA.images[id].smile}"
                   alt=""
                 >
 
@@ -1991,31 +2313,26 @@ function finishWeek() {
 
               </div>
 
-              <div class="weekExpBar">
-                <i
-                  style="
-                    width:${expPercent}%
-                  "
-                ></i>
-              </div>
-
               <div class="weekStats">
 
-                ${abilityStats.map(stat => {
+                ${[
+                  "vocal",
+                  "dance",
+                  "mc",
+                  "bond"
+                ].map(stat => {
                   const now =
                     member.stats[stat];
 
-                  const oldValue =
+                  const previous =
                     old.stats[stat];
 
                   const diff =
-                    now - oldValue;
-
-                  const sign =
-                    diff > 0 ? "+" : "";
+                    now - previous;
 
                   return `
                     <div>
+
                       <span>
                         ${statLabel(stat)}
                       </span>
@@ -2025,19 +2342,14 @@ function finishWeek() {
                         ${now}
                       </b>
 
-                      <em class="${
-                        diff > 0
-                          ? "plus"
-                          : diff < 0
-                            ? "minus"
-                            : ""
-                      }">
+                      <em>
                         ${
-                          diff !== 0
-                            ? `${sign}${diff}`
-                            : "±0"
+                          diff > 0
+                            ? `+${diff}`
+                            : diff
                         }
                       </em>
+
                     </div>
                   `;
                 }).join("")}
@@ -2048,19 +2360,15 @@ function finishWeek() {
 
                 <div>
                   <span>体力</span>
-
                   <strong>
                     ${member.stats.energy}
                   </strong>
                 </div>
 
                 <div class="energyBar">
-                  <i
-                    style="
-                      width:
-                      ${member.stats.energy}%
-                    "
-                  ></i>
+                  <i style="
+                    width:${member.stats.energy}%
+                  "></i>
                 </div>
 
               </div>
@@ -2078,7 +2386,7 @@ function finishWeek() {
         ${
           state.week ===
           DATA.seasons.weeksPerSeason
-            ? `SEASON ${state.season + 1}へ`
+            ? "NEXT SEASON"
             : `WEEK ${state.week + 1}へ`
         }
       </button>
@@ -2095,15 +2403,15 @@ function finishWeek() {
   saveState();
 }
 
+
 /* =========================================================
    NEXT WEEK
 ========================================================= */
 
 function nextWeek() {
   state.actionsUsed = 0;
-  state.selectedMember = "all";
+  state.selectedMember = null;
   state.weekSnapshot = null;
-  state.weekRewardClaimed = false;
 
   if (
     state.week <
@@ -2121,21 +2429,29 @@ function nextWeek() {
     }
   }
 
+  const weekStory =
+    STORY.weeks[state.week];
+
   if (
     state.season === 1 &&
-    STORY.weeks[state.week]
+    weekStory?.start
   ) {
     state.node =
-      STORY.weeks[state.week].start;
+      weekStory.start;
+
+    makeWeekSnapshot();
 
     saveState();
     renderStory();
     return;
   }
 
+  makeWeekSnapshot();
+
   saveState();
   openTraining();
 }
+
 
 /* =========================================================
    STATUS
@@ -2144,8 +2460,8 @@ function nextWeek() {
 function openStatus() {
   if (!statusModal) return;
 
-  statusModal.classList.add("show");
   renderStatus();
+  statusModal.classList.add("show");
 }
 
 function closeStatus() {
@@ -2183,34 +2499,18 @@ function renderStatus() {
           const member =
             state.members[id];
 
-          const needed =
-            expNeeded(member.level);
-
-          const percent =
-            Math.min(
-              100,
-              Math.round(
-                member.exp /
-                needed *
-                100
-              )
-            );
-
           return `
             <section
               class="statusMember"
               style="
-                --member-rgb:
-                ${base.rgb};
+                --member-rgb:${base.rgb};
               "
             >
 
               <div class="statusMemberHead">
 
                 <img
-                  src="${
-                    DATA.images[id].smile
-                  }"
+                  src="${DATA.images[id].smile}"
                   alt=""
                 >
 
@@ -2223,16 +2523,11 @@ function renderStatus() {
                     Lv.${member.level}
                   </span>
 
-                  <div class="statusExp">
-                    <i
-                      style="
-                        width:${percent}%
-                      "
-                    ></i>
-                  </div>
-
                   <small>
-                    EXP ${member.exp}/${needed}
+                    EXP
+                    ${member.exp}
+                    /
+                    ${expNeeded(member.level)}
                   </small>
                 </div>
 
@@ -2245,41 +2540,22 @@ function renderStatus() {
                   "dance",
                   "mc",
                   "bond"
-                ].map(stat => {
-                  const value =
-                    member.stats[stat];
+                ].map(stat => `
+                  <div class="statusStat">
 
-                  return `
-                    <div class="statusStat">
+                    <span>
+                      ${statLabel(stat)}
+                    </span>
 
-                      <span>
-                        ${statLabel(stat)}
-                      </span>
+                    <b>
+                      ${rankOf(
+                        member.stats[stat]
+                      )}
+                      ${member.stats[stat]}
+                    </b>
 
-                      <b>
-                        <i>
-                          ${rankOf(value)}
-                        </i>
-                        ${value}
-                      </b>
-
-                      ${
-                        member.sp > 0
-                          ? `
-                            <button
-                              class="statPlus"
-                              data-member="${id}"
-                              data-stat="${stat}"
-                            >
-                              ＋
-                            </button>
-                          `
-                          : ""
-                      }
-
-                    </div>
-                  `;
-                }).join("")}
+                  </div>
+                `).join("")}
 
               </div>
 
@@ -2294,21 +2570,11 @@ function renderStatus() {
                 </div>
 
                 <div class="energyBar">
-                  <i
-                    style="
-                      width:
-                      ${member.stats.energy}%
-                    "
-                  ></i>
+                  <i style="
+                    width:${member.stats.energy}%
+                  "></i>
                 </div>
 
-              </div>
-
-              <div class="statusPoints">
-                育成PT
-                <strong>
-                  ${member.sp}
-                </strong>
               </div>
 
             </section>
@@ -2325,127 +2591,132 @@ function renderStatus() {
       "click",
       closeStatus
     );
-
-  statusModal
-    .querySelectorAll(".statPlus")
-    .forEach(button => {
-      button.addEventListener(
-        "click",
-        () => {
-          useStatPoint(
-            button.dataset.member,
-            button.dataset.stat
-          );
-        }
-      );
-    });
 }
 
-function useStatPoint(
-  memberId,
-  stat
-) {
-  const member =
-    state.members[memberId];
-
-  if (
-    !member ||
-    member.sp <= 0
-  ) return;
-
-  member.sp--;
-
-  changeStat(
-    memberId,
-    stat,
-    1
-  );
-
-  saveState();
-  renderStatus();
-}
 
 /* =========================================================
    PROLOGUE
 ========================================================= */
 
-let prologueRunning = false;
+let prologueIndex = 0;
+let prologueBusy = false;
+
+function createPrologueMembers() {
+  const screen =
+    screens.prologue;
+
+  if (!screen) return;
+
+  if (
+    document.getElementById(
+      "prologueMembers"
+    )
+  )
+    return;
+
+  const members =
+    document.createElement("div");
+
+  members.id =
+    "prologueMembers";
+
+  DATA.memberOrder.forEach(
+    (id, index) => {
+      const img =
+        document.createElement("img");
+
+      img.src =
+        DATA.images[id].normal;
+
+      img.style.animationDelay =
+        `${index * .1}s`;
+
+      members.appendChild(img);
+    }
+  );
+
+  screen.prepend(members);
+}
 
 async function startPrologue() {
-  showScreen(prologueScreen);
+  showScreen(screens.prologue);
 
-  const prologueText =
+  ensureBGM();
+
+  createPrologueMembers();
+
+  const text =
     $("prologueText");
 
-  const prologueNext =
+  const next =
     $("prologueNext");
 
-  let index = 0;
-
   async function showPage() {
-    /*
-      前ページ描画中は次へ行かない。
-      これで文章が重なるバグを止める。
-    */
-    if (prologueRunning) {
+    if (prologueBusy) {
       skipTyping = true;
       return;
     }
 
     if (
-      index >= STORY.prologue.length
+      prologueIndex >=
+      STORY.prologue.length
     ) {
       state.prologueSeen = true;
+
       state.node =
         STORY.weeks[1].start;
 
       makeWeekSnapshot();
+
       saveState();
       renderStory();
+
       return;
     }
 
-    prologueRunning = true;
+    prologueBusy = true;
 
-    if (prologueNext) {
-      prologueNext.disabled = true;
-      prologueNext.textContent = "…";
+    if (next) {
+      next.disabled = true;
+      next.textContent = "…";
     }
 
     await typeText(
-      prologueText,
-      STORY.prologue[index],
-      22
+      text,
+      STORY.prologue[
+        prologueIndex
+      ],
+      24
     );
 
-    index++;
+    prologueIndex++;
 
-    prologueRunning = false;
+    prologueBusy = false;
 
-    if (prologueNext) {
-      prologueNext.disabled = false;
+    if (next) {
+      next.disabled = false;
 
-      prologueNext.textContent =
-        index >= STORY.prologue.length
+      next.textContent =
+        prologueIndex >=
+        STORY.prologue.length
           ? "START"
           : "NEXT";
     }
   }
 
-  if (prologueNext) {
-    prologueNext.onclick =
-      showPage;
-  }
+  if (next)
+    next.onclick = showPage;
 
   await showPage();
 }
+
 
 /* =========================================================
    TITLE
 ========================================================= */
 
 function showTitle() {
-  showScreen(titleScreen);
+  showScreen(screens.title);
 
   const continueBtn =
     $("continueBtn");
@@ -2459,15 +2730,46 @@ function showTitle() {
 }
 
 function startNewGame() {
-  resetRun();
+  /*
+    クリック＝Safariで音を
+    開始できるタイミング。
+  */
+  startBGM();
+
+  const permanent = {
+    ovkPoints:
+      state.ovkPoints || 0,
+
+    collection:
+      state.collection || {},
+
+    achievements:
+      state.achievements || [],
+
+    clearHistory:
+      state.clearHistory || []
+  };
+
+  state =
+    createInitialState();
+
+  Object.assign(
+    state,
+    permanent
+  );
 
   state.started = true;
 
+  prologueIndex = 0;
+
   saveState();
+
   startPrologue();
 }
 
 function continueGame() {
+  startBGM();
+
   if (!state.started) {
     startNewGame();
     return;
@@ -2481,22 +2783,22 @@ function continueGame() {
   renderStory();
 }
 
+
 /* =========================================================
-   SKIP
+   TAP TO SKIP TEXT
 ========================================================= */
 
 dialogueEl?.addEventListener(
   "click",
-  event => {
-    if (
-      event.target.closest("button")
-    ) return;
+  e => {
+    if (e.target.closest("button"))
+      return;
 
-    if (typing) {
+    if (typing)
       skipTyping = true;
-    }
   }
 );
+
 
 /* =========================================================
    BUTTONS
@@ -2526,15 +2828,17 @@ $("trainingStatusBtn")
     openStatus
   );
 
+
 /* =========================================================
    INIT
 ========================================================= */
 
 async function initializeGame() {
-  showScreen(loadingScreen);
+  showScreen(screens.loading);
 
   await preloadAssets();
-  await wait(220);
+
+  await wait(350);
 
   showTitle();
 }
