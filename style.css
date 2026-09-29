@@ -2323,3 +2323,231 @@ img{
     min-height:37px;
   }
 }
+
+/* =========================================================
+   O-VER-KiLL v0.23
+   CONDITION / TP / RESULT / PROLOGUE
+========================================================= */
+
+
+/* ---------- PROLOGUE ---------- */
+
+#prologueText {
+  width: min(100%, 500px);
+  margin-inline: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  text-align: center !important;
+
+  opacity: 1;
+  transform: translateY(0);
+
+  transition:
+    opacity .26s ease,
+    transform .26s ease;
+}
+
+
+#prologueText.prologueOut {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+
+#prologueText.prologueIn {
+  animation:
+    prologueIn .42s ease both;
+}
+
+
+@keyframes prologueIn {
+
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+
+/* ---------- CONDITION ---------- */
+
+.conditionBadge {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #fff !important;
+
+  font-size: 8px;
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+
+/* ---------- TRAINING TP ---------- */
+
+.commandTp {
+  display: inline-block;
+
+  margin-right: 5px;
+
+  padding:
+    2px 6px;
+
+  border-radius:
+    999px;
+
+  background:
+    rgba(255,255,255,.10);
+
+  color:
+    #fff !important;
+
+  font-weight: 900;
+}
+
+
+/* ---------- COMMAND DISABLED ---------- */
+
+.commandCard.disabled,
+.commandCard:disabled {
+
+  opacity: .38;
+
+  filter:
+    grayscale(.45);
+
+  pointer-events:
+    none;
+}
+
+
+/* ---------- TRAINING RESULT ---------- */
+
+.trainingVerdict {
+
+  opacity: 0;
+
+  transform:
+    translateY(8px)
+    scale(.96);
+
+  margin:
+    4px 0 8px;
+
+  padding:
+    9px 10px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.18);
+
+  border-radius:
+    12px;
+
+  background:
+    rgba(0,0,0,.42);
+
+  text-align:
+    center;
+
+  transition:
+    .28s ease;
+}
+
+
+.trainingVerdict.show {
+
+  opacity: 1;
+
+  transform:
+    translateY(0)
+    scale(1);
+}
+
+
+.trainingVerdict span {
+
+  display: block;
+
+  color:
+    #d8dbe5;
+
+  font-size:
+    9px;
+
+  font-weight:
+    700;
+}
+
+
+.trainingVerdict strong {
+
+  display: block;
+
+  margin-top:
+    4px;
+
+  font-size:
+    18px;
+
+  font-weight:
+    1000;
+
+  letter-spacing:
+    .04em;
+}
+
+
+/* 超大成功 */
+
+.trainingVerdict.outcome-super strong {
+
+  font-size:
+    21px;
+
+  text-shadow:
+    0 0 18px
+    rgba(255,255,255,.65);
+}
+
+
+/* 失敗 */
+
+.trainingVerdict.outcome-fail {
+
+  opacity:
+    .9;
+}
+
+
+/* ---------- SMALL iPHONE ---------- */
+
+@media (max-width: 390px) {
+
+  .trainingMemberInfo span,
+  .conditionBadge {
+
+    font-size:
+      7px;
+  }
+
+
+  .trainingVerdict strong {
+
+    font-size:
+      16px;
+  }
+
+}
