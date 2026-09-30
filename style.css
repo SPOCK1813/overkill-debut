@@ -2738,3 +2738,36 @@ img{
       18px;
   }
 }
+
+/* =========================================================
+   v0.24.1
+   PROLOGUE LINE ANIMATION
+========================================================= */
+
+.prologueLine {
+  width: 100%;
+
+  opacity: 0;
+
+  transform:
+    translateY(8px);
+
+  transition:
+    opacity .32s ease,
+    transform .32s ease;
+
+  text-align: center;
+}
+
+
+.prologueLine.show {
+  opacity: 1;
+
+  transform:
+    translateY(0);
+}
+
+
+.prologueSpacer {
+  height: 18px;
+}
