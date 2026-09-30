@@ -2771,3 +2771,42 @@ img{
 .prologueSpacer {
   height: 18px;
 }
+
+/* =========================================================
+   v0.24.2
+   PROLOGUE BACKGROUND
+========================================================= */
+
+#prologue::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      rgba(5,6,10,.68),
+      rgba(5,6,10,.90)
+    ),
+    url("./debut-live.webp")
+    center / cover
+    no-repeat;
+
+  filter:
+    blur(6px);
+
+  transform:
+    scale(1.04);
+
+  opacity:
+    .42;
+}
+
+
+#prologue > * {
+  position:
+    relative;
+
+  z-index:
+    2;
+}
