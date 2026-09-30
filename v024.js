@@ -2306,3 +2306,476 @@ async function (
     "decisionFade"
   );
 };
+
+/* =========================================================
+   v0.24.1 FIX
+   ・プロローグを上から順番に表示
+   ・MANAGER背景の黒画面修正
+   ・チラシを街背景へ
+   ・「結果を見る」を廃止
+========================================================= */
+
+
+/* =========================================================
+   BACKGROUND FIX
+========================================================= */
+
+/*
+  bg-manager.png が現在リポジトリに無いため
+  暫定で backstage を使用
+*/
+
+if (DATA.backgrounds) {
+
+  DATA.backgrounds.manager =
+    "./bg-backstage.png";
+
+
+  /*
+    bg-street.png も存在しないため
+    実在する街背景へ
+  */
+
+  DATA.backgrounds.city =
+    "./bg-street-night.png";
+}
+
+
+/* =========================================================
+   TRAINING SCENE
+   「結果を見る」ボタンを完全廃止
+========================================================= */
+
+showTrainingScene =
+async function (
+  memberId,
+  command,
+  before,
+  after,
+  meta
+) {
+
+  showScreen(
+    screens.game
+  );
+
+
+  const scene =
+    trainingSceneData(
+      memberId,
+      command
+    );
+
+
+  if (seasonLabel) {
+
+    seasonLabel.textContent =
+      `SEASON ${state.season}`;
+  }
+
+
+  if (chapterEl) {
+
+    chapterEl.textContent =
+      `WEEK ${state.week}｜${command.title}`;
+  }
+
+
+  if (speakerEl) {
+
+    speakerEl.textContent =
+      getMemberName(
+        memberId
+      );
+  }
+
+
+  if (choicesEl) {
+
+    choicesEl.innerHTML =
+      "";
+  }
+
+
+  if (textEl) {
+
+    textEl.innerHTML =
+      "";
+  }
+
+
+  dialogueEl.dataset.mode =
+    "normal";
+
+
+  await setBackground(
+    scene.bg
+  );
+
+
+  let expression =
+    "normal";
+
+
+  if (
+    command.id === "dance" ||
+    command.id === "vocal"
+  ) {
+
+    expression =
+      "smile";
+  }
+
+
+  if (
+    command.id === "rest" ||
+    meta?.outcome?.key === "fail"
+  ) {
+
+    expression =
+      "troubled";
+  }
+
+
+  await setCharacter(
+    memberId,
+    expression
+  );
+
+
+  setReaction(
+    scene.reaction
+  );
+
+
+  await wait(180);
+
+
+  /*
+    メンバーのセリフ
+  */
+
+  await typeText(
+    textEl,
+    scene.line,
+    23
+  );
+
+
+  /*
+    「結果を見る」は出さない。
+
+    少し間を置いて
+    そのまま結果演出へ。
+  */
+
+  await wait(550);
+
+
+  await playTrainingStatPops(
+    memberId,
+    command,
+    before,
+    after,
+    meta
+  );
+
+
+  /*
+    結果演出の
+    「次の活動へ」を押したら
+    次へ進む
+  */
+
+  continueAfterTraining();
+};
+
+
+/* =========================================================
+   PROLOGUE
+   上から1行ずつ表示
+========================================================= */
+
+let prologueLineToken = 0;
+
+
+startPrologue =
+async function () {
+
+  showScreen(
+    screens.prologue
+  );
+
+
+  void startBGM();
+
+
+  createPrologueMembers();
+
+
+  const text =
+    $("prologueText");
+
+
+  const next =
+    $("prologueNext");
+
+
+  const token =
+    ++prologueLineToken;
+
+
+  prologueBusy =
+    false;
+
+
+  async function showPage() {
+
+    if (
+      prologueBusy ||
+      token !== prologueLineToken
+    ) {
+
+      return;
+    }
+
+
+    /*
+      全ページ終了
+    */
+
+    if (
+      prologueIndex >=
+      STORY.prologue.length
+    ) {
+
+      state.prologueSeen =
+        true;
+
+
+      state.node =
+        STORY.weeks[1].start;
+
+
+      state.trainingTP =
+        DATA.weeklyTP || 100;
+
+
+      makeWeekSnapshot();
+
+
+      saveState();
+
+
+      renderStory();
+
+      return;
+    }
+
+
+    prologueBusy =
+      true;
+
+
+    typingToken++;
+
+    typing =
+      false;
+
+    skipTyping =
+      false;
+
+
+    if (next) {
+
+      next.disabled =
+        true;
+
+      next.textContent =
+        "…";
+    }
+
+
+    /*
+      前ページを消す
+    */
+
+    if (text) {
+
+      text.classList.add(
+        "prologueOut"
+      );
+    }
+
+
+    await wait(260);
+
+
+    if (
+      token !==
+      prologueLineToken
+    ) {
+
+      return;
+    }
+
+
+    if (text) {
+
+      text.innerHTML =
+        "";
+
+      text.classList.remove(
+        "prologueOut",
+        "prologueIn"
+      );
+    }
+
+
+    await wait(120);
+
+
+    /*
+      今回のページ
+    */
+
+    const page =
+      String(
+        STORY.prologue[
+          prologueIndex
+        ]
+      );
+
+
+    /*
+      改行単位で分割
+    */
+
+    const lines =
+      page
+        .split("\n")
+        .map(
+          line =>
+            line.trim()
+        );
+
+
+    /*
+      上から順番に表示
+    */
+
+    for (
+      const line of lines
+    ) {
+
+      if (
+        token !==
+        prologueLineToken
+      ) {
+
+        return;
+      }
+
+
+      /*
+        空行は余白
+      */
+
+      if (!line) {
+
+        const spacer =
+          document.createElement(
+            "div"
+          );
+
+
+        spacer.className =
+          "prologueSpacer";
+
+
+        text.appendChild(
+          spacer
+        );
+
+
+        await wait(120);
+
+
+        continue;
+      }
+
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+
+      row.className =
+        "prologueLine";
+
+
+      row.textContent =
+        line;
+
+
+      text.appendChild(
+        row
+      );
+
+
+      /*
+        CSSアニメーション開始
+      */
+
+      requestAnimationFrame(
+        () => {
+
+          row.classList.add(
+            "show"
+          );
+        }
+      );
+
+
+      /*
+        1行ごとの間隔
+      */
+
+      await wait(430);
+    }
+
+
+    prologueIndex++;
+
+
+    prologueBusy =
+      false;
+
+
+    if (next) {
+
+      next.disabled =
+        false;
+
+
+      next.textContent =
+        prologueIndex >=
+        STORY.prologue.length
+
+          ? "START"
+
+          : "NEXT";
+    }
+  }
+
+
+  if (next) {
+
+    next.onclick =
+      showPage;
+  }
+
+
+  await showPage();
+};
