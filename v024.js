@@ -1464,3 +1464,845 @@ $("continueBtn")
       capture: true
     }
   );
+
+/* =========================================================
+   v0.24 UX UPDATE
+   ・TP / 残り活動を見やすく
+   ・活動ごとのRESULT画面を省略
+   ・チラシ配り背景を修正
+========================================================= */
+
+state.version = "0.24";
+saveState();
+
+
+/* =========================================================
+   チラシ配り背景 FIX
+   bg-street.png が存在しないため
+   現在存在する bg-outdoor.png を使用
+========================================================= */
+
+if (DATA.backgrounds) {
+  DATA.backgrounds.city = "./bg-outdoor.png";
+}
+
+
+/* =========================================================
+   WEEK RESOURCE PANEL
+========================================================= */
+
+function ensureWeeklyResourcePanel() {
+
+  if (!trainingMembers) return;
+
+  let panel =
+    document.getElementById(
+      "weeklyResourcePanel"
+    );
+
+
+  if (!panel) {
+
+    panel =
+      document.createElement(
+        "section"
+      );
+
+    panel.id =
+      "weeklyResourcePanel";
+
+    panel.className =
+      "weeklyResourcePanel";
+
+
+    const parent =
+      trainingMembers.parentElement;
+
+
+    parent?.insertBefore(
+      panel,
+      trainingMembers
+    );
+  }
+
+
+  const remaining =
+    Math.max(
+      0,
+      DATA.weekActions -
+      state.actionsUsed
+    );
+
+
+  const maxTP =
+    DATA.weeklyTP || 100;
+
+
+  const tp =
+    Math.max(
+      0,
+      state.trainingTP
+    );
+
+
+  const tpPercent =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round(
+          tp / maxTP * 100
+        )
+      )
+    );
+
+
+  panel.innerHTML = `
+    <div class="weeklyResourceTop">
+
+      <div>
+
+        <small>
+          今週の残り活動
+        </small>
+
+        <strong>
+          ${"●".repeat(remaining)}
+          <span>
+            ${"○".repeat(
+              Math.max(
+                0,
+                DATA.weekActions -
+                remaining
+              )
+            )}
+          </span>
+        </strong>
+
+      </div>
+
+
+      <div class="weeklyTpNumber">
+
+        <small>
+          育成TP
+        </small>
+
+        <strong>
+          ⚡ ${tp}
+          <em>
+            /${maxTP}
+          </em>
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="weeklyTpBar">
+      <i style="
+        width:${tpPercent}%
+      "></i>
+    </div>
+
+
+    <p>
+      活動を選ぶと、
+      回数とTPを消費します
+    </p>
+  `;
+}
+
+
+/* =========================================================
+   TRAINING HEADER
+========================================================= */
+
+const renderTrainingHeaderV023 =
+  renderTrainingHeader;
+
+
+renderTrainingHeader =
+function () {
+
+  renderTrainingHeaderV023();
+
+
+  /*
+    上部にはWEEKだけ。
+    残り活動とTPは
+    中央パネルへ移動。
+  */
+
+  if (trainingWeek) {
+
+    trainingWeek.innerHTML =
+      `WEEK ${state.week}`;
+  }
+
+
+  ensureWeeklyResourcePanel();
+};
+
+
+/* =========================================================
+   COMMAND TP DISPLAY
+========================================================= */
+
+const renderCommandsV023 =
+  renderCommands;
+
+
+renderCommands =
+function () {
+
+  renderCommandsV023();
+
+  ensureWeeklyResourcePanel();
+
+
+  if (!state.selectedMember)
+    return;
+
+
+  commandGrid
+    ?.querySelectorAll(
+      ".commandCard"
+    )
+    .forEach(
+      (button, index) => {
+
+        const command =
+          DATA.trainingCommands[
+            index
+          ];
+
+
+        if (!command)
+          return;
+
+
+        const tp =
+          command.tp || 0;
+
+
+        const afterTP =
+          Math.max(
+            0,
+            state.trainingTP -
+            tp
+          );
+
+
+        const tpLabel =
+          button.querySelector(
+            ".commandTp"
+          );
+
+
+        /*
+          例：
+          ⚡35 → 残りTP 65
+        */
+
+        if (tpLabel) {
+
+          tpLabel.innerHTML = `
+            ⚡ ${tp}
+
+            <b>
+              → 残りTP
+              ${afterTP}
+            </b>
+          `;
+        }
+
+
+        /*
+          TP不足時
+        */
+
+        if (
+          tp >
+          state.trainingTP
+        ) {
+
+          const note =
+            document.createElement(
+              "small"
+            );
+
+
+          note.className =
+            "commandShortage";
+
+
+          note.textContent =
+            `TPがあと${
+              tp -
+              state.trainingTP
+            }必要`;
+
+
+          button
+            .querySelector(
+              ".commandText"
+            )
+            ?.appendChild(
+              note
+            );
+        }
+      }
+    );
+};
+
+
+/* =========================================================
+   TRAINING SCENE
+   毎回の詳細RESULT画面を省略
+========================================================= */
+
+showTrainingScene =
+async function (
+  memberId,
+  command,
+  before,
+  after,
+  meta
+) {
+
+  showScreen(
+    screens.game
+  );
+
+
+  const scene =
+    trainingSceneData(
+      memberId,
+      command
+    );
+
+
+  if (seasonLabel) {
+
+    seasonLabel.textContent =
+      `SEASON ${state.season}`;
+  }
+
+
+  if (chapterEl) {
+
+    chapterEl.textContent =
+      `WEEK ${state.week}｜${command.title}`;
+  }
+
+
+  if (speakerEl) {
+
+    speakerEl.textContent =
+      getMemberName(
+        memberId
+      );
+  }
+
+
+  if (choicesEl) {
+
+    choicesEl.innerHTML =
+      "";
+  }
+
+
+  if (textEl) {
+
+    textEl.innerHTML =
+      "";
+  }
+
+
+  dialogueEl.dataset.mode =
+    "normal";
+
+
+  await setBackground(
+    scene.bg
+  );
+
+
+  let expression =
+    "normal";
+
+
+  if (
+    command.id === "dance" ||
+    command.id === "vocal"
+  ) {
+
+    expression =
+      "smile";
+  }
+
+
+  if (
+    command.id === "rest" ||
+    meta?.outcome?.key ===
+      "fail"
+  ) {
+
+    expression =
+      "troubled";
+  }
+
+
+  await setCharacter(
+    memberId,
+    expression
+  );
+
+
+  setReaction(
+    scene.reaction
+  );
+
+
+  await wait(180);
+
+
+  await typeText(
+    textEl,
+    scene.line,
+    23
+  );
+
+
+  await wait(300);
+
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+
+  button.className =
+    "storyNextBtn";
+
+
+  button.textContent =
+    command.id === "rest"
+
+      ? "休養結果 ›"
+
+      : "結果を見る ›";
+
+
+  choicesEl.appendChild(
+    button
+  );
+
+
+  button.onclick =
+  async () => {
+
+    button.disabled =
+      true;
+
+
+    /*
+      キャラ横の
+      ＋○ / −○演出は残す
+    */
+
+    await playTrainingStatPops(
+      memberId,
+      command,
+      before,
+      after,
+      meta
+    );
+
+
+    /*
+      以前：
+      ↓
+      TRAINING RESULT
+      ↓
+      次の活動
+
+      今回：
+      ↓
+      そのまま次の活動
+    */
+
+    continueAfterTraining();
+  };
+};
+
+
+/* =========================================================
+   TRAINING POP
+========================================================= */
+
+playTrainingStatPops =
+async function (
+  memberId,
+  command,
+  before,
+  after,
+  meta
+) {
+
+  dialogueEl.classList.add(
+    "decisionFade"
+  );
+
+
+  await wait(140);
+
+
+  document
+    .getElementById(
+      "statPopLayer"
+    )
+    ?.remove();
+
+
+  const layer =
+    document.createElement(
+      "div"
+    );
+
+
+  layer.id =
+    "statPopLayer";
+
+
+  screens.game.appendChild(
+    layer
+  );
+
+
+  /* ---------- TITLE ---------- */
+
+  const title =
+    document.createElement(
+      "div"
+    );
+
+
+  title.className =
+    "lessonPopTitle";
+
+
+  title.innerHTML = `
+    <small>
+      ${getMemberName(
+        memberId
+      )}
+    </small>
+
+    ${command.icon}
+    ${command.title.toUpperCase()}
+  `;
+
+
+  layer.appendChild(
+    title
+  );
+
+
+  /* ---------- OUTCOME ---------- */
+
+  const verdict =
+    document.createElement(
+      "div"
+    );
+
+
+  verdict.className =
+    `trainingVerdict outcome-${
+      meta?.outcome?.key ||
+      "normal"
+    }`;
+
+
+  if (
+    command.id === "rest"
+  ) {
+
+    verdict.innerHTML = `
+      <strong>
+        💤 休養
+      </strong>
+
+      <span>
+        しっかり体力を回復した
+      </span>
+    `;
+
+  } else {
+
+    verdict.innerHTML = `
+      <span>
+        ${meta.condition.icon}
+        コンディション：
+        ${meta.condition.label}
+      </span>
+
+      <strong>
+        ${meta.outcome.icon}
+        ${meta.outcome.label}
+      </strong>
+    `;
+  }
+
+
+  layer.appendChild(
+    verdict
+  );
+
+
+  requestAnimationFrame(
+    () => {
+
+      verdict.classList.add(
+        "show"
+      );
+    }
+  );
+
+
+  await wait(430);
+
+
+  /* ---------- STAT ---------- */
+
+  const oldMember =
+    before[memberId];
+
+
+  const newMember =
+    after[memberId];
+
+
+  const changes = [];
+
+
+  Object
+    .keys(
+      DATA.statLabels
+    )
+    .forEach(
+      stat => {
+
+        const diff =
+          newMember.stats[stat] -
+          oldMember.stats[stat];
+
+
+        if (diff) {
+
+          changes.push({
+            stat,
+            diff
+          });
+        }
+      }
+    );
+
+
+  for (
+    const change of changes
+  ) {
+
+    const pop =
+      document.createElement(
+        "div"
+      );
+
+
+    pop.className =
+      `statPop ${
+        change.diff >= 0
+
+          ? "positive"
+
+          : "negative"
+      }`;
+
+
+    pop.innerHTML = `
+      <strong>
+        ${statLabel(
+          change.stat
+        )}
+      </strong>
+
+      <b>
+        ${
+          change.diff > 0
+            ? "+"
+            : ""
+        }
+        ${change.diff}
+      </b>
+    `;
+
+
+    layer.appendChild(
+      pop
+    );
+
+
+    requestAnimationFrame(
+      () => {
+
+        pop.classList.add(
+          "show"
+        );
+      }
+    );
+
+
+    await wait(230);
+  }
+
+
+  /* ---------- EXP ---------- */
+
+  const expPop =
+    document.createElement(
+      "div"
+    );
+
+
+  expPop.className =
+    "statPop positive";
+
+
+  expPop.innerHTML = `
+    <strong>
+      EXP
+    </strong>
+
+    <b>
+      +${meta.expGain}
+    </b>
+  `;
+
+
+  layer.appendChild(
+    expPop
+  );
+
+
+  requestAnimationFrame(
+    () => {
+
+      expPop.classList.add(
+        "show"
+      );
+    }
+  );
+
+
+  await wait(260);
+
+
+  /* ---------- REACH ---------- */
+
+  if (
+    meta.reachGain
+  ) {
+
+    const reachPop =
+      document.createElement(
+        "div"
+      );
+
+
+    reachPop.className =
+      "statPop positive";
+
+
+    reachPop.innerHTML = `
+      <strong>
+        認知度
+      </strong>
+
+      <b>
+        +${meta.reachGain}
+      </b>
+    `;
+
+
+    layer.appendChild(
+      reachPop
+    );
+
+
+    requestAnimationFrame(
+      () => {
+
+        reachPop.classList.add(
+          "show"
+        );
+      }
+    );
+
+
+    await wait(240);
+  }
+
+
+  /* ---------- NEXT ---------- */
+
+  const nextButton =
+    document.createElement(
+      "button"
+    );
+
+
+  nextButton.className =
+    "floatResultBtn";
+
+
+  nextButton.textContent =
+    state.actionsUsed >=
+    DATA.weekActions
+
+      ? "WEEK RESULTへ"
+
+      : "次の活動へ";
+
+
+  layer.appendChild(
+    nextButton
+  );
+
+
+  await new Promise(
+    resolve => {
+
+      nextButton.onclick =
+        resolve;
+    }
+  );
+
+
+  layer.classList.add(
+    "hide"
+  );
+
+
+  await wait(160);
+
+
+  layer.remove();
+
+
+  dialogueEl.classList.remove(
+    "decisionFade"
+  );
+};
