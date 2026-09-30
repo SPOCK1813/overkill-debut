@@ -2779,3 +2779,248 @@ async function () {
 
   await showPage();
 };
+
+/* =========================================================
+   v0.24.2
+   MANAGER DECISION RESULT を簡略化
+========================================================= */
+
+playStatPopSequence =
+async function (
+  result,
+  title
+) {
+
+  if (!screens.game)
+    return;
+
+
+  dialogueEl
+    ?.classList.add(
+      "decisionFade"
+    );
+
+
+  await wait(180);
+
+
+  document
+    .getElementById(
+      "statPopLayer"
+    )
+    ?.remove();
+
+
+  const layer =
+    document.createElement(
+      "div"
+    );
+
+
+  layer.id =
+    "statPopLayer";
+
+
+  const label =
+    document.createElement(
+      "div"
+    );
+
+
+  label.className =
+    "lessonPopTitle";
+
+
+  label.textContent =
+    title;
+
+
+  layer.appendChild(
+    label
+  );
+
+
+  screens.game.appendChild(
+    layer
+  );
+
+
+  const memberChanges =
+    collectChanges(
+      result.before,
+      result.after
+    );
+
+
+  const messages =
+    [];
+
+
+  memberChanges.forEach(
+    item => {
+
+      item.changes.forEach(
+        change => {
+
+          messages.push({
+            id: item.id,
+            stat: change.stat,
+            diff: change.diff
+          });
+        }
+      );
+    }
+  );
+
+
+  messages.sort(
+    (a,b) =>
+      Math.abs(b.diff) -
+      Math.abs(a.diff)
+  );
+
+
+  /*
+    重要な変化を
+    最大6個だけ表示
+  */
+
+  for (
+    const item of
+    messages.slice(0,6)
+  ) {
+
+    const pop =
+      document.createElement(
+        "div"
+      );
+
+
+    pop.className =
+      `statPop ${
+        item.diff >= 0
+          ? "positive"
+          : "negative"
+      }`;
+
+
+    pop.innerHTML = `
+      <small>
+        ${getMemberName(
+          item.id
+        )}
+      </small>
+
+      <strong>
+        ${statLabel(
+          item.stat
+        )}
+      </strong>
+
+      <b>
+        ${
+          item.diff > 0
+            ? "+"
+            : ""
+        }
+        ${item.diff}
+      </b>
+    `;
+
+
+    layer.appendChild(
+      pop
+    );
+
+
+    requestAnimationFrame(
+      () => {
+
+        pop.classList.add(
+          "show"
+        );
+      }
+    );
+
+
+    await wait(220);
+  }
+
+
+  await wait(300);
+
+
+  /*
+    RESULTを見る
+    ↓
+    NEXT
+  */
+
+  const btn =
+    document.createElement(
+      "button"
+    );
+
+
+  btn.className =
+    "floatResultBtn";
+
+
+  btn.textContent =
+    "NEXT";
+
+
+  layer.appendChild(
+    btn
+  );
+
+
+  await new Promise(
+    resolve => {
+
+      btn.onclick =
+        resolve;
+    }
+  );
+
+
+  layer.classList.add(
+    "hide"
+  );
+
+
+  await wait(160);
+
+
+  layer.remove();
+
+
+  dialogueEl
+    ?.classList.remove(
+      "decisionFade"
+    );
+};
+
+
+/* =========================================================
+   DECISION RESULT 自体も飛ばす
+========================================================= */
+
+showDecisionResult =
+function (
+  result
+) {
+
+  state.node =
+    state.pendingStoryNext;
+
+
+  state.pendingStoryNext =
+    null;
+
+
+  saveState();
+
+
+  renderStory();
+};
