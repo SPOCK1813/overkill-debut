@@ -2810,3 +2810,813 @@ img{
   z-index:
     2;
 }
+
+/* =========================================================
+   v0.25 HOME
+========================================================= */
+
+#home {
+  overflow-y: auto;
+
+  background:
+    linear-gradient(
+      rgba(5,7,12,.45),
+      rgba(5,7,12,.94)
+    ),
+    url("./bg-backstage.png")
+    center / cover
+    no-repeat;
+}
+
+
+.homeShade {
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.20),
+      rgba(0,0,0,.45) 40%,
+      rgba(0,0,0,.88)
+    );
+}
+
+
+.homeHeader {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding:
+    calc(12px + var(--safe-top))
+    18px
+    8px;
+}
+
+
+.homeHeader > div {
+  flex: 1;
+}
+
+
+.homeHeader small {
+  display: block;
+
+  color:
+    rgba(255,255,255,.55);
+
+  font-size: 8px;
+  font-weight: 900;
+
+  letter-spacing: .16em;
+}
+
+
+.homeHeader strong {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 15px;
+}
+
+
+.homeStatusBtn,
+.homeHeaderBtn {
+  min-height: 35px;
+
+  padding:
+    0 11px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.17);
+
+  border-radius:
+    999px;
+
+  color:
+    #fff;
+
+  background:
+    rgba(0,0,0,.28);
+
+  font-size:
+    8px;
+
+  font-weight:
+    900;
+}
+
+
+.homeBody {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  max-width: 650px;
+
+  margin:
+    0 auto;
+
+  padding:
+    8px 16px
+    calc(
+      28px +
+      var(--safe-bottom)
+    );
+}
+
+
+/* =========================================================
+   HOME HERO
+========================================================= */
+
+.homeHero {
+  margin-top:
+    4px;
+
+  text-align:
+    center;
+}
+
+
+.homeGroupLabel {
+  color:
+    rgba(255,255,255,.48);
+
+  font-size:
+    8px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    .25em;
+}
+
+
+.homeHero h1 {
+  margin:
+    5px 0 2px;
+
+  font-size:
+    31px;
+
+  font-weight:
+    1000;
+
+  letter-spacing:
+    -.04em;
+}
+
+
+.homeHero p {
+  margin:
+    0;
+
+  color:
+    rgba(255,255,255,.70);
+
+  font-size:
+    10px;
+}
+
+
+/* =========================================================
+   HOME RESOURCE
+========================================================= */
+
+.homeResourcePanel {
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr 1fr 1fr 1fr;
+
+  gap:
+    5px;
+
+  margin-top:
+    15px;
+}
+
+
+.homeResourcePanel > div {
+  min-width:
+    0;
+
+  padding:
+    8px 4px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.12);
+
+  border-radius:
+    10px;
+
+  background:
+    rgba(0,0,0,.27);
+
+  text-align:
+    center;
+}
+
+
+.homeResourcePanel span {
+  display:
+    block;
+
+  color:
+    rgba(255,255,255,.52);
+
+  font-size:
+    7px;
+}
+
+
+.homeResourcePanel strong {
+  display:
+    block;
+
+  margin-top:
+    3px;
+
+  font-size:
+    11px;
+}
+
+
+.homeResourcePanel strong em {
+  color:
+    rgba(255,255,255,.20);
+
+  font-style:
+    normal;
+}
+
+
+.homeResourcePanel strong small {
+  color:
+    rgba(255,255,255,.45);
+
+  font-size:
+    7px;
+}
+
+
+/* =========================================================
+   HOME MEMBER
+========================================================= */
+
+.homeMembers {
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:
+    6px;
+
+  margin-top:
+    12px;
+}
+
+
+.homeMember {
+  position:
+    relative;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    5px;
+
+  min-width:
+    0;
+
+  min-height:
+    79px;
+
+  padding:
+    5px;
+
+  overflow:
+    hidden;
+
+  border:
+    1px solid
+    rgba(
+      var(--member-rgb),
+      .28
+    );
+
+  border-radius:
+    13px;
+
+  color:
+    #fff;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(
+        var(--member-rgb),
+        .15
+      ),
+      rgba(0,0,0,.25)
+    );
+
+  text-align:
+    left;
+}
+
+
+.homeMember img {
+  flex:
+    0 0 62px;
+
+  width:
+    62px;
+
+  height:
+    68px;
+
+  object-fit:
+    contain;
+}
+
+
+.homeMember > div {
+  min-width:
+    0;
+}
+
+
+.homeMember strong {
+  display:
+    block;
+
+  font-size:
+    11px;
+}
+
+
+.homeMember span {
+  display:
+    block;
+
+  margin-top:
+    2px;
+
+  font-size:
+    8px;
+
+  font-weight:
+    900;
+}
+
+
+.homeMember small {
+  display:
+    block;
+
+  margin-top:
+    4px;
+
+  color:
+    rgba(255,255,255,.65);
+
+  font-size:
+    7px;
+
+  white-space:
+    nowrap;
+}
+
+
+/* =========================================================
+   HOME MENU
+========================================================= */
+
+.homeMainMenu {
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:
+    7px;
+
+  margin-top:
+    13px;
+}
+
+
+.homeMenu {
+  min-height:
+    83px;
+
+  padding:
+    10px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.13);
+
+  border-radius:
+    14px;
+
+  color:
+    #fff;
+
+  background:
+    rgba(10,12,18,.70);
+
+  text-align:
+    left;
+}
+
+
+.homeMenu.primary {
+  border-color:
+    rgba(255,255,255,.30);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.17),
+      rgba(20,23,33,.74)
+    );
+}
+
+
+.homeMenu > span {
+  display:
+    block;
+
+  color:
+    rgba(255,255,255,.45);
+
+  font-size:
+    7px;
+
+  font-weight:
+    950;
+
+  letter-spacing:
+    .18em;
+}
+
+
+.homeMenu > strong {
+  display:
+    block;
+
+  margin-top:
+    5px;
+
+  font-size:
+    14px;
+}
+
+
+.homeMenu > small {
+  display:
+    block;
+
+  margin-top:
+    4px;
+
+  color:
+    rgba(255,255,255,.58);
+
+  font-size:
+    8px;
+}
+
+
+.homeMenu:disabled {
+  opacity:
+    .32;
+}
+
+
+/* =========================================================
+   HOME MONEY
+========================================================= */
+
+.homeMoney {
+  margin-top:
+    10px;
+
+  color:
+    rgba(255,255,255,.55);
+
+  font-size:
+    8px;
+
+  text-align:
+    right;
+}
+
+
+.homeMoney strong {
+  margin-left:
+    5px;
+
+  color:
+    #fff;
+
+  font-size:
+    11px;
+}
+
+
+/* =========================================================
+   HOME TOAST
+========================================================= */
+
+.homeToast {
+  position:
+    fixed;
+
+  z-index:
+    1000;
+
+  left:
+    50%;
+
+  bottom:
+    calc(
+      25px +
+      var(--safe-bottom)
+    );
+
+  width:
+    max-content;
+
+  max-width:
+    85vw;
+
+  padding:
+    10px 14px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.18);
+
+  border-radius:
+    999px;
+
+  color:
+    #fff;
+
+  background:
+    rgba(7,9,14,.94);
+
+  box-shadow:
+    0 10px 30px
+    rgba(0,0,0,.35);
+
+  font-size:
+    9px;
+
+  font-weight:
+    900;
+
+  opacity:
+    0;
+
+  pointer-events:
+    none;
+
+  transform:
+    translate(
+      -50%,
+      8px
+    );
+
+  transition:
+    .2s ease;
+}
+
+
+.homeToast.show {
+  opacity:
+    1;
+
+  transform:
+    translate(
+      -50%,
+      0
+    );
+}
+
+
+/* =========================================================
+   v0.25 MEMBER / SP
+========================================================= */
+
+.memberV025 .memberHelp {
+  margin:
+    0 3px 10px;
+
+  padding:
+    8px 10px;
+
+  border-radius:
+    9px;
+
+  color:
+    rgba(255,255,255,.66);
+
+  background:
+    rgba(255,255,255,.05);
+
+  font-size:
+    8px;
+
+  line-height:
+    1.6;
+}
+
+
+.memberOverallRank {
+  display:
+    block;
+
+  margin-top:
+    4px;
+
+  font-size:
+    11px;
+}
+
+
+.memberSP {
+  margin-top:
+    3px;
+
+  color:
+    #fff !important;
+
+  font-weight:
+    950;
+}
+
+
+.v025Stats .statusStat {
+  position:
+    relative;
+
+  padding-bottom:
+    31px;
+}
+
+
+.v025Stats .statusStat > b {
+  font-size:
+    12px;
+}
+
+
+.spAdd {
+  position:
+    absolute;
+
+  left:
+    5px;
+
+  right:
+    5px;
+
+  bottom:
+    5px;
+
+  height:
+    21px;
+
+  border:
+    0;
+
+  border-radius:
+    6px;
+
+  color:
+    #111;
+
+  background:
+    #fff;
+
+  font-size:
+    14px;
+
+  font-weight:
+    1000;
+}
+
+
+.spAdd:disabled {
+  color:
+    rgba(255,255,255,.28);
+
+  background:
+    rgba(255,255,255,.07);
+}
+
+
+.focusMember025 {
+  border-color:
+    rgba(
+      var(--member-rgb),
+      .80
+    );
+
+  box-shadow:
+    0 0 24px
+    rgba(
+      var(--member-rgb),
+      .10
+    );
+}
+
+
+/* =========================================================
+   STORY / TRAINING HOME BUTTON
+========================================================= */
+
+.storyHeader .homeHeaderBtn,
+.trainingHeader .homeHeaderBtn {
+  margin-left:
+    auto;
+}
+
+
+.storyHeader #statusBtn,
+.trainingHeader #trainingStatusBtn {
+  margin-left:
+    0;
+}
+
+
+/* =========================================================
+   SMALL iPHONE
+========================================================= */
+
+@media (
+  max-width:
+  390px
+) {
+
+  .homeBody {
+    padding-left:
+      12px;
+
+    padding-right:
+      12px;
+  }
+
+
+  .homeHero h1 {
+    font-size:
+      27px;
+  }
+
+
+  .homeMember {
+    min-height:
+      72px;
+  }
+
+
+  .homeMember img {
+    width:
+      54px;
+
+    height:
+      61px;
+
+    flex-basis:
+      54px;
+  }
+
+
+  .homeMenu {
+    min-height:
+      76px;
+  }
+}
