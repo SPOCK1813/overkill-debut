@@ -43,14 +43,21 @@
 - 比較表に初期ステータス、各行動のTP消費と残行動、能力変化、体力変化、EXP/level、各能力とMEMBER RANK、SP、WEEK RESULT（認知度・ファン・cash・各メンバー・ミッション）、次週のSeason/Week/TP/残行動を記録する。
 - すべての差を「仕様として意図した差」「不具合」「判定保留」に分ける。ランダム結果を両版で固定できない場合は、乱数条件を開示し、実測値の差と計算式/仕様の差を混同しない。結果を `docs/v030-week-comparison.md` として保存する。
 
-
-## [x] 7. ちびSARiNAのパーツ分けアニメ最小試作
+## [x] 7. ちびSARiNAのパーツ分けアニメ最小試作（placeholder限定）
 
 - 4人全員ではなくSARiNA 1人だけを対象にする。静止画の差し替え、GIF、動画ベタ貼りではなく、重ねたパーツPNGをCSS/JavaScriptで動かす。
 - 必要パーツ名は `body`, `head_base`, `hair_back`, `hair_front`, `eye_left_open`, `eye_right_open`, `eye_left_closed`, `eye_right_closed`, `brow_normal`, `brow_happy`, `brow_troubled`, `mouth_1`, `mouth_2`, `mouth_3`, `mouth_smile`, `mouth_troubled`, `arm_left`, `arm_right`, `effect_sweat` とする。必要に応じ `effect_sparkle` はhappy用に追加できる。
 - 全パーツは透過PNG、同一キャンバスサイズ、同一基準位置とし、同名素材の差し替えでズレない。ファイル名一覧、レイヤー順、アンカー位置、fallback/差し替え方針を設計資料に記録する。
 - `idle`は小さな上下呼吸と時々のまばたき、`talk`はmouth_1〜3を切り替える口パクと軽い揺れ、`happy`は小さく跳ねる笑顔と任意のキラッとする反応、`troubled`は少し縮こまり困り眉と汗マーク、tapは軽い拡大またはぴょこっとした反応を行う。
 - HomeではSARiNAの表示にidle/conditionに応じたhappyまたはtroubledとtap反応を使う。会話・STORYではSARiNAの台詞でtalk、happy/troubledの表情を切り替える。他メンバーの既存表示は変えない。
-- ちび絵は可愛く親しみやすく、地下アイドルらしい雰囲気と既存SARiNAの茶髪・黒衣装・緑担当らしさを残す。特定作品の絵柄や既存キャラクターを模写せず、動きの楽しさを優先したオリジナルのデフォルメにする。
+- 現在の自動生成SARiNAパーツはデザイン確認用のplaceholderであり、既存SARiNAと異なるため本番素材として採用しない。画像は削除せずPreview専用に保持し、正式素材が承認されるまで本番・リリースに使用しない。新しいキャラクターデザインは作らず、既存ゲーム内素材を基準にする。
 - アニメと入力はiPhone Safariで軽く動き、タップしやすい領域、`prefers-reduced-motion`対応、HOME/STORY以外への無関係な変更なしを満たす。仮画像がなくてもcomponent・asset manifestを通して同じ座標のPNGへ置き換えられる構成とする。
 - `SarinaChibi` componentのmarkup/mood API、layer manifest、PNG資産、描画元、Story/Home組込み、animation制御、差し替え説明をv0.30へ追加し、GitHubでは既存 `feature/v030-phase1-4` のみ更新する。mainと現行公開URLは変更しない。
+
+## [x] 8. 既存SARiNAデザインを守る本番素材分割仕様
+
+- 基準はゲームで実際に使う `public/assets/characters/sarina_normal.png` と表情差分の `sarina_smile.png` / `sarina_angry.png` / `sarina_troubled.png` / `sarina_cry.png`（各1024×1536 RGBA）とする。リポジトリに独立したちびPNGやPSD/CLIP等のレイヤー原画は見つからないため、その制約を明記する。
+- `LayeredChibi`、manifest構造、idle/talk/happy/troubled/tapReaction、HOME/STORYへの組込みは維持する。現在の自動生成PNGは削除せずplaceholderと明記し、本番・リリースには使わない。
+- 顔・髪型・衣装・色・頭身・線を新規デザインへ置き換えず、normalを全身基準、他表情を顔パーツの参考にする。緑担当色は既存UI色 `#69e09a` を維持し、元絵に確認できない緑の衣装・髪アクセサリーを追加しない。
+- 既存実装の差替え契約を維持するため、同名20 PNGを512×512 RGBAで用意する。元絵1024×1536を一様に1/3縮小して512×512キャンバス中央へ置き、全レイヤー共通の座標変換と足元基準 `(256,512)` を使う。元絵を正方形へ縦横別々に伸縮しない。
+- `docs/sarina-chibi-material-spec.md` に参照元、SHA-256、各partの切り出し元、座標・alpha・線画・緑アクセントの規則、素材品質確認、レイヤー原画がない場合の限界を記録する。今回この仕様を作り、実素材の描画・分割やゲームコード変更は行わない。

@@ -1,6 +1,18 @@
 {
   "schemaVersion": 1,
   "character": "sarina",
+  "assetStatus": "placeholder",
+  "productionApproved": false,
+  "shippingPolicy": "Preview placeholder only; do not use for production or release",
+  "generator": "scripts/generate_chibi_parts.py",
+  "referenceDocument": "docs/sarina-chibi-material-spec.md",
+  "referenceArtworkPaths": [
+    "public/assets/characters/sarina_normal.png",
+    "public/assets/characters/sarina_smile.png",
+    "public/assets/characters/sarina_angry.png",
+    "public/assets/characters/sarina_troubled.png",
+    "public/assets/characters/sarina_cry.png"
+  ],
   "canvas": {
     "width": 512,
     "height": 512,
@@ -10,11 +22,12 @@
   "anchor": {
     "x": 256,
     "y": 512,
-    "description": "bottom-center foot anchor; do not trim transparent margins"
+    "description": "bottom-center foot anchor; do not trim transparent margins; current value describes the placeholder coordinate contract"
   },
   "headCenter": {
     "x": 256,
-    "y": 192
+    "y": 192,
+    "description": "placeholder-only reference; not an approved production coordinate"
   },
   "partsBackToFront": [
     "body.png",
