@@ -42,3 +42,15 @@
 - 現行版とv0.30 Preview版をそれぞれ新規セーブ（共有OVKポイント0）で開始し、Week 1 Storyの同じ選択肢 `split` と同じ乱数ロール列を使う。SARiNAのダンス35TP → MiYUのボーカル35TP → KiLUAのSNS20TPを同じ順に実行し、3行動・TP90消費・TP10残の週末、WEEK RESULT、「次週へ」後のSeason 1 Week 2を比較する。
 - 比較表に初期ステータス、各行動のTP消費と残行動、能力変化、体力変化、EXP/level、各能力とMEMBER RANK、SP、WEEK RESULT（認知度・ファン・cash・各メンバー・ミッション）、次週のSeason/Week/TP/残行動を記録する。
 - すべての差を「仕様として意図した差」「不具合」「判定保留」に分ける。ランダム結果を両版で固定できない場合は、乱数条件を開示し、実測値の差と計算式/仕様の差を混同しない。結果を `docs/v030-week-comparison.md` として保存する。
+
+
+## [x] 7. ちびSARiNAのパーツ分けアニメ最小試作
+
+- 4人全員ではなくSARiNA 1人だけを対象にする。静止画の差し替え、GIF、動画ベタ貼りではなく、重ねたパーツPNGをCSS/JavaScriptで動かす。
+- 必要パーツ名は `body`, `head_base`, `hair_back`, `hair_front`, `eye_left_open`, `eye_right_open`, `eye_left_closed`, `eye_right_closed`, `brow_normal`, `brow_happy`, `brow_troubled`, `mouth_1`, `mouth_2`, `mouth_3`, `mouth_smile`, `mouth_troubled`, `arm_left`, `arm_right`, `effect_sweat` とする。必要に応じ `effect_sparkle` はhappy用に追加できる。
+- 全パーツは透過PNG、同一キャンバスサイズ、同一基準位置とし、同名素材の差し替えでズレない。ファイル名一覧、レイヤー順、アンカー位置、fallback/差し替え方針を設計資料に記録する。
+- `idle`は小さな上下呼吸と時々のまばたき、`talk`はmouth_1〜3を切り替える口パクと軽い揺れ、`happy`は小さく跳ねる笑顔と任意のキラッとする反応、`troubled`は少し縮こまり困り眉と汗マーク、tapは軽い拡大またはぴょこっとした反応を行う。
+- HomeではSARiNAの表示にidle/conditionに応じたhappyまたはtroubledとtap反応を使う。会話・STORYではSARiNAの台詞でtalk、happy/troubledの表情を切り替える。他メンバーの既存表示は変えない。
+- ちび絵は可愛く親しみやすく、地下アイドルらしい雰囲気と既存SARiNAの茶髪・黒衣装・緑担当らしさを残す。特定作品の絵柄や既存キャラクターを模写せず、動きの楽しさを優先したオリジナルのデフォルメにする。
+- アニメと入力はiPhone Safariで軽く動き、タップしやすい領域、`prefers-reduced-motion`対応、HOME/STORY以外への無関係な変更なしを満たす。仮画像がなくてもcomponent・asset manifestを通して同じ座標のPNGへ置き換えられる構成とする。
+- `SarinaChibi` componentのmarkup/mood API、layer manifest、PNG資産、描画元、Story/Home組込み、animation制御、差し替え説明をv0.30へ追加し、GitHubでは既存 `feature/v030-phase1-4` のみ更新する。mainと現行公開URLは変更しない。

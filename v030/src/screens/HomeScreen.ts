@@ -4,6 +4,7 @@ import { ACTIONS_PER_WEEK } from "../domain/constants";
 import { selectHomeSummary } from "../domain/selectors";
 import type { GameState, MemberId } from "../domain/types";
 import { CONDITION_ICONS, CONDITION_LABELS, escapeHtml, formatMoney } from "../utils/format";
+import { renderSarinaChibi } from "../components/chibi/sarina/SarinaChibi";
 
 export function renderHomeScreen(state: GameState, options: { notice?: string | null; saveWarning?: string | null; audioEnabled?: boolean }): string {
   const summary = selectHomeSummary(state);
@@ -23,10 +24,14 @@ export function renderHomeScreen(state: GameState, options: { notice?: string | 
     const id = member.id as MemberId;
     const expression = member.condition === "best" ? "smile" : member.condition === "bad" || member.condition === "worst" ? "troubled" : "normal";
     const image = MEMBER_PORTRAITS[id][expression];
+    const chibiMood = member.condition === "best" ? "happy" : member.condition === "bad" || member.condition === "worst" ? "troubled" : "idle";
+    const avatar = id === "sarina"
+      ? renderSarinaChibi({ placement: "home", mood: chibiMood, ariaLabel: "SARiNA" })
+      : `<img class="member-avatar" src="${image}" alt="" loading="lazy" />`;
     const rgb = MEMBERS[id].rgb;
     return `
       <article class="member-status-card" style="--member-color:${member.color};--member-rgb:${rgb}">
-        <img class="member-avatar" src="${image}" alt="" loading="lazy" />
+        ${avatar}
         <div class="member-status-copy">
           <div class="member-name-row"><strong>${escapeHtml(member.name)}</strong><span class="rank-chip">${member.rank.rank}${member.rank.point}</span></div>
           <p class="condition-line"><span>${CONDITION_ICONS[member.condition]}</span>${CONDITION_LABELS[member.condition]} · 体力 ${member.stats.energy}</p>

@@ -7,6 +7,7 @@ import { SaveRepository, type LoadResult } from "../services/SaveRepository";
 import { MathRandomSource } from "../services/RandomSource";
 import { advanceStory, beginWeekendStory, chooseStory, nodeFor, openStory, storyStartFor, PROLOGUE } from "../services/StoryEngine";
 import { AudioService } from "../services/AudioService";
+import { playSarinaTap } from "../components/chibi/sarina/SarinaChibi";
 import { renderActionResultScreen } from "../screens/ActionResultScreen";
 import { renderHomeScreen } from "../screens/HomeScreen";
 import { renderMemberScreen } from "../screens/MemberScreen";
@@ -57,7 +58,7 @@ export class AppController {
     const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-action]") : null;
     if (!target || (target instanceof HTMLButtonElement && target.disabled)) return;
     const action = target.dataset.action;
-    if (action !== "toggle-audio") void this.audio.startFromUserGesture();
+    if (action !== "toggle-audio" && action !== "chibi-tap") void this.audio.startFromUserGesture();
 
     switch (action) {
       case "new-game": this.newGame(); break;
@@ -65,6 +66,7 @@ export class AppController {
       case "return-title": this.showingTitle = true; this.render(); break;
       case "toggle-audio": void this.audio.toggle().then(() => this.render()); break;
       case "prologue-next": this.advancePrologue(); break;
+      case "chibi-tap": playSarinaTap(target); break;
       case "go-home": this.goHome(); break;
       case "open-story": this.openStory(); break;
       case "story-next": this.advanceCurrentStory(); break;

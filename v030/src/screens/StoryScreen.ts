@@ -1,11 +1,21 @@
 import { backgroundFor, MEMBER_PORTRAITS } from "../data/assetManifest";
 import type { GameState, StoryNode } from "../domain/types";
 import { escapeHtml } from "../utils/format";
+import { chibiMoodForExpression, renderSarinaChibi } from "../components/chibi/sarina/SarinaChibi";
 
 export function renderStoryScreen(state: GameState, node: StoryNode, errorMessage?: string | null): string {
   const member = node.member;
   const expression = node.expression ?? "normal";
   const portrait = member ? MEMBER_PORTRAITS[member][expression] : "";
+  const sarinaSpeaking = node.speaker?.trim().toLocaleLowerCase() === "sarina";
+  const portraitMarkup = member === "sarina"
+    ? renderSarinaChibi({
+        placement: "story",
+        mood: sarinaSpeaking && expression === "normal" ? "talk" : chibiMoodForExpression(expression),
+        talking: sarinaSpeaking,
+        ariaLabel: "SARiNA",
+      })
+    : portrait ? `<img class="story-portrait" src="${portrait}" alt="" fetchpriority="high" />` : '<div class="story-portrait-placeholder" aria-hidden="true"></div>';
   const background = backgroundFor(node.bg);
   const choices = node.choices?.length
     ? `<div class="story-choices">${node.choices.map((choice, index) => `<button class="story-choice" type="button" data-action="story-choice" data-choice-index="${index}"><strong>${escapeHtml(choice.title)}</strong>${choice.hint ? `<small>${escapeHtml(choice.hint)}</small>` : ""}</button>`).join("")}</div>`
@@ -18,7 +28,7 @@ export function renderStoryScreen(state: GameState, node: StoryNode, errorMessag
       </header>
       <div class="story-stage" style="--scene-background:url('${background}')">
         <div class="scene-shade"></div>
-        ${portrait ? `<img class="story-portrait" src="${portrait}" alt="" fetchpriority="high" />` : '<div class="story-portrait-placeholder" aria-hidden="true"></div>'}
+        ${portraitMarkup}
         ${node.reaction ? `<span class="story-reaction" aria-hidden="true">${escapeHtml(node.reaction)}</span>` : ""}
         <article class="dialogue-panel">
           ${node.speaker ? `<p class="speaker-name">${escapeHtml(node.speaker)}</p>` : ""}

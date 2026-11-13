@@ -21,19 +21,24 @@
 ├── tsconfig.json
 ├── public/
 │   ├── manus-routes.json        # `/` のみ。Vite Preview開始前に配置
-│   └── assets/                  # 既存キャラクター/背景/音声/ロゴを再利用
+│   └── assets/                  # 既存キャラクター/背景/音声/ロゴと試作パーツ
+│       └── chibi/sarina/parts/  # 同一基準の透過512x512 PNGレイヤー
 ├── src/
 │   ├── main.ts                  # 起動・依存の組立て
 │   ├── app/                     # AppController、画面ID、描画/遷移
+│   ├── components/chibi/         # 汎用LayeredChibi renderer・共有motion CSS
+│   │   └── sarina/               # SARiNA用manifest・表情mapping・薄いwrapper
 │   ├── domain/                  # 型、初期値、selector、rank、SP、週進行、訓練
 │   ├── data/                    # メンバー、行動、旧シナリオ、asset manifest
 │   ├── services/                # SaveRepository、legacy/schema migration、乱数、音声
 │   ├── screens/                 # Title、Prologue、Home、Story、Training、Member、Result
 │   └── styles/                  # tokens、base、screens、iPhone向けmobile
+├── scripts/generate_chibi_parts.py # 交換前の試作PNGを再生成する決定的な描画源
 ├── tests/                       # domain、migration、冪等性、week progression
 ├── docs/
 │   ├── v030-baseline.md         # Phase 1の現行機能・数値・資産・参照一覧
-│   └── v030-week-comparison.md  # 実行後の現行版／Preview差分報告
+│   ├── v030-week-comparison.md  # 実行後の現行版／Preview差分報告
+│   └── chibi-sarina-parts.md    # レイヤー名、基準位置、差し替え契約
 └── TODO.md
 ```
 
@@ -53,7 +58,7 @@
 
 HOMEを縦画面のハブとして、STORY / TRAINING / ACTIVITY / LIVE / MEMBER / MISSION / ROOMへ移動する。HOMEにはSEASON/WEEK、残り行動、残りTP、活動資金、認知度、ファン数、4人のコンディション、各MEMBER RANKを表示する。タイトルと既存プロローグの後HOMEへ着地し、STORYはいつでも非消費で閲覧可能にする。Week 1の既存選択肢・週末エピソード・WEEK RESULTを再利用する。次週開始Storyが定義済みなら現行版同様に自動表示し、定義がなければHOMEに戻す。
 
-見た目は旧版の黒紺基調（`#080a10` / `#11141d`）、白い情報文字、4人の既存色・立ち絵、夜景/舞台背景を継承した暗くシネマティックなADV/マネージャーUIとする。画像・BGM・プロローグ・シナリオは既存ファイルをできるだけ無変更で再利用し、欠落参照はmanifestで代替先を明示する。追加の汎用イラストは生成しない。
+見た目は旧版の黒紺基調（`#080a10` / `#11141d`）、白い情報文字、4人の既存色・立ち絵、夜景/舞台背景を継承した暗くシネマティックなADV/マネージャーUIとする。画像・BGM・プロローグ・シナリオは既存ファイルをできるだけ無変更で再利用し、欠落参照はmanifestで代替先を明示する。汎用飾り素材は追加せず、今回の専用試作としてのみSARiNAの仮chibiパーツを作り、最終絵へ個別差し替え可能にする。
 
 **Design Movement:** 既存の暗いシネマティックADVとモバイル管理UIを継承する。
 
@@ -75,6 +80,13 @@ HOMEを縦画面のハブとして、STORY / TRAINING / ACTIVITY / LIVE / MEMBER
 **Wordmark & Logo:** 既存のO-VER-KiLLロゴ表記を再利用し、字間と区切りを維持する。新しい汎用テキストロゴへ置換しない。
 
 **Signature Brand Color:** 白い文字に添えるクールなブルーラベンダー`#bfc9ff`。4人それぞれの名前色・能力色を置き換えず、共通UIのフォーカスと週次進行にだけ使う。
+
+## ちびSARiNAの1人限定試作
+
+新しい共通ゲーム状態・save schemaは増やさず、`src/components/chibi/LayeredChibi.ts`がmanifestの`id/displayName/assetBase/partOrder`から共通DOMとvisual-only tap reactionを生成する。`src/components/chibi/sarina/SarinaChibi.ts`はSARiNA manifest・表情対応・薄いwrapperだけを持つ。HomeではSARiNAカードに小さく配置し、condition `best`ならhappy、`bad/worst`ならtroubled、それ以外はidle。Storyでは`member === "sarina"`の台詞立ち絵だけchibiへ置き換え、normalの発話中にtalk、smileにhappy、angry/troubled/cryにtroubledを割り当てる。他メンバーの既存立ち絵は無変更とする。クリックはControllerの委譲イベントで短いtap reactionだけ再生し、ゲーム進行・保存データは変更しない。
+素材は`public/assets/chibi/sarina/parts/`に透明背景PNGとして配置し、全ファイルを512×512、同じ左上原点・足元基準・頭中心で固定する。manifestはレイヤー名とpathを一元管理し、絵師の完成素材で同名ファイルを置換できる。今回の仮素材は既存SARiNAの暗い茶髪・黒い衣装・緑のアクセントを参照したオリジナルの丸いデフォルメで、source-controlled描画scriptから生成する。クレヨンしんちゃん的な楽しさは特定キャラクターの模写ではなく、大きな頭身差、分かりやすい表情、間のある跳ね・縮み・揺れの動きで表現する。
+
+レイヤーはDOMの奥から手前へ`body`, `arm_left`, `arm_right`, `hair_back`, `head_base`, active eye pair, active brow pair, active mouth, `hair_front`, `effect_sparkle`（happy/tap）, `effect_sweat`（troubledのみ）とする。eyes/brows/mouthは各状態に必要な同一座標の画像だけopacityで切り替える。idleは2.6秒程度の小さい上下呼吸と約4.8秒周期の短いblink、talkは3種の口形を約540msで切替え体を小さく揺らす。happyは間を置いて小さく跳ねながら腕を動かし、troubledは小さく縮こまって汗を出し、tapは約520msの一度きりのぴょこっと反応。CSS `transform`/`opacity`中心でJavaScriptのframe loop・canvas・GIF・動画は使わず、`prefers-reduced-motion`では反復運動とblinkを停止する。MiYU/KiLUA/RAiSAはそれぞれの`ChibiManifest`と同名partsを追加し、同じ`renderLayeredChibi(manifest, options)`と共有CSSを利用できる。今回の画面に表示するのはSARiNAだけ。
 
 ## 動作・配信・比較
 

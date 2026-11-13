@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "character": "sarina",
+  "canvas": {
+    "width": 512,
+    "height": 512,
+    "format": "RGBA PNG",
+    "transparentBackground": true
+  },
+  "anchor": {
+    "x": 256,
+    "y": 512,
+    "description": "bottom-center foot anchor; do not trim transparent margins"
+  },
+  "headCenter": {
+    "x": 256,
+    "y": 192
+  },
+  "partsBackToFront": [
+    "body.png",
+    "arm_left.png",
+    "arm_right.png",
+    "hair_back.png",
+    "head_base.png",
+    "eye_left_open.png",
+    "eye_right_open.png",
+    "eye_left_closed.png",
+    "eye_right_closed.png",
+    "brow_normal.png",
+    "brow_happy.png",
+    "brow_troubled.png",
+    "mouth_1.png",
+    "mouth_2.png",
+    "mouth_3.png",
+    "mouth_smile.png",
+    "mouth_troubled.png",
+    "hair_front.png",
+    "effect_sparkle.png",
+    "effect_sweat.png"
+  ]
+}
