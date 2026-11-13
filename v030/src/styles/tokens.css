@@ -1,0 +1,20 @@
+:root {
+  color-scheme: dark;
+  --bg: #080a10;
+  --panel: #11141d;
+  --panel-raised: #171b27;
+  --text: #f7f7f8;
+  --muted: #a9acb6;
+  --line: rgba(255, 255, 255, 0.13);
+  --accent: #bfc9ff;
+  --accent-strong: #d7defe;
+  --success: #69e09a;
+  --warning: #ffdc69;
+  --danger: #ff9aa5;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --page-width: 760px;
+  --radius: 16px;
+}
