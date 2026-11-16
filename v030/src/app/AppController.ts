@@ -4,12 +4,14 @@ import { createWeekSnapshot, startNewGame, cloneState, createInitialState } from
 import { nextWeek, returnToStablePhase } from "../domain/progression";
 import { executeTraining } from "../domain/training";
 import { SaveRepository, type LoadResult } from "../services/SaveRepository";
-import { MathRandomSource } from "../services/RandomSource";
-import { advanceStory, beginWeekendStory, chooseStory, nodeFor, openStory, storyStartFor, PROLOGUE } from "../services/StoryEngine";
+import { GAME_FEEL_PROTOTYPE, beginGameFeelStory, createGameFeelPreviewState, finishGameFeelStory } from "../services/GameFeelPrototype";
+import { MathRandomSource, SequenceRandomSource } from "../services/RandomSource";
+import { advanceStory, beginWeekendStory, chooseStory, nodeFor, openStory, storyStartFor, PROLOGUE, STORY_NODES } from "../services/StoryEngine";
 import { AudioService } from "../services/AudioService";
 import { playSarinaTap } from "../components/chibi/sarina/SarinaChibi";
 import { renderActionResultScreen } from "../screens/ActionResultScreen";
 import { renderHomeScreen } from "../screens/HomeScreen";
+import { renderGameFeelMemberScreen, renderGameFeelTrainingScreen } from "../screens/GameFeelScreens";
 import { renderMemberScreen } from "../screens/MemberScreen";
 import { renderPlaceholderScreen, renderGameCompleteScreen } from "../screens/PlaceholderScreen";
 import { renderPrologueScreen } from "../screens/PrologueScreen";
@@ -22,13 +24,14 @@ import type { ActionType, CoreStat, GameState, MemberId, ScreenPhase } from "../
 
 export class AppController {
   private state: GameState;
-  private showingTitle = true;
+  private showingTitle = !GAME_FEEL_PROTOTYPE.enabled;
   private selectedTrainingMember: MemberId | null = null;
   private placeholder = "activity";
   private loadError: string | null = null;
   private legacyPresent = false;
   private loadWarnings: string[] = [];
   private message: string | null = null;
+  private rewardPulse = false;
   private readonly random = new MathRandomSource();
   private readonly audio: AudioService;
 
@@ -41,13 +44,29 @@ export class AppController {
       this.state = loaded.state;
       this.loadWarnings = loaded.warnings;
     } else {
-      this.state = createInitialState();
+      this.state = GAME_FEEL_PROTOTYPE.enabled ? createGameFeelPreviewState() : createInitialState();
       if (loaded.status === "error") {
         this.loadError = loaded.message;
         this.legacyPresent = loaded.legacyPresent;
         this.state.progress.phase = "saveError";
         this.showingTitle = false;
       }
+    }
+    if (GAME_FEEL_PROTOTYPE.enabled && loaded.status !== "error") {
+      this.showingTitle = false;
+      let needsSave = loaded.status === "empty";
+      if (!this.state.started || this.state.progress.phase === "title" || this.state.progress.phase === "prologue") {
+        const next = cloneState(this.state);
+        next.started = true;
+        next.prologueSeen = true;
+        if (next.progress.phase === "title" || next.progress.phase === "prologue") next.progress.phase = "home";
+        next.progress.prologueIndex = 0;
+        next.ui.lastStablePhase = next.progress.phase === "home" ? "home" : next.ui.lastStablePhase;
+        if (!next.weekStartSnapshot && next.week.actionsUsed === 0) next.weekStartSnapshot = createWeekSnapshot(next);
+        this.state = next;
+        needsSave = true;
+      }
+      if (needsSave) this.save(this.state);
     }
     this.audio = new AudioService(document.querySelector<HTMLAudioElement>("#bgm"));
     this.root.addEventListener("click", this.onClick);
@@ -161,6 +180,11 @@ export class AppController {
   }
 
   private openStory(): void {
+    if (GAME_FEEL_PROTOTYPE.enabled) {
+      this.save(beginGameFeelStory(this.state));
+      this.render();
+      return;
+    }
     const next = openStory(this.state);
     if (next.progress.phase !== "story") {
       this.message = "この週のストーリーはまだ準備中です。行動や保存データは変更していません。";
@@ -172,7 +196,9 @@ export class AppController {
   }
 
   private advanceCurrentStory(): void {
-    this.save(advanceStory(this.state));
+    const isPrototypeVignette = GAME_FEEL_PROTOTYPE.enabled
+      && this.state.progress.story.eventId === GAME_FEEL_PROTOTYPE.storyEventId;
+    this.save(isPrototypeVignette ? finishGameFeelStory(this.state) : advanceStory(this.state));
     this.render();
   }
 
@@ -200,6 +226,7 @@ export class AppController {
   private selectMember(value?: string): void {
     const members: MemberId[] = ["sarina", "miyu", "kilua", "raisa"];
     if (!value || !members.includes(value as MemberId)) return;
+    if (GAME_FEEL_PROTOTYPE.enabled && value !== "sarina") return;
     this.selectedTrainingMember = value as MemberId;
     this.message = null;
     this.render();
@@ -212,7 +239,10 @@ export class AppController {
       this.render();
       return;
     }
-    const result = executeTraining(this.state, this.selectedTrainingMember, value as ActionType, this.random);
+    const random = GAME_FEEL_PROTOTYPE.enabled
+      ? new SequenceRandomSource([GAME_FEEL_PROTOTYPE.randomRoll])
+      : this.random;
+    const result = executeTraining(this.state, this.selectedTrainingMember, value as ActionType, random);
     if (!result.ok) {
       this.message = result.reason;
       this.render();
@@ -224,6 +254,8 @@ export class AppController {
   }
 
   private finishActionResult(): void {
+    const lastAction = this.state.week.actionHistory.at(-1);
+    this.rewardPulse = Boolean(lastAction?.memberId === "sarina" && lastAction.type === "dance" && (lastAction.statDelta.dance ?? 0) > 0);
     const next = cloneState(this.state);
     next.week.pendingActionId = null;
     next.progress.phase = "home";
@@ -298,15 +330,20 @@ export class AppController {
         this.root.innerHTML = renderPrologueScreen(this.state.progress.prologueIndex);
         return;
       case "home":
-        this.root.innerHTML = renderHomeScreen(this.state, { notice: this.message, saveWarning: this.loadWarnings.join(" ") || null, audioEnabled: this.audio.isEnabled });
+        this.root.innerHTML = renderHomeScreen(this.state, { notice: this.message, saveWarning: this.loadWarnings.join(" ") || null, audioEnabled: this.audio.isEnabled, rewardPulse: this.rewardPulse });
+        this.rewardPulse = false;
         return;
       case "story": {
-        const node = nodeFor(this.state);
+        const isPrototypeVignette = GAME_FEEL_PROTOTYPE.enabled
+          && this.state.progress.story.eventId === GAME_FEEL_PROTOTYPE.storyEventId;
+        const node = isPrototypeVignette ? STORY_NODES[GAME_FEEL_PROTOTYPE.storyNodeId] : nodeFor(this.state);
         this.root.innerHTML = node ? renderStoryScreen(this.state, node, this.message) : renderPlaceholderScreen(this.state, "story");
         return;
       }
       case "training":
-        this.root.innerHTML = renderTrainingScreen(this.state, this.selectedTrainingMember, this.message);
+        this.root.innerHTML = GAME_FEEL_PROTOTYPE.enabled
+          ? renderGameFeelTrainingScreen(this.state, this.selectedTrainingMember, this.message)
+          : renderTrainingScreen(this.state, this.selectedTrainingMember, this.message);
         return;
       case "actionResult": {
         const record = this.state.week.actionHistory.find((item) => item.id === this.state.week.pendingActionId);
@@ -317,7 +354,9 @@ export class AppController {
         this.root.innerHTML = renderWeekResultScreen(this.state);
         return;
       case "member":
-        this.root.innerHTML = renderMemberScreen(this.state, this.message);
+        this.root.innerHTML = GAME_FEEL_PROTOTYPE.enabled
+          ? renderGameFeelMemberScreen(this.state, this.message)
+          : renderMemberScreen(this.state, this.message);
         return;
       case "placeholder":
         this.root.innerHTML = renderPlaceholderScreen(this.state, this.placeholder);

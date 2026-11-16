@@ -28,6 +28,7 @@ export function renderStoryScreen(state: GameState, node: StoryNode, errorMessag
       </header>
       <div class="story-stage" style="--scene-background:url('${background}')">
         <div class="scene-shade"></div>
+        ${member === "sarina" ? '<span class="prototype-temp-label prototype-temp-label--story">ANIMATION TEST · 仮ビジュアル</span>' : ""}
         ${portraitMarkup}
         ${node.reaction ? `<span class="story-reaction" aria-hidden="true">${escapeHtml(node.reaction)}</span>` : ""}
         <article class="dialogue-panel">
